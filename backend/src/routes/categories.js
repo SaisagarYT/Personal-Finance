@@ -5,7 +5,6 @@ import { requireAuth } from '../middleware/auth.js';
 const router = Router();
 router.use(requireAuth);
 
-// GET /api/categories - Get all categories (public defaults + user custom)
 router.get('/', async (req, res) => {
   const { data, error } = await supabase
     .from('categories')
@@ -17,11 +16,10 @@ router.get('/', async (req, res) => {
   res.json(data);
 });
 
-// POST /api/categories - Create custom category
 router.post('/', async (req, res) => {
   const { name, type, icon, color } = req.body;
   if (!name || !type) {
-    return res.status(400).json({ error: 'Name and type (income/expense) are required' });
+    return res.status(400).json({ error: 'Name and type are required' });
   }
 
   const { data, error } = await supabase

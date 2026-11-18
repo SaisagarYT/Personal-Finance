@@ -5,7 +5,6 @@ import { requireAuth } from '../middleware/auth.js';
 const router = Router();
 router.use(requireAuth);
 
-// GET /api/accounts - List all accounts for current user
 router.get('/', async (req, res) => {
   const { data, error } = await supabase
     .from('accounts')
@@ -17,11 +16,10 @@ router.get('/', async (req, res) => {
   res.json(data);
 });
 
-// POST /api/accounts - Create an account
 router.post('/', async (req, res) => {
   const { name, type, balance, currency, color } = req.body;
   if (!name || !type) {
-    return res.status(400).json({ error: 'Name and account type are required' });
+    return res.status(400).json({ error: 'Name and type are required' });
   }
 
   const { data, error } = await supabase
@@ -31,7 +29,7 @@ router.post('/', async (req, res) => {
         user_id: req.user.id,
         name,
         type,
-        balance: balance || 0.0,
+        balance: parseFloat(balance) || 0.0,
         currency: currency || 'USD',
         color: color || '#3B82F6',
       },
@@ -43,14 +41,13 @@ router.post('/', async (req, res) => {
   res.status(201).json(data);
 });
 
-// PUT /api/accounts/:id - Update an account
 router.put('/:id', async (req, res) => {
   const { id } = req.params;
   const { name, type, balance, color } = req.body;
 
   const { data, error } = await supabase
     .from('accounts')
-    .update({ name, type, balance, color, updated_at: new Date().toISOString() })
+    .update({ name, type, balance: parseFloat(balance), color, updated_at: new Date().toISOString() })
     .eq('id', id)
     .eq('user_id', req.user.id)
     .select()
@@ -60,7 +57,6 @@ router.put('/:id', async (req, res) => {
   res.json(data);
 });
 
-// DELETE /api/accounts/:id - Delete an account
 router.delete('/:id', async (req, res) => {
   const { id } = req.params;
 
@@ -71,7 +67,7 @@ router.delete('/:id', async (req, res) => {
     .eq('user_id', req.user.id);
 
   if (error) return res.status(500).json({ error: error.message });
-  res.json({ message: 'Account deleted successfully' });
+  res.json({ message: 'Account deleted' });
 });
 
 export default router;

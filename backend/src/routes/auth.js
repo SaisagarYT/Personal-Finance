@@ -3,7 +3,6 @@ import { supabase } from '../config/supabase.js';
 
 const router = Router();
 
-// Sign Up
 router.post('/signup', async (req, res) => {
   const { email, password, full_name } = req.body;
   if (!email || !password) {
@@ -13,16 +12,13 @@ router.post('/signup', async (req, res) => {
   const { data, error } = await supabase.auth.signUp({
     email,
     password,
-    options: {
-      data: { full_name },
-    },
+    options: { data: { full_name } },
   });
 
   if (error) return res.status(400).json({ error: error.message });
   res.status(201).json({ user: data.user, session: data.session });
 });
 
-// Sign In
 router.post('/login', async (req, res) => {
   const { email, password } = req.body;
   if (!email || !password) {
@@ -38,12 +34,13 @@ router.post('/login', async (req, res) => {
   res.json({ user: data.user, session: data.session });
 });
 
-// Get Current User Profile
 router.get('/me', async (req, res) => {
   const authHeader = req.headers.authorization;
-  if (!authHeader) return res.status(401).json({ error: 'No token provided' });
+  if (!authHeader?.startsWith('Bearer ')) {
+    return res.status(401).json({ error: 'No token provided' });
+  }
 
-  const token = authHeader.replace('Bearer ', '');
+  const token = authHeader.substring(7);
   const { data: { user }, error } = await supabase.auth.getUser(token);
 
   if (error || !user) return res.status(401).json({ error: 'Invalid token' });

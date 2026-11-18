@@ -17,16 +17,16 @@ import {
 } from 'lucide-react';
 import { ResponsiveContainer, PieChart, Pie, Cell, Tooltip } from 'recharts';
 
+const CHART_COLORS = ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#EC4899', '#06B6D4'];
+
 export function App() {
   const [session, setSession] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
-  // Data states
   const [accounts, setAccounts] = useState<Account[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
 
-  // Modal states
   const [showAccountsModal, setShowAccountsModal] = useState(false);
   const [showTransactionModal, setShowTransactionModal] = useState(false);
 
@@ -36,9 +36,7 @@ export function App() {
       setLoading(false);
     });
 
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session);
     });
 
@@ -48,21 +46,18 @@ export function App() {
   const fetchData = async () => {
     if (!session?.user) return;
 
-    // 1. Fetch Accounts
     const { data: accData } = await supabase
       .from('accounts')
       .select('*')
       .order('created_at', { ascending: false });
     if (accData) setAccounts(accData);
 
-    // 2. Fetch Categories
     const { data: catData } = await supabase
       .from('categories')
       .select('*')
       .order('name');
     if (catData) setCategories(catData);
 
-    // 3. Fetch Transactions
     const { data: txData } = await supabase
       .from('transactions')
       .select(`
@@ -87,7 +82,6 @@ export function App() {
       const { error } = await supabase.from('transactions').delete().eq('id', id);
       if (error) throw error;
 
-      // Revert account balance
       const account = accounts.find((a) => a.id === accountId);
       if (account) {
         const cur = parseFloat(account.balance as any);
@@ -113,21 +107,18 @@ export function App() {
     return <AuthModal onSuccess={() => setLoading(false)} />;
   }
 
-  // Analytics Calculation
   const totalNetWorth = accounts.reduce((sum, a) => sum + parseFloat(a.balance as any || 0), 0);
-  
-  const currentMonth = new Date().toISOString().slice(0, 7); // YYYY-MM
+  const currentMonth = new Date().toISOString().slice(0, 7);
   const monthTransactions = transactions.filter((t) => t.transaction_date.startsWith(currentMonth));
-  
+
   const monthIncome = monthTransactions
     .filter((t) => t.type === 'income')
     .reduce((sum, t) => sum + parseFloat(t.amount as any), 0);
-  
+
   const monthExpenses = monthTransactions
     .filter((t) => t.type === 'expense')
     .reduce((sum, t) => sum + parseFloat(t.amount as any), 0);
 
-  // Group expenses by category for chart
   const categorySpendingMap: { [key: string]: number } = {};
   monthTransactions
     .filter((t) => t.type === 'expense')
@@ -141,23 +132,15 @@ export function App() {
     value,
   }));
 
-  const COLORS = ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#EC4899', '#06B6D4'];
-
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col">
-      {/* Top Navigation */}
-      <header className="border-b border-slate-800/80 bg-slate-900/60 backdrop-blur-md sticky top-0 z-40">
+      <header className="border-b border-slate-800 bg-slate-900/60 backdrop-blur-md sticky top-0 z-40">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-blue-600 flex items-center justify-center text-white shadow-lg shadow-blue-500/30">
               <Wallet className="w-5 h-5" />
             </div>
-            <div>
-              <span className="font-bold text-lg text-white">PersonalFinance</span>
-              <span className="hidden sm:inline-block ml-2 px-2 py-0.5 text-[10px] font-semibold bg-blue-500/10 text-blue-400 border border-blue-500/20 rounded-full">
-                Supabase Cloud
-              </span>
-            </div>
+            <span className="font-bold text-lg text-white">PersonalFinance</span>
           </div>
 
           <div className="flex items-center gap-3">
@@ -173,13 +156,11 @@ export function App() {
         </div>
       </header>
 
-      {/* Main Container */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-1 w-full space-y-8">
-        {/* Quick Actions Bar */}
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div>
-            <h1 className="text-2xl font-bold text-white">Financial Overview</h1>
-            <p className="text-xs text-slate-400">Track your cashflow, accounts, and recent activity.</p>
+            <h1 className="text-2xl font-bold text-white">Dashboard</h1>
+            <p className="text-xs text-slate-400">Overview of your cashflow and accounts.</p>
           </div>
           <div className="flex items-center gap-3">
             <button
@@ -197,12 +178,10 @@ export function App() {
           </div>
         </div>
 
-        {/* Overview Stat Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-          {/* Net Worth */}
-          <div className="bg-slate-900/60 border border-slate-800 p-6 rounded-2xl relative overflow-hidden">
+          <div className="bg-slate-900/60 border border-slate-800 p-6 rounded-2xl">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-medium text-slate-400">Total Net Worth</span>
+              <span className="text-xs font-medium text-slate-400">Net Worth</span>
               <div className="p-2 rounded-xl bg-blue-500/10 text-blue-400">
                 <DollarSign className="w-4 h-4" />
               </div>
@@ -210,13 +189,12 @@ export function App() {
             <p className="text-3xl font-bold text-white mt-3">
               ${totalNetWorth.toLocaleString('en-US', { minimumFractionDigits: 2 })}
             </p>
-            <p className="text-xs text-slate-500 mt-1">Across {accounts.length} active accounts</p>
+            <p className="text-xs text-slate-500 mt-1">{accounts.length} active accounts</p>
           </div>
 
-          {/* Monthly Income */}
-          <div className="bg-slate-900/60 border border-slate-800 p-6 rounded-2xl relative overflow-hidden">
+          <div className="bg-slate-900/60 border border-slate-800 p-6 rounded-2xl">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-medium text-slate-400">This Month's Income</span>
+              <span className="text-xs font-medium text-slate-400">Monthly Income</span>
               <div className="p-2 rounded-xl bg-emerald-500/10 text-emerald-400">
                 <ArrowUpRight className="w-4 h-4" />
               </div>
@@ -224,13 +202,11 @@ export function App() {
             <p className="text-3xl font-bold text-emerald-400 mt-3">
               +${monthIncome.toLocaleString('en-US', { minimumFractionDigits: 2 })}
             </p>
-            <p className="text-xs text-slate-500 mt-1">Current billing cycle</p>
           </div>
 
-          {/* Monthly Expenses */}
-          <div className="bg-slate-900/60 border border-slate-800 p-6 rounded-2xl relative overflow-hidden">
+          <div className="bg-slate-900/60 border border-slate-800 p-6 rounded-2xl">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-medium text-slate-400">This Month's Expenses</span>
+              <span className="text-xs font-medium text-slate-400">Monthly Expenses</span>
               <div className="p-2 rounded-xl bg-rose-500/10 text-rose-400">
                 <ArrowDownLeft className="w-4 h-4" />
               </div>
@@ -238,22 +214,18 @@ export function App() {
             <p className="text-3xl font-bold text-rose-400 mt-3">
               -${monthExpenses.toLocaleString('en-US', { minimumFractionDigits: 2 })}
             </p>
-            <p className="text-xs text-slate-500 mt-1">
-              Net Savings: ${(monthIncome - monthExpenses).toFixed(2)}
-            </p>
+            <p className="text-xs text-slate-500 mt-1">Savings: ${(monthIncome - monthExpenses).toFixed(2)}</p>
           </div>
         </div>
 
-        {/* Content Grid: Chart & Accounts Summary */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Spending Breakdown Chart */}
           <div className="lg:col-span-1 bg-slate-900/60 border border-slate-800 rounded-2xl p-6 flex flex-col">
             <h2 className="text-sm font-semibold text-white flex items-center gap-2 mb-4">
               <PieChartIcon className="w-4 h-4 text-blue-400" /> Spending by Category
             </h2>
             {chartData.length === 0 ? (
               <div className="flex-1 flex items-center justify-center text-xs text-slate-500 italic py-12">
-                No expense data this month.
+                No expense data recorded.
               </div>
             ) : (
               <div className="h-56 w-full flex items-center justify-center">
@@ -270,7 +242,7 @@ export function App() {
                       paddingAngle={4}
                     >
                       {chartData.map((_, index) => (
-                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                        <Cell key={`cell-${index}`} fill={CHART_COLORS[index % CHART_COLORS.length]} />
                       ))}
                     </Pie>
                     <Tooltip
@@ -288,7 +260,6 @@ export function App() {
             )}
           </div>
 
-          {/* Recent Transactions List */}
           <div className="lg:col-span-2 bg-slate-900/60 border border-slate-800 rounded-2xl p-6">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-sm font-semibold text-white">Recent Transactions</h2>
@@ -297,10 +268,10 @@ export function App() {
 
             {transactions.length === 0 ? (
               <div className="text-center py-12 text-xs text-slate-500 italic">
-                No transactions yet. Click "+ Add Transaction" to log your first income or expense!
+                No transactions yet. Click "+ Add Transaction" to log one.
               </div>
             ) : (
-              <div className="divide-y divide-slate-800/60 overflow-x-auto">
+              <div className="divide-y divide-slate-800/60">
                 {transactions.slice(0, 10).map((t) => (
                   <div key={t.id} className="py-3 flex items-center justify-between gap-4">
                     <div className="flex items-center gap-3">
@@ -354,7 +325,6 @@ export function App() {
         </div>
       </main>
 
-      {/* Modals */}
       {showAccountsModal && (
         <AccountsModal
           accounts={accounts}

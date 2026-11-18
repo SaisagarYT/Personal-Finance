@@ -5,9 +5,8 @@ import { requireAuth } from '../middleware/auth.js';
 const router = Router();
 router.use(requireAuth);
 
-// GET /api/transactions - List all transactions with optional filters
 router.get('/', async (req, res) => {
-  const { account_id, type, start_date, end_date, limit = 50 } = req.query;
+  const { account_id, type, limit = 50 } = req.query;
 
   let query = supabase
     .from('transactions')
@@ -27,15 +26,12 @@ router.get('/', async (req, res) => {
 
   if (account_id) query = query.eq('account_id', account_id);
   if (type) query = query.eq('type', type);
-  if (start_date) query = query.gte('transaction_date', start_date);
-  if (end_date) query = query.lte('transaction_date', end_date);
 
   const { data, error } = await query;
   if (error) return res.status(500).json({ error: error.message });
   res.json(data);
 });
 
-// POST /api/transactions - Create transaction and adjust account balance
 router.post('/', async (req, res) => {
   const { account_id, category_id, amount, type, description, transaction_date } = req.body;
 
@@ -45,10 +41,9 @@ router.post('/', async (req, res) => {
 
   const numAmount = parseFloat(amount);
   if (isNaN(numAmount) || numAmount <= 0) {
-    return res.status(400).json({ error: 'Amount must be a positive number' });
+    return res.status(400).json({ error: 'Amount must be greater than 0' });
   }
 
-  // 1. Verify account belongs to user
   const { data: account, error: accError } = await supabase
     .from('accounts')
     .select('id, balance')
@@ -57,10 +52,9 @@ router.post('/', async (req, res) => {
     .single();
 
   if (accError || !account) {
-    return res.status(404).json({ error: 'Account not found or unauthorized' });
+    return res.status(404).json({ error: 'Account not found' });
   }
 
-  // 2. Insert transaction
   const { data: transaction, error: txError } = await supabase
     .from('transactions')
     .insert([
@@ -79,7 +73,6 @@ router.post('/', async (req, res) => {
 
   if (txError) return res.status(500).json({ error: txError.message });
 
-  // 3. Update account balance (income increases, expense decreases)
   const currentBalance = parseFloat(account.balance);
   const newBalance = type === 'income' ? currentBalance + numAmount : currentBalance - numAmount;
 
@@ -88,14 +81,12 @@ router.post('/', async (req, res) => {
     .update({ balance: newBalance, updated_at: new Date().toISOString() })
     .eq('id', account_id);
 
-  res.status(201).json({ ...transaction, new_account_balance: newBalance });
+  res.status(201).json({ ...transaction, new_balance: newBalance });
 });
 
-// DELETE /api/transactions/:id - Delete transaction and revert balance
 router.delete('/:id', async (req, res) => {
   const { id } = req.params;
 
-  // 1. Get existing transaction
   const { data: tx, error: fetchError } = await supabase
     .from('transactions')
     .select('*')
@@ -107,7 +98,6 @@ router.delete('/:id', async (req, res) => {
     return res.status(404).json({ error: 'Transaction not found' });
   }
 
-  // 2. Delete transaction
   const { error: delError } = await supabase
     .from('transactions')
     .delete()
@@ -115,7 +105,6 @@ router.delete('/:id', async (req, res) => {
 
   if (delError) return res.status(500).json({ error: delError.message });
 
-  // 3. Revert balance on account
   const { data: account } = await supabase
     .from('accounts')
     .select('balance')
@@ -123,16 +112,12 @@ router.delete('/:id', async (req, res) => {
     .single();
 
   if (account) {
-    const currentBalance = parseFloat(account.balance);
-    const revertedBalance = tx.type === 'income' ? currentBalance - parseFloat(tx.amount) : currentBalance + parseFloat(tx.amount);
-
-    await supabase
-      .from('accounts')
-      .update({ balance: revertedBalance, updated_at: new Date().toISOString() })
-      .eq('id', tx.account_id);
+    const curBalance = parseFloat(account.balance);
+    const reverted = tx.type === 'income' ? curBalance - parseFloat(tx.amount) : curBalance + parseFloat(tx.amount);
+    await supabase.from('accounts').update({ balance: reverted }).eq('id', tx.account_id);
   }
 
-  res.json({ message: 'Transaction deleted successfully' });
+  res.json({ message: 'Transaction deleted' });
 });
 
 export default router;
