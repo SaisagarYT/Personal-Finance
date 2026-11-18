@@ -7,9 +7,8 @@ interface ChartDataPoint {
 }
 
 interface IncomeChartCardProps {
-  spentAmount?: string;
-  totalLimit?: string;
-  spentPercentage?: number;
+  title?: string;
+  subtitle?: string;
 }
 
 const CHART_DATA: ChartDataPoint[] = [
@@ -24,32 +23,15 @@ const CHART_DATA: ChartDataPoint[] = [
 ];
 
 export const IncomeChartCard: React.FC<IncomeChartCardProps> = ({
-  spentAmount = '$1,400.00',
-  totalLimit = '$5,500.00',
-  spentPercentage = 26,
+  title = 'Total income',
+  subtitle = 'Profit and loss by month, Jan–Aug 2026',
 }) => {
   return (
     <div className="bg-[#FFFFFF] border border-[#E7E6DF] rounded-[28px] p-6 shadow-sm flex flex-col justify-between h-full">
-      {/* SVG Pattern Definition for Striped Diagonal Orange Bars */}
-      <svg width="0" height="0" className="absolute">
-        <defs>
-          <pattern
-            id="diagonalHatch"
-            width="6"
-            height="6"
-            patternTransform="rotate(45 0 0)"
-            patternUnits="userSpaceOnUse"
-          >
-            <line x1="0" y1="0" x2="0" y2="6" stroke="#E74D28" strokeWidth="2.5" />
-            <line x1="0" y1="0" x2="6" y2="0" stroke="#FDECE8" strokeWidth="2.5" />
-          </pattern>
-        </defs>
-      </svg>
-
       {/* Top Header */}
       <div>
-        <h2 className="text-lg font-bold text-[#141414] tracking-tight">Total income</h2>
-        <p className="text-xs text-[#9E9D97] mt-0.5">Profit and loss by month, Jan–Aug 2026</p>
+        <h2 className="text-lg font-bold text-[#141414] tracking-tight">{title}</h2>
+        <p className="text-xs text-[#9E9D97] mt-0.5">{subtitle}</p>
 
         {/* Legend */}
         <div className="flex items-center justify-between mt-5 mb-3 px-1">
@@ -118,27 +100,6 @@ export const IncomeChartCard: React.FC<IncomeChartCardProps> = ({
               })}
             </div>
           </div>
-        </div>
-      </div>
-
-      {/* Bottom: Monthly Spending Limit Section */}
-      <div className="mt-6 pt-5 border-t border-[#EAE9E4]/60">
-        <h3 className="text-xs font-bold text-[#141414]">Monthly spending limit</h3>
-
-        {/* Diagonal Striped Track with Solid Orange Fill */}
-        <div className="w-full h-3.5 rounded-full overflow-hidden mt-3 relative striped-track border border-[#EAE9E4]/50">
-          <div
-            className="h-full bg-[#E74D28] rounded-full transition-all duration-500"
-            style={{ width: `${spentPercentage}%` }}
-          />
-        </div>
-
-        {/* Footer Labels */}
-        <div className="flex items-center justify-between text-xs font-bold text-[#141414] mt-3">
-          <span>
-            {spentAmount} <span className="text-[#9E9D97] font-normal">spent of</span>
-          </span>
-          <span>{totalLimit}</span>
         </div>
       </div>
     </div>
