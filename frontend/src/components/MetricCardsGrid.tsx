@@ -1,0 +1,138 @@
+import React from 'react';
+import { Wallet, CreditCard, Coins, TrendingUp } from 'lucide-react';
+
+interface MetricItem {
+  id: string;
+  label: string;
+  value: string;
+  trend: string;
+  trendType: 'positive' | 'negative';
+  period: string;
+  isHero?: boolean;
+}
+
+interface MetricCardsGridProps {
+  earnings?: string;
+  spending?: string;
+  income?: string;
+  revenue?: string;
+}
+
+export const MetricCardsGrid: React.FC<MetricCardsGridProps> = ({
+  earnings = '$950',
+  spending = '$700',
+  income = '$1,050',
+  revenue = '$850',
+}) => {
+  const metrics: MetricItem[] = [
+    {
+      id: 'earnings',
+      label: 'Total earnings',
+      value: earnings,
+      trend: '↑ 7%',
+      trendType: 'positive',
+      period: 'this month',
+      isHero: true,
+    },
+    {
+      id: 'spending',
+      label: 'Total spending',
+      value: spending,
+      trend: '↓ 5%',
+      trendType: 'negative',
+      period: 'this month',
+    },
+    {
+      id: 'income',
+      label: 'Total income',
+      value: income,
+      trend: '↑ 8%',
+      trendType: 'positive',
+      period: 'this month',
+    },
+    {
+      id: 'revenue',
+      label: 'Total revenue',
+      value: revenue,
+      trend: '↑ 4%',
+      trendType: 'positive',
+      period: 'this month',
+    },
+  ];
+
+  const getMetricIcon = (id: string, isHero?: boolean) => {
+    const iconClass = `w-4 h-4 ${isHero ? 'text-white' : 'text-[#141414]'}`;
+    switch (id) {
+      case 'earnings':
+        return <Wallet className={iconClass} />;
+      case 'spending':
+        return <CreditCard className={iconClass} />;
+      case 'income':
+        return <Coins className={iconClass} />;
+      default:
+        return <TrendingUp className={iconClass} />;
+    }
+  };
+
+  return (
+    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 h-full">
+      {metrics.map((m) => {
+        if (m.isHero) {
+          return (
+            <div
+              key={m.id}
+              className="bg-[#E74D28] text-white rounded-[28px] p-6 shadow-sm flex flex-col justify-between"
+            >
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-medium text-white/90">{m.label}</span>
+                <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center">
+                  {getMetricIcon(m.id, true)}
+                </div>
+              </div>
+
+              <div className="mt-4">
+                <h3 className="text-[34px] sm:text-[38px] font-extrabold tracking-tight leading-tight">
+                  {m.value}
+                </h3>
+                <div className="flex items-center gap-1.5 mt-1.5 text-xs">
+                  <span className="font-semibold text-white">{m.trend}</span>
+                  <span className="text-white/80">{m.period}</span>
+                </div>
+              </div>
+            </div>
+          );
+        }
+
+        return (
+          <div
+            key={m.id}
+            className="bg-[#FFFFFF] border border-[#E7E6DF] rounded-[28px] p-6 shadow-sm flex flex-col justify-between"
+          >
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-medium text-[#6B6A66]">{m.label}</span>
+              <div className="w-8 h-8 rounded-full bg-[#FAFAF7] border border-[#EAE9E4] flex items-center justify-center">
+                {getMetricIcon(m.id, false)}
+              </div>
+            </div>
+
+            <div className="mt-4">
+              <h3 className="text-[34px] sm:text-[38px] font-extrabold text-[#141414] tracking-tight leading-tight">
+                {m.value}
+              </h3>
+              <div className="flex items-center gap-1.5 mt-1.5 text-xs">
+                <span
+                  className={`font-semibold ${
+                    m.trendType === 'positive' ? 'text-[#16A34A]' : 'text-[#E74D28]'
+                  }`}
+                >
+                  {m.trend}
+                </span>
+                <span className="text-[#6B6A66]">{m.period}</span>
+              </div>
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+};
