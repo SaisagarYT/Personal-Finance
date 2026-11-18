@@ -89,19 +89,20 @@ export const TotalBalanceCard: React.FC<TotalBalanceCardProps> = ({
         </div>
       </div>
 
-      {/* Wallets Sub-Section */}
-      <div className="mt-8">
-        <div className="flex items-center justify-between mb-3.5">
+      {/* Wallets Recessed Tray Container */}
+      <div className="mt-8 bg-[#F6F5F0] border border-[#EBEAE3] rounded-[24px] p-3.5">
+        <div className="flex items-center justify-between mb-3 px-1">
           <span className="text-[13px] font-bold text-[#141414]">
             Wallets <span className="text-[#9E9D97] font-normal ml-0.5">· 6 total</span>
           </span>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        {/* Grid of Pure White Wallet Cards */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
           {wallets.map((wallet) => (
             <div
               key={wallet.currency}
-              className="bg-[#FAFAF7] border border-[#EAE9E4] rounded-[20px] p-4 flex flex-col justify-between"
+              className="bg-[#FFFFFF] border border-[#EAE8E0] rounded-[18px] p-4 shadow-[0_1px_3px_rgba(0,0,0,0.02)] flex flex-col justify-between"
             >
               {/* Currency Icon & Label */}
               <div className="flex items-center gap-2 mb-3">
