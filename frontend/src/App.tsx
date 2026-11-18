@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { supabase } from './lib/supabase';
+import { supabase, isSupabaseConfigured } from './lib/supabase';
 import { AuthModal } from './components/AuthModal';
 import { AccountsModal } from './components/AccountsModal';
 import { AddTransactionModal } from './components/AddTransactionModal';
@@ -14,6 +14,7 @@ import {
   LogOut,
   PieChart as PieChartIcon,
   Layers,
+  AlertTriangle,
 } from 'lucide-react';
 import { ResponsiveContainer, PieChart, Pie, Cell, Tooltip } from 'recharts';
 
@@ -31,43 +32,58 @@ export function App() {
   const [showTransactionModal, setShowTransactionModal] = useState(false);
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
+    if (!isSupabaseConfigured) {
       setLoading(false);
-    });
+      return;
+    }
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session);
-    });
+    try {
+      supabase.auth.getSession()
+        .then(({ data: { session } }) => {
+          setSession(session);
+          setLoading(false);
+        })
+        .catch(() => setLoading(false));
 
-    return () => subscription.unsubscribe();
+      const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+        setSession(session);
+      });
+
+      return () => subscription.unsubscribe();
+    } catch {
+      setLoading(false);
+    }
   }, []);
 
   const fetchData = async () => {
-    if (!session?.user) return;
+    if (!session?.user || !isSupabaseConfigured) return;
 
-    const { data: accData } = await supabase
-      .from('accounts')
-      .select('*')
-      .order('created_at', { ascending: false });
-    if (accData) setAccounts(accData);
+    try {
+      const { data: accData } = await supabase
+        .from('accounts')
+        .select('*')
+        .order('created_at', { ascending: false });
+      if (accData) setAccounts(accData);
 
-    const { data: catData } = await supabase
-      .from('categories')
-      .select('*')
-      .order('name');
-    if (catData) setCategories(catData);
+      const { data: catData } = await supabase
+        .from('categories')
+        .select('*')
+        .order('name');
+      if (catData) setCategories(catData);
 
-    const { data: txData } = await supabase
-      .from('transactions')
-      .select(`
-        *,
-        accounts ( name, type, color ),
-        categories ( name, icon, color )
-      `)
-      .order('transaction_date', { ascending: false })
-      .limit(50);
-    if (txData) setTransactions(txData);
+      const { data: txData } = await supabase
+        .from('transactions')
+        .select(`
+          *,
+          accounts ( name, type, color ),
+          categories ( name, icon, color )
+        `)
+        .order('transaction_date', { ascending: false })
+        .limit(50);
+      if (txData) setTransactions(txData);
+    } catch (e) {
+      console.error(e);
+    }
   };
 
   useEffect(() => {
@@ -95,9 +111,33 @@ export function App() {
     }
   };
 
+  if (!isSupabaseConfigured) {
+    return (
+      <div className="min-h-screen bg-slate-950 text-slate-100 flex items-center justify-center p-4">
+        <div className="max-w-md w-full bg-slate-900 border border-amber-500/30 rounded-2xl p-6 shadow-2xl text-center space-y-4">
+          <div className="w-12 h-12 rounded-xl bg-amber-500/10 text-amber-400 mx-auto flex items-center justify-center border border-amber-500/20">
+            <AlertTriangle className="w-6 h-6" />
+          </div>
+          <h2 className="text-xl font-bold text-white">Supabase Key Required</h2>
+          <p className="text-xs text-slate-400 leading-relaxed">
+            The frontend needs your Supabase project's <strong>Anon Key</strong> to connect to the database and authenticate users.
+          </p>
+          <div className="bg-slate-950 p-3 rounded-xl border border-slate-800 text-left text-xs font-mono text-slate-300 space-y-1">
+            <p className="text-slate-500">// File: frontend/.env</p>
+            <p className="text-blue-400">VITE_SUPABASE_URL=https://cijknmicojgxllburhot.supabase.co</p>
+            <p className="text-emerald-400">VITE_SUPABASE_ANON_KEY=&lt;your-anon-key&gt;</p>
+          </div>
+          <p className="text-[11px] text-slate-500">
+            Find it in your Supabase Dashboard under <strong>Project Settings → API → Project API keys → anon (public)</strong>.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
   if (loading) {
     return (
-      <div className="min-h-screen bg-slate-950 flex items-center justify-center text-slate-400">
+      <div className="min-h-screen bg-slate-950 flex items-center justify-center text-slate-400 text-sm">
         Loading...
       </div>
     );
