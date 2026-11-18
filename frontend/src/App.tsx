@@ -3,8 +3,7 @@ import { supabase, isSupabaseConfigured } from './lib/supabase';
 import { Navbar } from './components/Navbar';
 import { TotalBalanceCard } from './components/TotalBalanceCard';
 import { MetricCardsGrid } from './components/MetricCardsGrid';
-import { IncomeChartCard } from './components/IncomeChartCard';
-import { SpendingLimitCard } from './components/SpendingLimitCard';
+import { IncomeChartWithLimitCard } from './components/IncomeChartWithLimitCard';
 import { RecentActivitiesTable } from './components/RecentActivitiesTable';
 import { ActionModals } from './components/ActionModals';
 import type { Account, Category, Transaction } from './types';
@@ -37,21 +36,18 @@ export function App() {
     if (!isSupabaseConfigured) return;
 
     try {
-      // 1. Fetch Accounts
       const { data: accData } = await supabase
         .from('accounts')
         .select('*')
         .order('created_at', { ascending: false });
       if (accData) setAccounts(accData);
 
-      // 2. Fetch Categories
       const { data: catData } = await supabase
         .from('categories')
         .select('*')
         .order('name');
       if (catData) setCategories(catData);
 
-      // 3. Fetch Transactions
       const { data: txData } = await supabase
         .from('transactions')
         .select(`
@@ -90,7 +86,7 @@ export function App() {
     }
   };
 
-  // Calculations
+  // Dynamic calculations
   const totalBalanceNumber = accounts.reduce((sum, a) => sum + parseFloat(a.balance as any || 0), 0);
   const totalBalanceFormatted = accounts.length > 0
     ? `$${totalBalanceNumber.toLocaleString('en-US', { minimumFractionDigits: 2 })}`
@@ -147,40 +143,37 @@ export function App() {
           </p>
         </div>
 
-        {/* Master Asymmetric Grid: Left Main (8 cols) + Right Sidebar (4 cols) */}
+        {/* Master 60/40 Asymmetric 2-Column Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-          {/* ================= LEFT MAIN COLUMN (8 of 12) ================= */}
-          <div className="lg:col-span-8 flex flex-col space-y-6">
-            {/* Top Row: Total Balance (50%) + 2x2 Metric Cards (50%) */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-5 items-stretch">
-              <TotalBalanceCard
-                balance={totalBalanceFormatted}
-                wallets={walletsData}
-                onTransfer={() => setActiveModal('transfer')}
-                onRequest={() => setActiveModal('request')}
-              />
-              <MetricCardsGrid
-                earnings={earningsFormatted}
-                spending={spendingFormatted}
-                income={incomeFormatted}
-                revenue={revenueFormatted}
-              />
-            </div>
+          {/* ================= LEFT WIDER COLUMN (~58-60%, 7 of 12 cols) ================= */}
+          <div className="lg:col-span-7 flex flex-col space-y-6">
+            {/* 1. Total Balance Card */}
+            <TotalBalanceCard
+              balance={totalBalanceFormatted}
+              wallets={walletsData}
+              onTransfer={() => setActiveModal('transfer')}
+              onRequest={() => setActiveModal('request')}
+            />
 
-            {/* Bottom Row: Full-Width Recent Activities Table */}
+            {/* 2. Recent Activities Table (Directly below Total Balance) */}
             <RecentActivitiesTable
               transactions={transactions.length > 0 ? transactions : undefined}
               onDeleteTransaction={handleDeleteTransaction}
             />
           </div>
 
-          {/* ================= RIGHT SIDEBAR COLUMN (4 of 12) ================= */}
-          <div className="lg:col-span-4 flex flex-col space-y-6">
-            {/* 1. Total Income Profit & Loss Bar Chart Card */}
-            <IncomeChartCard />
+          {/* ================= RIGHT COMPACT COLUMN (~40-42%, 5 of 12 cols) ================= */}
+          <div className="lg:col-span-5 flex flex-col space-y-6">
+            {/* 1. 2x2 Metric Cards Grid (Total earnings, spending, income, revenue) */}
+            <MetricCardsGrid
+              earnings={earningsFormatted}
+              spending={spendingFormatted}
+              income={incomeFormatted}
+              revenue={revenueFormatted}
+            />
 
-            {/* 2. Monthly Spending Limit Progress Card */}
-            <SpendingLimitCard
+            {/* 2. Total Income Profit & Loss Chart + Monthly Spending Limit (Directly below 2x2 cards) */}
+            <IncomeChartWithLimitCard
               spentAmount={currentSpentOfLimit}
               totalLimit="$5,500.00"
               spentPercentage={spentPercent}
@@ -189,7 +182,7 @@ export function App() {
         </div>
       </main>
 
-      {/* Action Modals for Transfer & Request */}
+      {/* Action Modals */}
       <ActionModals
         accounts={accounts}
         categories={categories}
