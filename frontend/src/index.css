@@ -1,1 +1,64 @@
 @import "tailwindcss";
+
+@theme {
+  --font-sans: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+
+  /* Global Theme Colors */
+  --color-canvas: #F3F2ED;
+  --color-surface: #FFFFFF;
+  --color-surface-subtle: #FAFAF7;
+  --color-border-subtle: #E7E6DF;
+
+  /* Accent Brand Colors */
+  --color-brand: #E74D28;
+  --color-brand-light: #FDECE8;
+  --color-brand-dark: #D43E1B;
+
+  /* Text Colors */
+  --color-text-main: #141414;
+  --color-text-muted: #6B6A66;
+  --color-text-dim: #9E9D97;
+
+  /* Status Colors */
+  --color-status-success: #16A34A;
+  --color-status-success-bg: #DCFCE7;
+  --color-status-warning: #D97706;
+  --color-status-warning-bg: #FEF3C7;
+  --color-status-purple: #8B5CF6;
+  --color-status-purple-bg: #EDE9FE;
+  --color-status-danger: #DC2626;
+  --color-status-danger-bg: #FEE2E2;
+}
+
+body {
+  font-family: var(--font-sans);
+  background-color: var(--color-canvas);
+  color: var(--color-text-main);
+}
+
+/* Custom striped progress bar background from design */
+.striped-track {
+  background: repeating-linear-gradient(
+    -45deg,
+    #ECEAE3,
+    #ECEAE3 6px,
+    #F3F2ED 6px,
+    #F3F2ED 12px
+  );
+}
+
+/* Custom scrollbar for modern feel */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #D8D6CE;
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #B8B6AE;
+}
