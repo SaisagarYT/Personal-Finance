@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Navbar } from './components/Navbar';
 import { TotalBalanceCard } from './components/TotalBalanceCard';
 import { MetricCardsGrid } from './components/MetricCardsGrid';
+import { IncomeChartCard } from './components/IncomeChartCard';
 
 export function App() {
   const [activeTab, setActiveTab] = useState('Overview');
@@ -23,27 +24,31 @@ export function App() {
           </p>
         </div>
 
-        {/* Top Grid: Left Side (Total Balance) & Center (2x2 Metric Cards) */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-stretch">
-          {/* Left Column (5 of 12 cols): Total Balance & Wallets */}
-          <div className="lg:col-span-5 flex flex-col">
-            <TotalBalanceCard
-              onTransfer={() => console.log('Transfer clicked')}
-              onRequest={() => console.log('Request clicked')}
-            />
+        {/* Master 2-Column Grid (Left: 8 Cols, Right: 4 Cols) */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
+          {/* ================= LEFT MAIN COLUMN (8 of 12) ================= */}
+          <div className="lg:col-span-8 flex flex-col space-y-6">
+            {/* Top Row: Total Balance (1/2) + 2x2 Metric Grid (1/2) */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5 items-stretch">
+              <TotalBalanceCard
+                onTransfer={() => console.log('Transfer clicked')}
+                onRequest={() => console.log('Request clicked')}
+              />
+              <MetricCardsGrid />
+            </div>
+
+            {/* Bottom Row: Step 5 Space for Recent Activities Table */}
+            <div className="flex-1 border-2 border-dashed border-[#E7E6DF] rounded-[28px] bg-[#FAFAF7]/50 p-8 text-[#6B6A66] flex flex-col items-center justify-center min-h-[300px]">
+              <p className="text-sm font-semibold text-[#141414]">Step 5 Space: Recent Activities Table</p>
+              <p className="text-xs text-[#9E9D97] mt-1 text-center">
+                Search bar, Filter button, checkboxes, activity avatars (P, M, H, F, G, S), and status tags.
+              </p>
+            </div>
           </div>
 
-          {/* Center Column (4 of 12 cols): 2x2 Metric Cards Grid */}
+          {/* ================= RIGHT COLUMN (4 of 12) ================= */}
           <div className="lg:col-span-4 flex flex-col">
-            <MetricCardsGrid />
-          </div>
-
-          {/* Right Column (3 of 12 cols): Step 4 Space for Total Income Chart & Monthly Limit */}
-          <div className="lg:col-span-3 flex flex-col justify-center items-center border-2 border-dashed border-[#E7E6DF] rounded-[28px] bg-[#FAFAF7]/50 p-6 text-[#6B6A66] min-h-[350px]">
-            <p className="text-sm font-semibold text-[#141414]">Step 4 Space</p>
-            <p className="text-xs text-[#9E9D97] mt-1 text-center">
-              Total income profit/loss stacked bar chart + monthly spending limit progress.
-            </p>
+            <IncomeChartCard />
           </div>
         </div>
       </main>
