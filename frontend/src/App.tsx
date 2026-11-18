@@ -6,11 +6,13 @@ import { MetricCardsGrid } from './components/MetricCardsGrid';
 import { IncomeChartWithLimitCard } from './components/IncomeChartWithLimitCard';
 import { RecentActivitiesTable } from './components/RecentActivitiesTable';
 import { ActionModals } from './components/ActionModals';
+import { AuthView } from './components/AuthView';
 import type { Account, Category, Transaction } from './types';
 
 export function App() {
   const [activeTab, setActiveTab] = useState('Overview');
   const [session, setSession] = useState<any>(null);
+  const [authLoading, setAuthLoading] = useState(true);
 
   const [accounts, setAccounts] = useState<Account[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
@@ -19,21 +21,26 @@ export function App() {
   const [activeModal, setActiveModal] = useState<'transfer' | 'request' | null>(null);
 
   useEffect(() => {
-    if (!isSupabaseConfigured) return;
+    if (!isSupabaseConfigured) {
+      setAuthLoading(false);
+      return;
+    }
 
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
+      setAuthLoading(false);
     });
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session);
+      setAuthLoading(false);
     });
 
     return () => subscription.unsubscribe();
   }, []);
 
   const fetchData = async () => {
-    if (!isSupabaseConfigured) return;
+    if (!session?.user || !isSupabaseConfigured) return;
 
     try {
       const { data: accData } = await supabase
@@ -64,7 +71,9 @@ export function App() {
   };
 
   useEffect(() => {
-    fetchData();
+    if (session?.user) {
+      fetchData();
+    }
   }, [session]);
 
   const handleDeleteTransaction = async (id: string, accountId: string, amount: number, type: string) => {
@@ -85,6 +94,19 @@ export function App() {
       alert(err.message);
     }
   };
+
+  if (authLoading) {
+    return (
+      <div className="min-h-screen bg-[#F3F2ED] flex items-center justify-center text-xs font-semibold text-[#6B6A66]">
+        Loading Kova...
+      </div>
+    );
+  }
+
+  // If user is not authenticated, display the exact login UI
+  if (!session?.user) {
+    return <AuthView onAuthSuccess={() => setAuthLoading(false)} />;
+  }
 
   // Dynamic calculations
   const totalBalanceNumber = accounts.reduce((sum, a) => sum + parseFloat(a.balance as any || 0), 0);
@@ -155,7 +177,7 @@ export function App() {
               onRequest={() => setActiveModal('request')}
             />
 
-            {/* 2. Recent Activities Table (Directly below Total Balance) */}
+            {/* 2. Recent Activities Table */}
             <RecentActivitiesTable
               transactions={transactions.length > 0 ? transactions : undefined}
               onDeleteTransaction={handleDeleteTransaction}
@@ -164,7 +186,7 @@ export function App() {
 
           {/* ================= RIGHT COMPACT COLUMN (~40-42%, 5 of 12 cols) ================= */}
           <div className="lg:col-span-5 flex flex-col space-y-6">
-            {/* 1. 2x2 Metric Cards Grid (Total earnings, spending, income, revenue) */}
+            {/* 1. 2x2 Metric Cards Grid */}
             <MetricCardsGrid
               earnings={earningsFormatted}
               spending={spendingFormatted}
@@ -172,7 +194,7 @@ export function App() {
               revenue={revenueFormatted}
             />
 
-            {/* 2. Total Income Profit & Loss Chart + Monthly Spending Limit (Directly below 2x2 cards) */}
+            {/* 2. Total Income Profit & Loss Chart + Monthly Spending Limit */}
             <IncomeChartWithLimitCard
               spentAmount={currentSpentOfLimit}
               totalLimit="$5,500.00"
