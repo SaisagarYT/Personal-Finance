@@ -1,5 +1,5 @@
 import React from 'react';
-import { ArrowUpRight, ArrowLeftRight, ArrowDown, ChevronDown } from 'lucide-react';
+import { ArrowLeftRight, ArrowDown, ChevronDown } from 'lucide-react';
 
 interface Wallet {
   currency: string;
@@ -45,56 +45,54 @@ const DEFAULT_WALLETS: Wallet[] = [
 export const TotalBalanceCard: React.FC<TotalBalanceCardProps> = ({
   balance = '$689,372.00',
   currency = 'USD',
-  trendPercentage = '5%',
+  trendPercentage = '↑ 5%',
   wallets = DEFAULT_WALLETS,
   onTransfer,
   onRequest,
 }) => {
   return (
-    <div className="bg-[#FFFFFF] border border-[#E7E6DF] rounded-3xl p-6 shadow-sm flex flex-col justify-between">
-      {/* Top Header & Dropdown */}
+    <div className="bg-[#FFFFFF] border border-[#E7E6DF] rounded-[28px] p-6 shadow-sm flex flex-col justify-between">
       <div>
+        {/* Top Header & Dropdown */}
         <div className="flex items-center justify-between">
           <span className="text-xs font-medium text-[#6B6A66]">Total balance</span>
-          <button className="flex items-center gap-1.5 px-3 py-1 bg-[#FAFAF7] border border-[#E7E6DF] rounded-full text-xs font-semibold text-[#141414] hover:bg-[#F3F2ED] transition cursor-pointer">
+          <button className="flex items-center gap-1.5 px-3 py-1 bg-[#FAFAF7] border border-[#EAE9E4] rounded-full text-[11px] font-semibold text-[#141414] hover:bg-[#F3F2ED] transition cursor-pointer">
             {currency} <ChevronDown className="w-3.5 h-3.5 text-[#6B6A66]" />
           </button>
         </div>
 
         {/* Big Balance Number */}
-        <h2 className="text-3xl sm:text-4xl font-extrabold text-[#141414] tracking-tight mt-3">
+        <h2 className="text-[34px] sm:text-[38px] font-extrabold text-[#141414] tracking-tight mt-2.5 leading-tight">
           {balance}
         </h2>
 
-        {/* Trend Indicator */}
-        <div className="flex items-center gap-1.5 mt-2">
-          <span className="inline-flex items-center text-xs font-semibold text-[#16A34A] bg-[#DCFCE7] px-2 py-0.5 rounded-full">
-            <ArrowUpRight className="w-3.5 h-3.5 mr-0.5" /> {trendPercentage}
-          </span>
-          <span className="text-xs text-[#6B6A66]">vs last month</span>
+        {/* Trend Indicator: Clean inline text without background pill */}
+        <div className="flex items-center gap-1.5 mt-1.5 text-xs">
+          <span className="font-semibold text-[#16A34A]">{trendPercentage}</span>
+          <span className="text-[#6B6A66]">vs last month</span>
         </div>
 
-        {/* Action Buttons */}
+        {/* Action Buttons: Solid dark vs soft warm pill */}
         <div className="grid grid-cols-2 gap-3 mt-6">
           <button
             onClick={onTransfer}
             className="flex items-center justify-center gap-2 py-3 px-4 bg-[#141414] hover:bg-[#27272A] text-white text-xs font-semibold rounded-full shadow-sm transition cursor-pointer"
           >
-            <ArrowLeftRight className="w-4 h-4" /> Transfer
+            <ArrowLeftRight className="w-3.5 h-3.5" /> Transfer
           </button>
           <button
             onClick={onRequest}
-            className="flex items-center justify-center gap-2 py-3 px-4 bg-[#FAFAF7] hover:bg-[#ECEAE3] border border-[#E7E6DF] text-[#141414] text-xs font-semibold rounded-full shadow-sm transition cursor-pointer"
+            className="flex items-center justify-center gap-2 py-3 px-4 bg-[#F3F2ED] hover:bg-[#ECEAE3] text-[#141414] text-xs font-semibold rounded-full transition cursor-pointer"
           >
-            <ArrowDown className="w-4 h-4" /> Request
+            <ArrowDown className="w-3.5 h-3.5" /> Request
           </button>
         </div>
       </div>
 
-      {/* Wallets Sub-Section */}
-      <div className="mt-8 pt-5 border-t border-[#E7E6DF]/60">
+      {/* Wallets Sub-Section (no hard divider line) */}
+      <div className="mt-7">
         <div className="flex items-center justify-between mb-3">
-          <span className="text-xs font-semibold text-[#141414]">
+          <span className="text-xs font-bold text-[#141414]">
             Wallets <span className="text-[#9E9D97] font-normal">· 6 total</span>
           </span>
         </div>
@@ -103,7 +101,7 @@ export const TotalBalanceCard: React.FC<TotalBalanceCardProps> = ({
           {wallets.map((wallet) => (
             <div
               key={wallet.currency}
-              className="bg-[#FAFAF7] border border-[#E7E6DF] rounded-2xl p-3.5 flex flex-col justify-between"
+              className="bg-[#FAFAF7] border border-[#EAE9E4] rounded-2xl p-3.5 flex flex-col justify-between"
             >
               <div className="flex items-center gap-1.5 mb-2">
                 <span className="w-4 h-4 rounded-full bg-[#141414] text-white text-[10px] font-bold flex items-center justify-center">
@@ -116,7 +114,7 @@ export const TotalBalanceCard: React.FC<TotalBalanceCardProps> = ({
                 <p className="text-[10px] text-[#9E9D97] mt-0.5">{wallet.limit}</p>
                 <span
                   className={`inline-block text-[10px] font-semibold mt-2 ${
-                    wallet.status === 'Active' ? 'text-[#16A34A]' : 'text-[#DC2626]'
+                    wallet.status === 'Active' ? 'text-[#16A34A]' : 'text-[#E74D28]'
                   }`}
                 >
                   {wallet.status}
