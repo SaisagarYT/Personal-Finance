@@ -51,7 +51,7 @@ export const TotalBalanceCard: React.FC<TotalBalanceCardProps> = ({
   onRequest,
 }) => {
   return (
-    <div className="bg-[#FFFFFF] border border-[#E7E6DF] rounded-[28px] p-6 shadow-sm flex flex-col justify-between">
+    <div className="bg-[#FFFFFF] border border-[#E7E6DF] rounded-[28px] p-6 sm:p-7 shadow-sm flex flex-col justify-between">
       <div>
         {/* Top Header & Dropdown */}
         <div className="flex items-center justify-between">
@@ -89,11 +89,11 @@ export const TotalBalanceCard: React.FC<TotalBalanceCardProps> = ({
         </div>
       </div>
 
-      {/* Wallets Sub-Section (no hard divider line) */}
-      <div className="mt-7">
-        <div className="flex items-center justify-between mb-3">
-          <span className="text-xs font-bold text-[#141414]">
-            Wallets <span className="text-[#9E9D97] font-normal">· 6 total</span>
+      {/* Wallets Sub-Section */}
+      <div className="mt-8">
+        <div className="flex items-center justify-between mb-3.5">
+          <span className="text-[13px] font-bold text-[#141414]">
+            Wallets <span className="text-[#9E9D97] font-normal ml-0.5">· 6 total</span>
           </span>
         </div>
 
@@ -101,19 +101,26 @@ export const TotalBalanceCard: React.FC<TotalBalanceCardProps> = ({
           {wallets.map((wallet) => (
             <div
               key={wallet.currency}
-              className="bg-[#FAFAF7] border border-[#EAE9E4] rounded-2xl p-3.5 flex flex-col justify-between"
+              className="bg-[#FAFAF7] border border-[#EAE9E4] rounded-[20px] p-4 flex flex-col justify-between"
             >
-              <div className="flex items-center gap-1.5 mb-2">
-                <span className="w-4 h-4 rounded-full bg-[#141414] text-white text-[10px] font-bold flex items-center justify-center">
+              {/* Currency Icon & Label */}
+              <div className="flex items-center gap-2 mb-3">
+                <span className="w-5 h-5 rounded-full bg-[#141414] text-white text-[11px] font-bold flex items-center justify-center shrink-0">
                   {wallet.symbol}
                 </span>
-                <span className="text-xs font-bold text-[#141414]">{wallet.currency}</span>
+                <span className="text-[13px] font-bold text-[#141414] tracking-tight">{wallet.currency}</span>
               </div>
+
+              {/* Balance & Sub-details */}
               <div>
-                <p className="text-sm font-bold text-[#141414] tracking-tight">{wallet.balance}</p>
-                <p className="text-[10px] text-[#9E9D97] mt-0.5">{wallet.limit}</p>
+                <p className="text-[17px] font-bold text-[#141414] tracking-tight leading-tight">
+                  {wallet.balance}
+                </p>
+                <p className="text-[11px] text-[#9E9D97] mt-1 font-normal">
+                  {wallet.limit}
+                </p>
                 <span
-                  className={`inline-block text-[10px] font-semibold mt-2 ${
+                  className={`inline-block text-[11px] font-semibold mt-3 ${
                     wallet.status === 'Active' ? 'text-[#16A34A]' : 'text-[#E74D28]'
                   }`}
                 >
