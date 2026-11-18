@@ -1,120 +1,41 @@
 import React, { useState } from 'react';
-import { Search, SlidersHorizontal, Check } from 'lucide-react';
+import { Search, SlidersHorizontal, Check, Trash2 } from 'lucide-react';
+import type { Transaction } from '../types';
 
-interface ActivityItem {
-  id: string;
-  orderId: string;
-  activity: string;
-  initial: string;
-  initialBg: string;
-  initialColor: string;
-  price: string;
-  status: 'Completed' | 'Pending' | 'In progress';
-  checked?: boolean;
+interface RecentActivitiesTableProps {
+  transactions?: Transaction[];
+  onDeleteTransaction?: (id: string, accountId: string, amount: number, type: string) => void;
 }
 
-const DEFAULT_ACTIVITIES: ActivityItem[] = [
-  {
-    id: '1',
-    orderId: 'INV-000078',
-    activity: 'Payroll transfer',
-    initial: 'P',
-    initialBg: 'bg-[#E0F2FE]',
-    initialColor: 'text-[#0284C7]',
-    price: '$18,400',
-    status: 'Completed',
-  },
-  {
-    id: '2',
-    orderId: 'INV-000077',
-    activity: 'Mobile app purchase',
-    initial: 'M',
-    initialBg: 'bg-[#EDE9FE]',
-    initialColor: 'text-[#7C3AED]',
-    price: '$25,500',
-    status: 'Completed',
-  },
-  {
-    id: '3',
-    orderId: 'INV-000076',
-    activity: 'Hotel booking',
-    initial: 'H',
-    initialBg: 'bg-[#F3E8FF]',
-    initialColor: 'text-[#9333EA]',
-    price: '$32,750',
-    status: 'Pending',
-  },
-  {
-    id: '4',
-    orderId: 'INV-000075',
-    activity: 'Flight ticket',
-    initial: 'F',
-    initialBg: 'bg-[#E0F2FE]',
-    initialColor: 'text-[#0284C7]',
-    price: '$40,200',
-    status: 'Completed',
-  },
-  {
-    id: '5',
-    orderId: 'INV-000073',
-    activity: 'Grocery purchase',
-    initial: 'G',
-    initialBg: 'bg-[#FEF3C7]',
-    initialColor: 'text-[#D97706]',
-    price: '$50,200',
-    status: 'In progress',
-    checked: true,
-  },
-  {
-    id: '6',
-    orderId: 'INV-000072',
-    activity: 'Software license',
-    initial: 'S',
-    initialBg: 'bg-[#FEE2E2]',
-    initialColor: 'text-[#DC2626]',
-    price: '$15,900',
-    status: 'Completed',
-  },
-];
-
-export const RecentActivitiesTable: React.FC = () => {
-  const [activities, setActivities] = useState<ActivityItem[]>(DEFAULT_ACTIVITIES);
+export const RecentActivitiesTable: React.FC<RecentActivitiesTableProps> = ({
+  transactions = [],
+  onDeleteTransaction,
+}) => {
   const [searchTerm, setSearchTerm] = useState('');
+  const [checkedIds, setCheckedIds] = useState<{ [key: string]: boolean }>({});
 
   const toggleCheck = (id: string) => {
-    setActivities((prev) =>
-      prev.map((item) => (item.id === id ? { ...item, checked: !item.checked } : item))
-    );
+    setCheckedIds((prev) => ({ ...prev, [id]: !prev[id] }));
   };
 
-  const getStatusBadge = (status: ActivityItem['status']) => {
-    switch (status) {
-      case 'Completed':
-        return (
-          <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#141414]">
-            <span className="w-2 h-2 rounded-full bg-[#16A34A]" /> Completed
-          </span>
-        );
-      case 'Pending':
-        return (
-          <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#141414]">
-            <span className="w-2 h-2 rounded-full bg-[#8B5CF6]" /> Pending
-          </span>
-        );
-      case 'In progress':
-        return (
-          <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#141414]">
-            <span className="w-2 h-2 rounded-full bg-[#D97706]" /> In progress
-          </span>
-        );
-    }
+  const getInitialStyle = (index: number) => {
+    const styles = [
+      { bg: 'bg-[#E0F2FE]', color: 'text-[#0284C7]' },
+      { bg: 'bg-[#EDE9FE]', color: 'text-[#7C3AED]' },
+      { bg: 'bg-[#F3E8FF]', color: 'text-[#9333EA]' },
+      { bg: 'bg-[#FEF3C7]', color: 'text-[#D97706]' },
+      { bg: 'bg-[#FEE2E2]', color: 'text-[#DC2626]' },
+      { bg: 'bg-[#DCFCE7]', color: 'text-[#16A34A]' },
+    ];
+    return styles[index % styles.length];
   };
 
-  const filtered = activities.filter(
-    (a) =>
-      a.activity.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      a.orderId.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filtered = transactions.filter((t) => {
+    const desc = t.description?.toLowerCase() || '';
+    const cat = t.categories?.name?.toLowerCase() || '';
+    const s = searchTerm.toLowerCase();
+    return desc.includes(s) || cat.includes(s) || t.id.toLowerCase().includes(s);
+  });
 
   return (
     <div className="bg-[#FFFFFF] border border-[#E7E6DF] rounded-[28px] p-6 sm:p-7 shadow-sm">
@@ -157,50 +78,85 @@ export const RecentActivitiesTable: React.FC = () => {
             </tr>
           </thead>
           <tbody className="divide-y divide-[#F7F6F2]">
-            {filtered.map((item) => (
-              <tr key={item.id} className="hover:bg-[#FAFAF7]/60 transition">
-                {/* Custom Checkbox */}
-                <td className="py-3 pl-2 pr-3">
-                  <button
-                    onClick={() => toggleCheck(item.id)}
-                    className={`w-4 h-4 rounded flex items-center justify-center transition cursor-pointer ${
-                      item.checked
-                        ? 'bg-[#141414] text-white border border-[#141414]'
-                        : 'border border-[#D8D6CE] bg-[#FAFAF7] hover:border-[#141414]'
-                    }`}
-                  >
-                    {item.checked && <Check className="w-3 h-3 stroke-[3]" />}
-                  </button>
-                </td>
-
-                {/* Order ID */}
-                <td className="py-3 px-3 text-xs font-semibold text-[#141414]">
-                  {item.orderId}
-                </td>
-
-                {/* Activity with Avatar */}
-                <td className="py-3 px-3">
-                  <div className="flex items-center gap-2.5">
-                    <span
-                      className={`w-6 h-6 rounded-md flex items-center justify-center font-bold text-[11px] ${item.initialBg} ${item.initialColor}`}
-                    >
-                      {item.initial}
-                    </span>
-                    <span className="text-xs font-semibold text-[#141414]">{item.activity}</span>
-                  </div>
-                </td>
-
-                {/* Price */}
-                <td className="py-3 px-3 text-xs font-bold text-[#141414]">
-                  {item.price}
-                </td>
-
-                {/* Status */}
-                <td className="py-3 pr-2 pl-3">
-                  {getStatusBadge(item.status)}
+            {filtered.length === 0 ? (
+              <tr>
+                <td colSpan={5} className="py-8 text-center text-xs text-[#9E9D97] italic">
+                  No transactions yet. Click "+ Transfer" or "+ Request" above to log activity.
                 </td>
               </tr>
-            ))}
+            ) : (
+              filtered.map((item, index) => {
+                const style = getInitialStyle(index);
+                const title = item.description || item.categories?.name || 'General payment';
+                const initial = title.charAt(0).toUpperCase();
+                const orderCode = `INV-${item.id.slice(0, 6).toUpperCase()}`;
+                const isChecked = Boolean(checkedIds[item.id]);
+
+                return (
+                  <tr key={item.id} className="hover:bg-[#FAFAF7]/60 transition">
+                    <td className="py-3 pl-2 pr-3">
+                      <button
+                        onClick={() => toggleCheck(item.id)}
+                        className={`w-4 h-4 rounded flex items-center justify-center transition cursor-pointer ${
+                          isChecked
+                            ? 'bg-[#141414] text-white border border-[#141414]'
+                            : 'border border-[#D8D6CE] bg-[#FAFAF7] hover:border-[#141414]'
+                        }`}
+                      >
+                        {isChecked && <Check className="w-3 h-3 stroke-[3]" />}
+                      </button>
+                    </td>
+
+                    <td className="py-3 px-3 text-xs font-semibold text-[#141414]">{orderCode}</td>
+
+                    <td className="py-3 px-3">
+                      <div className="flex items-center gap-2.5">
+                        <span
+                          className={`w-6 h-6 rounded-md flex items-center justify-center font-bold text-[11px] ${style.bg} ${style.color}`}
+                        >
+                          {initial}
+                        </span>
+                        <div>
+                          <span className="text-xs font-semibold text-[#141414]">{title}</span>
+                          <span className="block text-[10px] text-[#9E9D97]">
+                            {item.accounts?.name || 'Account'} • {item.transaction_date}
+                          </span>
+                        </div>
+                      </div>
+                    </td>
+
+                    <td className="py-3 px-3 text-xs font-bold text-[#141414]">
+                      {item.type === 'income' ? '+' : '-'}$
+                      {Number(item.amount).toLocaleString('en-US', { minimumFractionDigits: 2 })}
+                    </td>
+
+                    <td className="py-3 pr-2 pl-3">
+                      <div className="flex items-center justify-between">
+                        <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#141414]">
+                          <span className="w-2 h-2 rounded-full bg-[#16A34A]" /> Completed
+                        </span>
+                        {onDeleteTransaction && (
+                          <button
+                            onClick={() =>
+                              onDeleteTransaction(
+                                item.id,
+                                item.account_id,
+                                Number(item.amount),
+                                item.type
+                              )
+                            }
+                            className="p-1 text-[#9E9D97] hover:text-[#DC2626] transition cursor-pointer"
+                            title="Delete transaction"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        )}
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })
+            )}
           </tbody>
         </table>
       </div>
