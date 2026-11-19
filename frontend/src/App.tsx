@@ -120,46 +120,51 @@ export function App() {
     return <AuthView onAuthSuccess={() => setAuthLoading(false)} />;
   }
 
-  // Dynamic calculations with Indian Rupees (INR) and US Dollar (USD) conversion
-  const rawBalance = accounts.length > 0
-    ? accounts.reduce((sum, a) => sum + parseFloat(a.balance as any || 0), 0)
-    : 22678.00;
-  const totalBalanceFormatted = formatCurrencyAmount(rawBalance, currency, true);
+  // Real dynamic calculations from Supabase database
+  const rawBalance = accounts.reduce((sum, a) => sum + parseFloat(a.balance as any || 0), 0);
+  const totalBalanceFormatted = formatCurrencyAmount(rawBalance, currency, false);
 
   const currentMonth = new Date().toISOString().slice(0, 7);
   const monthTransactions = transactions.filter((t) => t.transaction_date.startsWith(currentMonth));
 
   const monthIncomeRaw = monthTransactions
     .filter((t) => t.type === 'income')
-    .reduce((sum, t) => sum + parseFloat(t.amount as any), 0);
-  const effectiveIncome = monthIncomeRaw > 0 ? monthIncomeRaw : 1050;
+    .reduce((sum, t) => sum + parseFloat(t.amount as any || 0), 0);
 
   const monthExpensesRaw = monthTransactions
     .filter((t) => t.type === 'expense')
-    .reduce((sum, t) => sum + parseFloat(t.amount as any), 0);
-  const effectiveExpenses = monthExpensesRaw > 0 ? monthExpensesRaw : 700;
+    .reduce((sum, t) => sum + parseFloat(t.amount as any || 0), 0);
 
-  const earningsFormatted = formatCurrencyAmount(effectiveIncome * 0.9, currency, true);
-  const spendingFormatted = formatCurrencyAmount(effectiveExpenses, currency, true);
-  const incomeFormatted = formatCurrencyAmount(effectiveIncome, currency, true);
-  const revenueFormatted = formatCurrencyAmount(effectiveIncome * 0.8, currency, true);
+  const netRevenue = monthIncomeRaw - monthExpensesRaw;
 
-  const walletsData = accounts.length > 0
-    ? accounts.slice(0, 3).map((acc) => ({
-        currency: currency,
-        symbol: currency === 'INR' ? '₹' : '$',
-        balance: formatCurrencyAmount(Number(acc.balance), currency, true),
-        limit: `Limit ${currency === 'INR' ? '₹10L' : '$10k'} / mo`,
-        status: (acc.balance >= 0 ? 'Active' : 'Inactive') as 'Active' | 'Inactive',
-      }))
-    : undefined;
+  const earningsFormatted = formatCurrencyAmount(monthIncomeRaw, currency, false);
+  const spendingFormatted = formatCurrencyAmount(monthExpensesRaw, currency, false);
+  const incomeFormatted = formatCurrencyAmount(monthIncomeRaw, currency, false);
+  const revenueFormatted = formatCurrencyAmount(netRevenue, currency, false);
 
-  const currentSpentOfLimit = formatCurrencyAmount(effectiveExpenses * 2, currency, true);
-  const totalLimitFormatted = formatCurrencyAmount(5500, currency, true);
-  const spentPercent = Math.min(Math.round(((effectiveExpenses * 2) / 5500) * 100) || 26, 100);
+  const incomeCount = monthTransactions.filter((t) => t.type === 'income').length;
+  const expenseCount = monthTransactions.filter((t) => t.type === 'expense').length;
 
-  const currentUserName = session?.user?.user_metadata?.full_name || 'Amara Okello';
-  const currentUserEmail = session?.user?.email || 'amara@kova.app';
+  const walletsData = accounts.slice(0, 3).map((acc) => ({
+    currency: acc.currency || currency,
+    symbol: acc.currency === 'INR' ? '₹' : acc.currency === 'USD' ? '$' : acc.currency === 'EUR' ? '€' : '₹',
+    balance: formatCurrencyAmount(Number(acc.balance), currency, false),
+    limit: `Limit ${currency === 'INR' ? '₹10L' : '$10k'} / mo`,
+    status: (Number(acc.balance) >= 0 ? 'Active' : 'Inactive') as 'Active' | 'Inactive',
+  }));
+
+  // Budget calculations derived from real activity
+  const monthlyBudgetLimitNumber = rawBalance > 0 ? Math.max(rawBalance * 0.4, 50000) : 50000;
+  const currentSpentOfLimit = formatCurrencyAmount(monthExpensesRaw, currency, false);
+  const totalLimitFormatted = formatCurrencyAmount(monthlyBudgetLimitNumber, currency, false);
+  const spentPercent = monthlyBudgetLimitNumber > 0
+    ? Math.min(Math.round((monthExpensesRaw / monthlyBudgetLimitNumber) * 100), 100)
+    : 0;
+
+  // Real user identity from authenticated Supabase session
+  const currentUserName = session?.user?.user_metadata?.full_name ||
+                          (session?.user?.email ? session.user.email.split('@')[0] : 'My Account');
+  const currentUserEmail = session?.user?.email || '';
 
   return (
     <div className="min-h-screen bg-[#F3F2ED] text-[#141414] flex flex-col font-sans antialiased pb-12">
@@ -199,8 +204,9 @@ export function App() {
                   onRequest={() => setActiveModal('request')}
                 />
                 <RecentActivitiesTable
-                  transactions={transactions.length > 0 ? transactions : undefined}
+                  transactions={transactions}
                   currency={currency}
+                  onViewAll={() => setActiveTab('Activity')}
                   onDeleteTransaction={handleDeleteTransaction}
                 />
               </div>
@@ -212,6 +218,8 @@ export function App() {
                   spending={spendingFormatted}
                   income={incomeFormatted}
                   revenue={revenueFormatted}
+                  incomeCount={incomeCount}
+                  expenseCount={expenseCount}
                 />
                 <IncomeChartWithLimitCard
                   spentAmount={currentSpentOfLimit}

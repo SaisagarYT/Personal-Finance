@@ -1,20 +1,21 @@
 import React, { useState } from 'react';
-import { Search, SlidersHorizontal, Check, Trash2 } from 'lucide-react';
+import { Check, Trash2, ArrowRight } from 'lucide-react';
 import { formatCurrencyAmount, type CurrencyCode } from '../lib/currency';
 import type { Transaction } from '../types';
 
 interface RecentActivitiesTableProps {
   transactions?: Transaction[];
   currency?: CurrencyCode;
+  onViewAll?: () => void;
   onDeleteTransaction?: (id: string, accountId: string, amount: number, type: string) => void;
 }
 
 export const RecentActivitiesTable: React.FC<RecentActivitiesTableProps> = ({
   transactions = [],
   currency = 'INR',
+  onViewAll,
   onDeleteTransaction,
 }) => {
-  const [searchTerm, setSearchTerm] = useState('');
   const [checkedIds, setCheckedIds] = useState<{ [key: string]: boolean }>({});
 
   const toggleCheck = (id: string) => {
@@ -31,37 +32,27 @@ export const RecentActivitiesTable: React.FC<RecentActivitiesTableProps> = ({
     return styles[index % styles.length];
   };
 
-  const filtered = transactions.filter((t) => {
-    const desc = t.description?.toLowerCase() || '';
-    const cat = t.categories?.name?.toLowerCase() || '';
-    const s = searchTerm.toLowerCase();
-    return desc.includes(s) || cat.includes(s) || t.id.toLowerCase().includes(s);
-  });
+  // Only display the 4 to 5 most recent transactions
+  const recentTransactions = transactions.slice(0, 5);
 
   return (
     <div className="bg-[#FFFFFF] border border-[#E7E6DF] rounded-[28px] p-6 sm:p-7 shadow-sm">
-      {/* Table Header Controls */}
-      <div className="flex flex-wrap items-center justify-between gap-4 mb-5">
-        <h2 className="text-lg font-bold text-[#141414] tracking-tight">Recent activities</h2>
-
-        <div className="flex items-center gap-2.5">
-          {/* Search Pill */}
-          <div className="relative">
-            <Search className="w-4 h-4 text-[#9E9D97] absolute left-3 top-1/2 -translate-y-1/2" />
-            <input
-              type="text"
-              placeholder="Search"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-9 pr-4 py-1.5 bg-[#FAFAF7] border border-[#EAE9E4] rounded-full text-xs text-[#141414] placeholder-[#9E9D97] focus:outline-none focus:border-[#141414] transition w-36 sm:w-48"
-            />
-          </div>
-
-          {/* Filter Pill */}
-          <button className="flex items-center gap-1.5 px-3.5 py-1.5 bg-[#FAFAF7] border border-[#EAE9E4] rounded-full text-xs font-semibold text-[#141414] hover:bg-[#F3F2ED] transition cursor-pointer">
-            Filter <SlidersHorizontal className="w-3.5 h-3.5 text-[#6B6A66]" />
-          </button>
+      {/* Table Header: Clean, with no search or filter bar */}
+      <div className="flex items-center justify-between mb-5">
+        <div>
+          <h2 className="text-lg font-bold text-[#141414] tracking-tight">Recent activities</h2>
+          <p className="text-xs text-[#9E9D97] mt-0.5">Latest financial movements</p>
         </div>
+
+        {onViewAll && (
+          <button
+            onClick={onViewAll}
+            className="flex items-center gap-1.5 text-xs font-semibold text-[#141414] hover:text-[#E74D28] transition cursor-pointer"
+          >
+            <span>View all</span>
+            <ArrowRight className="w-3.5 h-3.5" />
+          </button>
+        )}
       </div>
 
       {/* Activities Table */}
@@ -79,14 +70,14 @@ export const RecentActivitiesTable: React.FC<RecentActivitiesTableProps> = ({
             </tr>
           </thead>
           <tbody className="divide-y divide-[#F7F6F2]">
-            {filtered.length === 0 ? (
+            {recentTransactions.length === 0 ? (
               <tr>
                 <td colSpan={5} className="py-8 text-center text-xs text-[#9E9D97] italic">
-                  No transactions yet. Click "+ Transfer" or "+ Request" above to log activity.
+                  No recent activity recorded yet. Click "+ Transfer" or "+ Request" to log a transaction.
                 </td>
               </tr>
             ) : (
-              filtered.map((item, index) => {
+              recentTransactions.map((item, index) => {
                 const style = getInitialStyle(index);
                 const title = item.description || item.categories?.name || 'General payment';
                 const initial = title.charAt(0).toUpperCase();

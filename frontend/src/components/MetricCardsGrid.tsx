@@ -17,20 +17,24 @@ interface MetricCardsGridProps {
   spending?: string;
   income?: string;
   revenue?: string;
+  incomeCount?: number;
+  expenseCount?: number;
 }
 
 export const MetricCardsGrid: React.FC<MetricCardsGridProps> = ({
-  earnings = '$950',
-  spending = '$700',
-  income = '$1,050',
-  revenue = '$850',
+  earnings = '₹0.00',
+  spending = '₹0.00',
+  income = '₹0.00',
+  revenue = '₹0.00',
+  incomeCount = 0,
+  expenseCount = 0,
 }) => {
   const metrics: MetricItem[] = [
     {
       id: 'earnings',
       label: 'Total earnings',
       value: earnings,
-      trend: '↑ 7%',
+      trend: incomeCount > 0 ? `${incomeCount} credits` : '0 entries',
       trendType: 'positive',
       period: 'this month',
       isHero: true,
@@ -39,7 +43,7 @@ export const MetricCardsGrid: React.FC<MetricCardsGridProps> = ({
       id: 'spending',
       label: 'Total spending',
       value: spending,
-      trend: '↓ 5%',
+      trend: expenseCount > 0 ? `${expenseCount} debits` : '0 entries',
       trendType: 'negative',
       period: 'this month',
     },
@@ -47,7 +51,7 @@ export const MetricCardsGrid: React.FC<MetricCardsGridProps> = ({
       id: 'income',
       label: 'Total income',
       value: income,
-      trend: '↑ 8%',
+      trend: incomeCount > 0 ? 'Active inflow' : 'No deposits',
       trendType: 'positive',
       period: 'this month',
     },
@@ -55,7 +59,7 @@ export const MetricCardsGrid: React.FC<MetricCardsGridProps> = ({
       id: 'revenue',
       label: 'Total revenue',
       value: revenue,
-      trend: '↑ 4%',
+      trend: 'Net monthly delta',
       trendType: 'positive',
       period: 'this month',
     },

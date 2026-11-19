@@ -10,24 +10,27 @@ interface IncomeChartWithLimitCardProps {
   spentAmount?: string;
   totalLimit?: string;
   spentPercentage?: number;
+  chartData?: ChartDataPoint[];
 }
 
-const CHART_DATA: ChartDataPoint[] = [
-  { month: 'Jan', loss: 20, profit: 16 },
-  { month: 'Feb', loss: 17, profit: 21 },
-  { month: 'Mar', loss: 14, profit: 18 },
-  { month: 'Apr', loss: 19, profit: 19 },
-  { month: 'May', loss: 22, profit: 24 },
-  { month: 'Jun', loss: 31, profit: 21 },
-  { month: 'Jul', loss: 20, profit: 18 },
-  { month: 'Aug', loss: 15, profit: 16 },
+const DEFAULT_CHART_MONTHS: ChartDataPoint[] = [
+  { month: 'Jan', loss: 0, profit: 0 },
+  { month: 'Feb', loss: 0, profit: 0 },
+  { month: 'Mar', loss: 0, profit: 0 },
+  { month: 'Apr', loss: 0, profit: 0 },
+  { month: 'May', loss: 0, profit: 0 },
+  { month: 'Jun', loss: 0, profit: 0 },
+  { month: 'Jul', loss: 0, profit: 0 },
+  { month: 'Aug', loss: 0, profit: 0 },
 ];
 
 export const IncomeChartWithLimitCard: React.FC<IncomeChartWithLimitCardProps> = ({
-  spentAmount = '$1,400.00',
-  totalLimit = '$5,500.00',
-  spentPercentage = 26,
+  spentAmount = '₹0.00',
+  totalLimit = '₹50,000.00',
+  spentPercentage = 0,
+  chartData,
 }) => {
+  const displayData = chartData && chartData.length > 0 ? chartData : DEFAULT_CHART_MONTHS;
   return (
     <div className="bg-[#FFFFFF] border border-[#E7E6DF] rounded-[28px] p-6 shadow-sm flex flex-col justify-between">
       {/* Top Section: Profit & Loss Chart */}
@@ -64,11 +67,11 @@ export const IncomeChartWithLimitCard: React.FC<IncomeChartWithLimitCardProps> =
 
             {/* Stacked Bars Container */}
             <div className="flex-1 flex items-end justify-between gap-1 sm:gap-1.5 px-1 pb-1">
-              {CHART_DATA.map((item) => {
+              {displayData.map((item) => {
                 const totalK = item.loss + item.profit;
-                const totalHeightPct = (totalK / 60) * 100;
-                const lossPctOfBar = (item.loss / totalK) * 100;
-                const profitPctOfBar = (item.profit / totalK) * 100;
+                const totalHeightPct = totalK > 0 ? Math.min((totalK / 60) * 100, 100) : 4;
+                const lossPctOfBar = totalK > 0 ? (item.loss / totalK) * 100 : 50;
+                const profitPctOfBar = totalK > 0 ? (item.profit / totalK) * 100 : 50;
 
                 return (
                   <div key={item.month} className="flex-1 flex flex-col items-center h-full justify-end">

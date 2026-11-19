@@ -22,36 +22,12 @@ interface TotalBalanceCardProps {
   onRequest?: () => void;
 }
 
-const DEFAULT_WALLETS: Wallet[] = [
-  {
-    currency: 'INR',
-    symbol: '₹',
-    balance: '₹18,93,613.00',
-    limit: 'Limit ₹10L / mo',
-    status: 'Active',
-  },
-  {
-    currency: 'USD',
-    symbol: '$',
-    balance: '$22,678.00',
-    limit: 'Limit $10k / mo',
-    status: 'Active',
-  },
-  {
-    currency: 'EUR',
-    symbol: '€',
-    balance: '€18,345.00',
-    limit: 'Limit €8k / mo',
-    status: 'Active',
-  },
-];
-
 export const TotalBalanceCard: React.FC<TotalBalanceCardProps> = ({
-  balance = '₹18,93,613.00',
+  balance = '₹0.00',
   currency = 'INR',
   onCurrencyChange,
-  trendPercentage = '↑ 5%',
-  wallets = DEFAULT_WALLETS,
+  trendPercentage,
+  wallets = [],
   onTransfer,
   onRequest,
 }) => {
@@ -102,44 +78,50 @@ export const TotalBalanceCard: React.FC<TotalBalanceCardProps> = ({
       <div className="mt-8 bg-[#F6F5F0] border border-[#EBEAE3] rounded-[24px] p-3.5">
         <div className="flex items-center justify-between mb-3 px-1">
           <span className="text-[13px] font-bold text-[#141414]">
-            Wallets <span className="text-[#9E9D97] font-normal ml-0.5">· 6 total</span>
+            Wallets <span className="text-[#9E9D97] font-normal ml-0.5">· {wallets.length} total</span>
           </span>
         </div>
 
-        {/* Grid of Pure White Wallet Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
-          {wallets.map((wallet) => (
-            <div
-              key={wallet.currency}
-              className="bg-[#FFFFFF] border border-[#EAE8E0] rounded-[18px] p-4 shadow-[0_1px_3px_rgba(0,0,0,0.02)] flex flex-col justify-between"
-            >
-              {/* Currency Icon & Label */}
-              <div className="flex items-center gap-2 mb-3">
-                <span className="w-5 h-5 rounded-full bg-[#141414] text-white text-[11px] font-bold flex items-center justify-center shrink-0">
-                  {wallet.symbol}
-                </span>
-                <span className="text-[13px] font-bold text-[#141414] tracking-tight">{wallet.currency}</span>
-              </div>
+        {wallets.length === 0 ? (
+          <div className="py-6 text-center text-xs text-[#9E9D97] italic">
+            No wallets created yet. Head to <span className="font-semibold text-[#141414]">Account</span> to link a wallet.
+          </div>
+        ) : (
+          /* Grid of Pure White Wallet Cards */
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+            {wallets.map((wallet) => (
+              <div
+                key={wallet.currency + wallet.balance}
+                className="bg-[#FFFFFF] border border-[#EAE8E0] rounded-[18px] p-4 shadow-[0_1px_3px_rgba(0,0,0,0.02)] flex flex-col justify-between"
+              >
+                {/* Currency Icon & Label */}
+                <div className="flex items-center gap-2 mb-3">
+                  <span className="w-5 h-5 rounded-full bg-[#141414] text-white text-[11px] font-bold flex items-center justify-center shrink-0">
+                    {wallet.symbol}
+                  </span>
+                  <span className="text-[13px] font-bold text-[#141414] tracking-tight">{wallet.currency}</span>
+                </div>
 
-              {/* Balance & Sub-details with Dynamic Scaling */}
-              <div className="overflow-hidden">
-                <p className={`${getAmountFontSize(wallet.balance, 'walletTray')} font-bold text-[#141414] tracking-tight leading-tight whitespace-nowrap overflow-hidden text-ellipsis`} title={wallet.balance}>
-                  {wallet.balance}
-                </p>
-                <p className="text-[11px] text-[#9E9D97] mt-1 font-normal">
-                  {wallet.limit}
-                </p>
-                <span
-                  className={`inline-block text-[11px] font-semibold mt-3 ${
-                    wallet.status === 'Active' ? 'text-[#16A34A]' : 'text-[#E74D28]'
-                  }`}
-                >
-                  {wallet.status}
-                </span>
+                {/* Balance & Sub-details with Dynamic Scaling */}
+                <div className="overflow-hidden">
+                  <p className={`${getAmountFontSize(wallet.balance, 'walletTray')} font-bold text-[#141414] tracking-tight leading-tight whitespace-nowrap overflow-hidden text-ellipsis`} title={wallet.balance}>
+                    {wallet.balance}
+                  </p>
+                  <p className="text-[11px] text-[#9E9D97] mt-1 font-normal">
+                    {wallet.limit}
+                  </p>
+                  <span
+                    className={`inline-block text-[11px] font-semibold mt-3 ${
+                      wallet.status === 'Active' ? 'text-[#16A34A]' : 'text-[#E74D28]'
+                    }`}
+                  >
+                    {wallet.status}
+                  </span>
+                </div>
               </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );
