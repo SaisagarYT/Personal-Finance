@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ArrowUpRight, ArrowDownLeft, Plus, Wallet as WalletIcon } from 'lucide-react';
+import { ArrowUpRight, ArrowDownLeft, Wallet as WalletIcon } from 'lucide-react';
 import { CurrencySelector } from './CurrencySelector';
 import { getAmountFontSize } from '../lib/dynamicSize';
 import type { CurrencyCode } from '../lib/currency';
@@ -38,15 +38,8 @@ export const TotalBalanceCard: React.FC<TotalBalanceCardProps> = ({
   onCurrencyChange,
   trendPercentage = '+12.5%',
   wallets = [],
-  onSend,
-  onReceive,
-  onTransfer,
-  onRequest,
 }) => {
   const [viewMode, setViewMode] = useState<'total' | 'send' | 'receive'>('total');
-
-  const handleSend = onSend || onTransfer;
-  const handleReceive = onReceive || onRequest;
 
   // Determine current active display amount and label based on tab
   const displayAmount =
@@ -158,52 +151,10 @@ export const TotalBalanceCard: React.FC<TotalBalanceCardProps> = ({
             )}
           </div>
         </div>
-
-        {/* Contextual Action Buttons */}
-        <div className="mt-5">
-          {viewMode === 'total' && (
-            <div className="grid grid-cols-2 gap-3">
-              <button
-                type="button"
-                onClick={handleSend}
-                className="flex items-center justify-center gap-1.5 py-2.5 px-4 bg-[#141414] hover:bg-[#27272A] text-white text-xs font-semibold rounded-full shadow-sm transition cursor-pointer"
-              >
-                <Plus className="w-3.5 h-3.5" /> Send Money
-              </button>
-              <button
-                type="button"
-                onClick={handleReceive}
-                className="flex items-center justify-center gap-1.5 py-2.5 px-4 bg-[#FAFAF7] hover:bg-[#F3F2ED] border border-[#E7E6DF] text-[#141414] text-xs font-semibold rounded-full shadow-sm transition cursor-pointer"
-              >
-                <Plus className="w-3.5 h-3.5" /> Receive Money
-              </button>
-            </div>
-          )}
-
-          {viewMode === 'send' && (
-            <button
-              type="button"
-              onClick={handleSend}
-              className="w-full flex items-center justify-center gap-2 py-2.5 px-4 bg-[#141414] hover:bg-[#27272A] text-white text-xs font-semibold rounded-full shadow-sm transition cursor-pointer"
-            >
-              <Plus className="w-3.5 h-3.5" /> + New Send Payment (Expense)
-            </button>
-          )}
-
-          {viewMode === 'receive' && (
-            <button
-              type="button"
-              onClick={handleReceive}
-              className="w-full flex items-center justify-center gap-2 py-2.5 px-4 bg-[#E74D28] hover:bg-[#D43E1B] text-white text-xs font-semibold rounded-full shadow-sm transition cursor-pointer"
-            >
-              <Plus className="w-3.5 h-3.5" /> + New Receive Deposit (Income)
-            </button>
-          )}
-        </div>
       </div>
 
       {/* Wallets Recessed Tray Container */}
-      <div className="mt-7 bg-[#F6F5F0] border border-[#EBEAE3] rounded-[24px] p-3.5">
+      <div className="mt-8 bg-[#F6F5F0] border border-[#EBEAE3] rounded-[24px] p-3.5">
         <div className="flex items-center justify-between mb-3 px-1">
           <span className="text-[13px] font-bold text-[#141414] flex items-center gap-1.5">
             <WalletIcon className="w-3.5 h-3.5 text-[#6B6A66]" />
