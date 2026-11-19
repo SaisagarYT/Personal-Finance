@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Search, Download, Check, Trash2, ArrowUpRight, ArrowDownLeft, Layers } from 'lucide-react';
 import { CurrencySelector } from './CurrencySelector';
 import { formatCurrencyAmount, type CurrencyCode } from '../lib/currency';
+import { getAmountFontSize } from '../lib/dynamicSize';
 import type { Transaction } from '../types';
 
 interface ActivityViewProps {
@@ -125,8 +126,14 @@ export const ActivityView: React.FC<ActivityViewProps> = ({
               <Layers className="w-4 h-4 text-white" />
             </div>
           </div>
-          <div className="mt-4">
-            <h3 className="text-[32px] sm:text-[36px] font-extrabold tracking-tight leading-tight text-white">
+          <div className="mt-4 overflow-hidden">
+            <h3
+              className={`${getAmountFontSize(
+                formatCurrencyAmount(totalVolume, currency, true),
+                'activitySummary'
+              )} font-extrabold tracking-tight leading-tight text-white whitespace-nowrap overflow-hidden text-ellipsis`}
+              title={formatCurrencyAmount(totalVolume, currency, true)}
+            >
               {formatCurrencyAmount(totalVolume, currency, true)}
             </h3>
             <p className="text-xs text-white/70 mt-1">{transactions.length} total entries</p>
@@ -141,8 +148,14 @@ export const ActivityView: React.FC<ActivityViewProps> = ({
               <ArrowDownLeft className="w-4 h-4 text-[#141414]" />
             </div>
           </div>
-          <div className="mt-4">
-            <h3 className="text-[32px] sm:text-[36px] font-extrabold text-[#141414] tracking-tight leading-tight">
+          <div className="mt-4 overflow-hidden">
+            <h3
+              className={`${getAmountFontSize(
+                formatCurrencyAmount(totalIncome, currency, true),
+                'activitySummary'
+              )} font-extrabold text-[#141414] tracking-tight leading-tight whitespace-nowrap overflow-hidden text-ellipsis`}
+              title={formatCurrencyAmount(totalIncome, currency, true)}
+            >
               {formatCurrencyAmount(totalIncome, currency, true)}
             </h3>
             <div className="flex items-center gap-1.5 mt-1 text-xs">
@@ -160,8 +173,14 @@ export const ActivityView: React.FC<ActivityViewProps> = ({
               <ArrowUpRight className="w-4 h-4 text-[#141414]" />
             </div>
           </div>
-          <div className="mt-4">
-            <h3 className="text-[32px] sm:text-[36px] font-extrabold text-[#141414] tracking-tight leading-tight">
+          <div className="mt-4 overflow-hidden">
+            <h3
+              className={`${getAmountFontSize(
+                formatCurrencyAmount(totalExpense, currency, true),
+                'activitySummary'
+              )} font-extrabold text-[#141414] tracking-tight leading-tight whitespace-nowrap overflow-hidden text-ellipsis`}
+              title={formatCurrencyAmount(totalExpense, currency, true)}
+            >
               {formatCurrencyAmount(totalExpense, currency, true)}
             </h3>
             <div className="flex items-center gap-1.5 mt-1 text-xs">

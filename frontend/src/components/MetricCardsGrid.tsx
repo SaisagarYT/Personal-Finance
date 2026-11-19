@@ -1,5 +1,6 @@
 import React from 'react';
 import { Wallet, CreditCard, Coins, TrendingUp } from 'lucide-react';
+import { getAmountFontSize } from '../lib/dynamicSize';
 
 interface MetricItem {
   id: string;
@@ -90,8 +91,8 @@ export const MetricCardsGrid: React.FC<MetricCardsGridProps> = ({
                 </div>
               </div>
 
-              <div className="mt-4">
-                <h3 className="text-[34px] sm:text-[38px] font-extrabold tracking-tight leading-tight">
+              <div className="mt-4 overflow-hidden">
+                <h3 className={`${getAmountFontSize(m.value, 'metricCard')} font-extrabold tracking-tight leading-tight whitespace-nowrap overflow-hidden text-ellipsis`} title={m.value}>
                   {m.value}
                 </h3>
                 <div className="flex items-center gap-1.5 mt-1.5 text-xs">
@@ -115,8 +116,8 @@ export const MetricCardsGrid: React.FC<MetricCardsGridProps> = ({
               </div>
             </div>
 
-            <div className="mt-4">
-              <h3 className="text-[34px] sm:text-[38px] font-extrabold text-[#141414] tracking-tight leading-tight">
+            <div className="mt-4 overflow-hidden">
+              <h3 className={`${getAmountFontSize(m.value, 'metricCard')} font-extrabold text-[#141414] tracking-tight leading-tight whitespace-nowrap overflow-hidden text-ellipsis`} title={m.value}>
                 {m.value}
               </h3>
               <div className="flex items-center gap-1.5 mt-1.5 text-xs">

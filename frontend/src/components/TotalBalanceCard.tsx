@@ -1,6 +1,7 @@
 import React from 'react';
 import { ArrowLeftRight, ArrowDown } from 'lucide-react';
 import { CurrencySelector } from './CurrencySelector';
+import { getAmountFontSize } from '../lib/dynamicSize';
 import type { CurrencyCode } from '../lib/currency';
 
 interface Wallet {
@@ -69,8 +70,8 @@ export const TotalBalanceCard: React.FC<TotalBalanceCardProps> = ({
           )}
         </div>
 
-        {/* Big Balance Number */}
-        <h2 className="text-[34px] sm:text-[38px] font-extrabold text-[#141414] tracking-tight mt-2.5 leading-tight">
+        {/* Big Balance Number with Dynamic Scaling */}
+        <h2 className={`${getAmountFontSize(balance, 'totalBalance')} font-extrabold text-[#141414] tracking-tight mt-2.5 leading-tight whitespace-nowrap overflow-hidden text-ellipsis`} title={balance}>
           {balance}
         </h2>
 
@@ -120,9 +121,9 @@ export const TotalBalanceCard: React.FC<TotalBalanceCardProps> = ({
                 <span className="text-[13px] font-bold text-[#141414] tracking-tight">{wallet.currency}</span>
               </div>
 
-              {/* Balance & Sub-details */}
-              <div>
-                <p className="text-[17px] font-bold text-[#141414] tracking-tight leading-tight">
+              {/* Balance & Sub-details with Dynamic Scaling */}
+              <div className="overflow-hidden">
+                <p className={`${getAmountFontSize(wallet.balance, 'walletTray')} font-bold text-[#141414] tracking-tight leading-tight whitespace-nowrap overflow-hidden text-ellipsis`} title={wallet.balance}>
                   {wallet.balance}
                 </p>
                 <p className="text-[11px] text-[#9E9D97] mt-1 font-normal">

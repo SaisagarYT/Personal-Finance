@@ -118,11 +118,11 @@ export const IncomeChartWithLimitCard: React.FC<IncomeChartWithLimitCardProps> =
         </div>
 
         {/* Footer Labels */}
-        <div className="flex items-center justify-between text-xs font-bold text-[#141414] mt-3">
-          <span>
+        <div className="flex flex-wrap items-center justify-between gap-1 text-xs font-bold text-[#141414] mt-3">
+          <span className="truncate max-w-[65%]">
             {spentAmount} <span className="text-[#9E9D97] font-normal">spent of</span>
           </span>
-          <span>{totalLimit}</span>
+          <span className="truncate">{totalLimit}</span>
         </div>
       </div>
     </div>
