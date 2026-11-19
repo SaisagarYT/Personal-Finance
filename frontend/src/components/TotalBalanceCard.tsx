@@ -1,5 +1,5 @@
 import React from 'react';
-import { ArrowLeftRight, ArrowDown } from 'lucide-react';
+import { ArrowUpRight, ArrowDownLeft } from 'lucide-react';
 import { CurrencySelector } from './CurrencySelector';
 import { getAmountFontSize } from '../lib/dynamicSize';
 import type { CurrencyCode } from '../lib/currency';
@@ -18,6 +18,8 @@ interface TotalBalanceCardProps {
   onCurrencyChange?: (c: CurrencyCode) => void;
   trendPercentage?: string;
   wallets?: Wallet[];
+  onSend?: () => void;
+  onReceive?: () => void;
   onTransfer?: () => void;
   onRequest?: () => void;
 }
@@ -28,9 +30,14 @@ export const TotalBalanceCard: React.FC<TotalBalanceCardProps> = ({
   onCurrencyChange,
   trendPercentage,
   wallets = [],
+  onSend,
+  onReceive,
   onTransfer,
   onRequest,
 }) => {
+  const handleSend = onSend || onTransfer;
+  const handleReceive = onReceive || onRequest;
+
   return (
     <div className="bg-[#FFFFFF] border border-[#E7E6DF] rounded-[28px] p-6 sm:p-7 shadow-sm flex flex-col justify-between">
       <div>
@@ -57,19 +64,19 @@ export const TotalBalanceCard: React.FC<TotalBalanceCardProps> = ({
           <span className="text-[#6B6A66]">vs last month</span>
         </div>
 
-        {/* Action Buttons: Solid dark vs soft warm pill */}
+        {/* Action Buttons: Solid dark Send vs soft warm Receive */}
         <div className="grid grid-cols-2 gap-3 mt-6">
           <button
-            onClick={onTransfer}
+            onClick={handleSend}
             className="flex items-center justify-center gap-2 py-3 px-4 bg-[#141414] hover:bg-[#27272A] text-white text-xs font-semibold rounded-full shadow-sm transition cursor-pointer"
           >
-            <ArrowLeftRight className="w-3.5 h-3.5" /> Transfer
+            <ArrowUpRight className="w-3.5 h-3.5" /> Send
           </button>
           <button
-            onClick={onRequest}
+            onClick={handleReceive}
             className="flex items-center justify-center gap-2 py-3 px-4 bg-[#F3F2ED] hover:bg-[#ECEAE3] text-[#141414] text-xs font-semibold rounded-full transition cursor-pointer"
           >
-            <ArrowDown className="w-3.5 h-3.5" /> Request
+            <ArrowDownLeft className="w-3.5 h-3.5" /> Receive
           </button>
         </div>
       </div>

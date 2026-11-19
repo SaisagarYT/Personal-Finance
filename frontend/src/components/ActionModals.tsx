@@ -8,7 +8,7 @@ import type { Account, Category } from '../types';
 interface ActionModalsProps {
   accounts: Account[];
   categories: Category[];
-  activeModal: 'transfer' | 'request' | null;
+  activeModal: 'send' | 'receive' | 'transfer' | 'request' | null;
   currency?: CurrencyCode;
   onClose: () => void;
   onRefresh: () => void;
@@ -35,8 +35,8 @@ export const ActionModals: React.FC<ActionModalsProps> = ({
 
   if (!activeModal) return null;
 
-  const isTransfer = activeModal === 'transfer';
-  const type = isTransfer ? 'expense' : 'income';
+  const isSend = activeModal === 'send' || activeModal === 'transfer';
+  const type = isSend ? 'expense' : 'income';
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -61,7 +61,7 @@ export const ActionModals: React.FC<ActionModalsProps> = ({
           category_id: categoryId || null,
           amount: numAmount,
           type,
-          description: description || (isTransfer ? 'Transfer payment' : 'Requested funds'),
+          description: description || (isSend ? 'Send payment' : 'Received funds'),
           transaction_date: new Date().toISOString().split('T')[0],
         },
       ]);
@@ -70,7 +70,7 @@ export const ActionModals: React.FC<ActionModalsProps> = ({
       const account = accounts.find((a) => a.id === accountId);
       if (account) {
         const cur = parseFloat(account.balance as any);
-        const newBal = isTransfer ? cur - numAmount : cur + numAmount;
+        const newBal = isSend ? cur - numAmount : cur + numAmount;
         await supabase.from('accounts').update({ balance: newBal }).eq('id', accountId);
       }
 
@@ -90,13 +90,13 @@ export const ActionModals: React.FC<ActionModalsProps> = ({
           <div className="flex items-center gap-2">
             <div
               className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                isTransfer ? 'bg-[#141414] text-white' : 'bg-[#E74D28] text-white'
+                isSend ? 'bg-[#141414] text-white' : 'bg-[#E74D28] text-white'
               }`}
             >
-              {isTransfer ? <ArrowDownLeft className="w-4 h-4" /> : <ArrowUpRight className="w-4 h-4" />}
+              {isSend ? <ArrowUpRight className="w-4 h-4" /> : <ArrowDownLeft className="w-4 h-4" />}
             </div>
             <h2 className="text-base font-bold text-[#141414]">
-              {isTransfer ? 'Transfer Out / Expense' : 'Request Funds / Income'}
+              {isSend ? 'Send Money / Expense' : 'Receive Money / Income'}
             </h2>
           </div>
           <button
@@ -176,7 +176,7 @@ export const ActionModals: React.FC<ActionModalsProps> = ({
               type="text"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              placeholder="e.g. Payroll transfer, Software license"
+              placeholder={isSend ? "e.g. Payroll transfer, Software license, Rent" : "e.g. Freelance invoice, Client payment, Salary"}
               className="w-full bg-[#FAFAF7] border border-[#EAE9E4] rounded-xl px-3.5 py-2 text-xs text-[#141414] placeholder-[#9E9D97] focus:outline-none focus:border-[#141414]"
             />
           </div>
@@ -185,11 +185,11 @@ export const ActionModals: React.FC<ActionModalsProps> = ({
             type="submit"
             disabled={loading}
             className={`w-full py-3 rounded-full text-xs font-semibold text-white transition flex items-center justify-center gap-1.5 cursor-pointer shadow-sm ${
-              isTransfer ? 'bg-[#141414] hover:bg-[#27272A]' : 'bg-[#E74D28] hover:bg-[#D43E1B]'
+              isSend ? 'bg-[#141414] hover:bg-[#27272A]' : 'bg-[#E74D28] hover:bg-[#D43E1B]'
             }`}
           >
             <Plus className="w-3.5 h-3.5" />
-            {loading ? 'Processing...' : isTransfer ? 'Confirm Transfer' : 'Confirm Request'}
+            {loading ? 'Processing...' : isSend ? 'Confirm Send' : 'Confirm Receive'}
           </button>
         </form>
       </div>

@@ -22,7 +22,7 @@ export function App() {
   const [categories, setCategories] = useState<Category[]>([]);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
 
-  const [activeModal, setActiveModal] = useState<'transfer' | 'request' | null>(null);
+  const [activeModal, setActiveModal] = useState<'send' | 'receive' | 'transfer' | 'request' | null>(null);
 
   useEffect(() => {
     if (!isSupabaseConfigured) {
@@ -200,8 +200,8 @@ export function App() {
                   currency={currency}
                   onCurrencyChange={setCurrency}
                   wallets={walletsData}
-                  onTransfer={() => setActiveModal('transfer')}
-                  onRequest={() => setActiveModal('request')}
+                  onSend={() => setActiveModal('send')}
+                  onReceive={() => setActiveModal('receive')}
                 />
                 <RecentActivitiesTable
                   transactions={transactions}
@@ -238,8 +238,8 @@ export function App() {
             currency={currency}
             onCurrencyChange={setCurrency}
             onDeleteTransaction={handleDeleteTransaction}
-            onOpenTransfer={() => setActiveModal('transfer')}
-            onOpenRequest={() => setActiveModal('request')}
+            onOpenSend={() => setActiveModal('send')}
+            onOpenReceive={() => setActiveModal('receive')}
           />
         )}
 

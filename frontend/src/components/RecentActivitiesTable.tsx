@@ -73,7 +73,7 @@ export const RecentActivitiesTable: React.FC<RecentActivitiesTableProps> = ({
             {recentTransactions.length === 0 ? (
               <tr>
                 <td colSpan={5} className="py-8 text-center text-xs text-[#9E9D97] italic">
-                  No recent activity recorded yet. Click "+ Transfer" or "+ Request" to log a transaction.
+                  No recent activity recorded yet. Click "Send" or "Receive" to log a transaction.
                 </td>
               </tr>
             ) : (

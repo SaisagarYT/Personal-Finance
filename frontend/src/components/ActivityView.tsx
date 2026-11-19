@@ -10,6 +10,8 @@ interface ActivityViewProps {
   currency?: CurrencyCode;
   onCurrencyChange?: (c: CurrencyCode) => void;
   onDeleteTransaction?: (id: string, accountId: string, amount: number, type: string) => void;
+  onOpenSend?: () => void;
+  onOpenReceive?: () => void;
   onOpenTransfer?: () => void;
   onOpenRequest?: () => void;
 }
@@ -19,9 +21,14 @@ export const ActivityView: React.FC<ActivityViewProps> = ({
   currency = 'INR',
   onCurrencyChange,
   onDeleteTransaction,
+  onOpenSend,
+  onOpenReceive,
   onOpenTransfer,
   onOpenRequest,
 }) => {
+  const handleSend = onOpenSend || onOpenTransfer;
+  const handleReceive = onOpenReceive || onOpenRequest;
+
   const [searchTerm, setSearchTerm] = useState('');
   const [typeFilter, setTypeFilter] = useState<'all' | 'expense' | 'income'>('all');
   const [checkedIds, setCheckedIds] = useState<{ [key: string]: boolean }>({});
@@ -95,16 +102,16 @@ export const ActivityView: React.FC<ActivityViewProps> = ({
             <CurrencySelector value={currency} onChange={onCurrencyChange} />
           )}
           <button
-            onClick={onOpenTransfer}
+            onClick={handleSend}
             className="flex items-center gap-2 py-2.5 px-4 bg-[#141414] hover:bg-[#27272A] text-white text-xs font-semibold rounded-full shadow-sm transition cursor-pointer"
           >
-            <ArrowDownLeft className="w-3.5 h-3.5" /> Transfer
+            <ArrowUpRight className="w-3.5 h-3.5" /> Send
           </button>
           <button
-            onClick={onOpenRequest}
+            onClick={handleReceive}
             className="flex items-center gap-2 py-2.5 px-4 bg-[#FAFAF7] hover:bg-[#F3F2ED] border border-[#E7E6DF] text-[#141414] text-xs font-semibold rounded-full shadow-sm transition cursor-pointer"
           >
-            <ArrowUpRight className="w-3.5 h-3.5" /> Request
+            <ArrowDownLeft className="w-3.5 h-3.5" /> Receive
           </button>
           <button
             onClick={exportToCSV}
@@ -273,20 +280,20 @@ export const ActivityView: React.FC<ActivityViewProps> = ({
                         No transactions match your current search or filter criteria. Record a new movement or reset your filters.
                       </p>
                       <div className="flex items-center gap-2 pt-3">
-                        {onOpenTransfer && (
+                        {handleSend && (
                           <button
-                            onClick={onOpenTransfer}
+                            onClick={handleSend}
                             className="px-3.5 py-1.5 bg-[#141414] text-white text-xs font-semibold rounded-full hover:bg-[#27272A] transition cursor-pointer"
                           >
-                            + Record Transfer
+                            + Send Money
                           </button>
                         )}
-                        {onOpenRequest && (
+                        {handleReceive && (
                           <button
-                            onClick={onOpenRequest}
+                            onClick={handleReceive}
                             className="px-3.5 py-1.5 bg-[#FAFAF7] border border-[#E7E6DF] text-[#141414] text-xs font-semibold rounded-full hover:bg-[#F3F2ED] transition cursor-pointer"
                           >
-                            + Request Payment
+                            + Receive Money
                           </button>
                         )}
                         {searchTerm && (
