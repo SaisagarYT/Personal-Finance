@@ -135,8 +135,12 @@ export function App() {
     );
   }
 
-  // If user is not authenticated, show fullscreen AuthView
-  if (!session?.user) {
+  // Allow previewing the AuthView via ?preview=auth without terminating the session
+  const urlParams = new URLSearchParams(window.location.search);
+  const isAuthPreview = urlParams.get('preview') === 'auth';
+
+  // If user is not authenticated or explicitly previewing auth, show fullscreen AuthView
+  if (!session?.user || isAuthPreview) {
     return <AuthView onAuthSuccess={() => setAuthLoading(false)} />;
   }
 
@@ -269,10 +273,11 @@ export function App() {
               </p>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-              {/* Left Column (7 of 12) */}
-              <div className="lg:col-span-7 flex flex-col space-y-6">
+            {/* Top Row: Total Balance Card (7 of 12) + 2x2 Metric Cards (5 of 12) with matching height */}
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
+              <div className="lg:col-span-7 flex flex-col">
                 <TotalBalanceCard
+                  className="h-full"
                   balance={totalBalanceFormatted}
                   sentAmount={spendingFormatted}
                   receivedAmount={earningsFormatted}
@@ -285,6 +290,24 @@ export function App() {
                   onSend={() => setActiveModal('send')}
                   onReceive={() => setActiveModal('receive')}
                 />
+              </div>
+
+              <div className="lg:col-span-5 flex flex-col">
+                <MetricCardsGrid
+                  className="h-full"
+                  earnings={earningsFormatted}
+                  spending={spendingFormatted}
+                  income={incomeFormatted}
+                  revenue={revenueFormatted}
+                  incomeCount={incomeCount}
+                  expenseCount={expenseCount}
+                />
+              </div>
+            </div>
+
+            {/* Bottom Row: Recent Activities (7 of 12) + Income Chart With Spending Limit (5 of 12) */}
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+              <div className="lg:col-span-7">
                 <RecentActivitiesTable
                   transactions={transactions}
                   accounts={accounts}
@@ -294,16 +317,7 @@ export function App() {
                 />
               </div>
 
-              {/* Right Column (5 of 12) */}
-              <div className="lg:col-span-5 flex flex-col space-y-6">
-                <MetricCardsGrid
-                  earnings={earningsFormatted}
-                  spending={spendingFormatted}
-                  income={incomeFormatted}
-                  revenue={revenueFormatted}
-                  incomeCount={incomeCount}
-                  expenseCount={expenseCount}
-                />
+              <div className="lg:col-span-5">
                 <IncomeChartWithLimitCard
                   spentAmount={currentSpentOfLimit}
                   totalLimit={totalLimitFormatted}

@@ -15,6 +15,7 @@ interface Wallet {
 }
 
 interface TotalBalanceCardProps {
+  className?: string;
   balance?: string;
   sentAmount?: string;
   receivedAmount?: string;
@@ -31,6 +32,7 @@ interface TotalBalanceCardProps {
 }
 
 export const TotalBalanceCard: React.FC<TotalBalanceCardProps> = ({
+  className = '',
   balance = '₹0.00',
   sentAmount = '₹0.00',
   receivedAmount = '₹0.00',
@@ -59,7 +61,7 @@ export const TotalBalanceCard: React.FC<TotalBalanceCardProps> = ({
       : 'Total Net Balance';
 
   return (
-    <div className="bg-[#FFFFFF] border border-[#E7E6DF] rounded-[28px] p-6 sm:p-7 shadow-sm flex flex-col justify-between">
+    <div className={`bg-[#FFFFFF] border border-[#E7E6DF] rounded-[28px] p-6 sm:p-7 shadow-sm flex flex-col justify-between ${className}`}>
       <div>
         {/* Top Header: Label, Mode Switcher, and Currency Dropdown */}
         <div className="flex flex-wrap items-center justify-between gap-3">

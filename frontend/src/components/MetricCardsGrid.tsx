@@ -13,6 +13,7 @@ interface MetricItem {
 }
 
 interface MetricCardsGridProps {
+  className?: string;
   earnings?: string;
   spending?: string;
   income?: string;
@@ -22,6 +23,7 @@ interface MetricCardsGridProps {
 }
 
 export const MetricCardsGrid: React.FC<MetricCardsGridProps> = ({
+  className = '',
   earnings = '₹0.00',
   spending = '₹0.00',
   income = '₹0.00',
@@ -80,13 +82,13 @@ export const MetricCardsGrid: React.FC<MetricCardsGridProps> = ({
   };
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 h-full">
+    <div className={`grid grid-cols-1 sm:grid-cols-2 sm:grid-rows-2 gap-4 h-full ${className}`}>
       {metrics.map((m) => {
         if (m.isHero) {
           return (
             <div
               key={m.id}
-              className="bg-[#E74D28] text-white rounded-[28px] p-6 shadow-sm flex flex-col justify-between"
+              className="bg-[#E74D28] text-white rounded-[28px] p-6 shadow-sm flex flex-col justify-between h-full"
             >
               <div className="flex items-center justify-between">
                 <span className="text-xs font-medium text-white/90">{m.label}</span>
@@ -111,7 +113,7 @@ export const MetricCardsGrid: React.FC<MetricCardsGridProps> = ({
         return (
           <div
             key={m.id}
-            className="bg-[#FFFFFF] border border-[#E7E6DF] rounded-[28px] p-6 shadow-sm flex flex-col justify-between"
+            className="bg-[#FFFFFF] border border-[#E7E6DF] rounded-[28px] p-6 shadow-sm flex flex-col justify-between h-full"
           >
             <div className="flex items-center justify-between">
               <span className="text-xs font-medium text-[#6B6A66]">{m.label}</span>
