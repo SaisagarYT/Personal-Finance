@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
 import { X, Plus, ArrowDownLeft, ArrowUpRight } from 'lucide-react';
 import { CurrencySelector } from './CurrencySelector';
-import { USD_TO_INR_RATE, type CurrencyCode } from '../lib/currency';
+import { USD_TO_INR_RATE, formatCurrencyAmount, type CurrencyCode } from '../lib/currency';
 import type { Account, Category } from '../types';
 
 interface ActionModalsProps {
@@ -25,23 +25,31 @@ export const ActionModals: React.FC<ActionModalsProps> = ({
   const [amount, setAmount] = useState('');
   const [modalCurrency, setModalCurrency] = useState<CurrencyCode>(currency);
   const [description, setDescription] = useState('');
-  const [accountId, setAccountId] = useState(accounts[0]?.id || '');
+  const [accountId, setAccountId] = useState('');
   const [categoryId, setCategoryId] = useState('');
   const [loading, setLoading] = useState(false);
 
+  // Sync currency and account selection whenever modal opens or accounts load
   useEffect(() => {
     setModalCurrency(currency);
-  }, [currency, activeModal]);
+    if (activeModal && accounts.length > 0) {
+      if (!accountId || !accounts.some((a) => a.id === accountId)) {
+        setAccountId(accounts[0].id);
+      }
+    }
+  }, [currency, activeModal, accounts, accountId]);
 
   if (!activeModal) return null;
 
   const isSend = activeModal === 'send' || activeModal === 'transfer';
   const type = isSend ? 'expense' : 'income';
 
+  const effectiveAccountId = accountId || accounts[0]?.id || '';
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const rawNum = parseFloat(amount);
-    if (!accountId || isNaN(rawNum) || rawNum <= 0) {
+    if (!effectiveAccountId || isNaN(rawNum) || rawNum <= 0) {
       alert('Please enter a valid amount and account');
       return;
     }
@@ -57,7 +65,7 @@ export const ActionModals: React.FC<ActionModalsProps> = ({
       const { error: txErr } = await supabase.from('transactions').insert([
         {
           user_id: user.id,
-          account_id: accountId,
+          account_id: effectiveAccountId,
           category_id: categoryId || null,
           amount: numAmount,
           type,
@@ -67,11 +75,11 @@ export const ActionModals: React.FC<ActionModalsProps> = ({
       ]);
       if (txErr) throw txErr;
 
-      const account = accounts.find((a) => a.id === accountId);
+      const account = accounts.find((a) => a.id === effectiveAccountId);
       if (account) {
         const cur = parseFloat(account.balance as any);
         const newBal = isSend ? cur - numAmount : cur + numAmount;
-        await supabase.from('accounts').update({ balance: newBal }).eq('id', accountId);
+        await supabase.from('accounts').update({ balance: newBal }).eq('id', effectiveAccountId);
       }
 
       onRefresh();
@@ -139,14 +147,14 @@ export const ActionModals: React.FC<ActionModalsProps> = ({
           <div>
             <label className="block text-xs font-semibold text-[#6B6A66] mb-1">Account</label>
             <select
-              value={accountId}
+              value={effectiveAccountId}
               onChange={(e) => setAccountId(e.target.value)}
               required
               className="w-full bg-[#FAFAF7] border border-[#EAE9E4] rounded-xl px-3 py-2 text-xs font-medium text-[#141414] focus:outline-none focus:border-[#141414]"
             >
               {accounts.map((acc) => (
                 <option key={acc.id} value={acc.id}>
-                  {acc.name} (${Number(acc.balance).toFixed(2)})
+                  {acc.name} ({formatCurrencyAmount(Number(acc.balance), modalCurrency, false)})
                 </option>
               ))}
             </select>
