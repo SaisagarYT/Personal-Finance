@@ -129,12 +129,12 @@ export const ActivityView: React.FC<ActivityViewProps> = ({
           <div className="mt-4 overflow-hidden">
             <h3
               className={`${getAmountFontSize(
-                formatCurrencyAmount(totalVolume, currency, true),
+                formatCurrencyAmount(totalVolume, currency, false),
                 'activitySummary'
               )} font-extrabold tracking-tight leading-tight text-white whitespace-nowrap overflow-hidden text-ellipsis`}
-              title={formatCurrencyAmount(totalVolume, currency, true)}
+              title={formatCurrencyAmount(totalVolume, currency, false)}
             >
-              {formatCurrencyAmount(totalVolume, currency, true)}
+              {formatCurrencyAmount(totalVolume, currency, false)}
             </h3>
             <p className="text-xs text-white/70 mt-1">{transactions.length} total entries</p>
           </div>
@@ -151,12 +151,12 @@ export const ActivityView: React.FC<ActivityViewProps> = ({
           <div className="mt-4 overflow-hidden">
             <h3
               className={`${getAmountFontSize(
-                formatCurrencyAmount(totalIncome, currency, true),
+                formatCurrencyAmount(totalIncome, currency, false),
                 'activitySummary'
               )} font-extrabold text-[#141414] tracking-tight leading-tight whitespace-nowrap overflow-hidden text-ellipsis`}
-              title={formatCurrencyAmount(totalIncome, currency, true)}
+              title={formatCurrencyAmount(totalIncome, currency, false)}
             >
-              {formatCurrencyAmount(totalIncome, currency, true)}
+              {formatCurrencyAmount(totalIncome, currency, false)}
             </h3>
             <div className="flex items-center gap-1.5 mt-1 text-xs">
               <span className="font-semibold text-[#16A34A]">↑ Inflow</span>
@@ -176,12 +176,12 @@ export const ActivityView: React.FC<ActivityViewProps> = ({
           <div className="mt-4 overflow-hidden">
             <h3
               className={`${getAmountFontSize(
-                formatCurrencyAmount(totalExpense, currency, true),
+                formatCurrencyAmount(totalExpense, currency, false),
                 'activitySummary'
               )} font-extrabold text-[#141414] tracking-tight leading-tight whitespace-nowrap overflow-hidden text-ellipsis`}
-              title={formatCurrencyAmount(totalExpense, currency, true)}
+              title={formatCurrencyAmount(totalExpense, currency, false)}
             >
-              {formatCurrencyAmount(totalExpense, currency, true)}
+              {formatCurrencyAmount(totalExpense, currency, false)}
             </h3>
             <div className="flex items-center gap-1.5 mt-1 text-xs">
               <span className="font-semibold text-[#E74D28]">↓ Outflow</span>
@@ -357,7 +357,7 @@ export const ActivityView: React.FC<ActivityViewProps> = ({
                       {/* Price */}
                       <td className="py-3.5 px-3 text-xs font-bold text-[#141414]">
                         {item.type === 'income' ? '+' : '-'}
-                        {formatCurrencyAmount(Number(item.amount), currency, true)}
+                        {formatCurrencyAmount(Number(item.amount), currency, false)}
                       </td>
 
                       {/* Status & Delete Action */}

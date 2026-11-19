@@ -119,7 +119,7 @@ export const RecentActivitiesTable: React.FC<RecentActivitiesTableProps> = ({
 
                     <td className="py-3 px-3 text-xs font-bold text-[#141414]">
                       {item.type === 'income' ? '+' : '-'}
-                      {formatCurrencyAmount(Number(item.amount), currency, true)}
+                      {formatCurrencyAmount(Number(item.amount), currency, false)}
                     </td>
 
                     <td className="py-3 pr-2 pl-3">
