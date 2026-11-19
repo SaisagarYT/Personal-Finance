@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
 import { Check, Trash2, ArrowRight } from 'lucide-react';
 import { formatCurrencyAmount, type CurrencyCode } from '../lib/currency';
-import type { Transaction } from '../types';
+import type { Account, Transaction } from '../types';
 
 interface RecentActivitiesTableProps {
   transactions?: Transaction[];
+  accounts?: Account[];
   currency?: CurrencyCode;
   onViewAll?: () => void;
   onDeleteTransaction?: (id: string, accountId: string, amount: number, type: string) => void;
@@ -12,6 +13,7 @@ interface RecentActivitiesTableProps {
 
 export const RecentActivitiesTable: React.FC<RecentActivitiesTableProps> = ({
   transactions = [],
+  accounts = [],
   currency = 'INR',
   onViewAll,
   onDeleteTransaction,
@@ -84,6 +86,9 @@ export const RecentActivitiesTable: React.FC<RecentActivitiesTableProps> = ({
                 const orderCode = `INV-${item.id.slice(0, 6).toUpperCase()}`;
                 const isChecked = Boolean(checkedIds[item.id]);
 
+                const accCurrency = (item.accounts?.currency || accounts.find((a) => a.id === item.account_id)?.currency || 'INR').toUpperCase() as CurrencyCode;
+                const isDifferentCurrency = currency !== accCurrency;
+
                 return (
                   <tr key={item.id} className="hover:bg-[#FAFAF7]/60 transition">
                     <td className="py-3 pl-2 pr-3">
@@ -118,8 +123,18 @@ export const RecentActivitiesTable: React.FC<RecentActivitiesTableProps> = ({
                     </td>
 
                     <td className="py-3 px-3 text-xs font-bold text-[#141414]">
-                      {item.type === 'income' ? '+' : '-'}
-                      {formatCurrencyAmount(Number(item.amount), currency, false)}
+                      <div>
+                        <span>
+                          {item.type === 'income' ? '+' : '-'}
+                          {formatCurrencyAmount(Number(item.amount), currency, accCurrency)}
+                        </span>
+                        {isDifferentCurrency && (
+                          <span className="block text-[10px] text-[#9E9D97] font-normal" title="Native transaction amount">
+                            ({item.type === 'income' ? '+' : '-'}
+                            {formatCurrencyAmount(Number(item.amount), accCurrency, accCurrency)})
+                          </span>
+                        )}
+                      </div>
                     </td>
 
                     <td className="py-3 pr-2 pl-3">

@@ -36,9 +36,11 @@ export interface Transaction {
   transaction_date: string;
   created_at: string;
   accounts?: {
+    id?: string;
     name: string;
     type: string;
     color: string;
+    currency?: string;
   };
   categories?: {
     name: string;

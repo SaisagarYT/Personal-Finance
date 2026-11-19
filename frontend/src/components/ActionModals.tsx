@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
 import { X, Plus, ArrowDownLeft, ArrowUpRight } from 'lucide-react';
 import { CurrencySelector } from './CurrencySelector';
-import { USD_TO_INR_RATE, formatCurrencyAmount, type CurrencyCode } from '../lib/currency';
+import { formatCurrencyAmount, convertCurrency, type CurrencyCode } from '../lib/currency';
 import type { Account, Category } from '../types';
 
 interface ActionModalsProps {
@@ -45,6 +45,13 @@ export const ActionModals: React.FC<ActionModalsProps> = ({
   const type = isSend ? 'expense' : 'income';
 
   const effectiveAccountId = accountId || accounts[0]?.id || '';
+  const selectedAccount = accounts.find((a) => a.id === effectiveAccountId);
+  const selectedAccountCurrency = (selectedAccount?.currency || 'INR').toUpperCase() as CurrencyCode;
+  const parsedAmount = parseFloat(amount);
+  const isAmountValid = !isNaN(parsedAmount) && parsedAmount > 0;
+  const convertedInAccountCurrency = isAmountValid && modalCurrency !== selectedAccountCurrency
+    ? convertCurrency(parsedAmount, modalCurrency, selectedAccountCurrency)
+    : null;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -54,8 +61,12 @@ export const ActionModals: React.FC<ActionModalsProps> = ({
       return;
     }
 
-    // Normalize amount to base storage (USD base: if entered in INR, normalize by USD_TO_INR_RATE)
-    const numAmount = modalCurrency === 'INR' ? parseFloat((rawNum / USD_TO_INR_RATE).toFixed(2)) : rawNum;
+    const targetAccount = accounts.find((a) => a.id === effectiveAccountId);
+    const accountCurrency = (targetAccount?.currency || 'INR').toUpperCase() as CurrencyCode;
+
+    // Convert entered amount from modal's selected currency to target account's native currency
+    const amountInAccountCurrency = convertCurrency(rawNum, modalCurrency, accountCurrency);
+    const numAmount = parseFloat(amountInAccountCurrency.toFixed(2));
 
     setLoading(true);
     try {
@@ -75,9 +86,8 @@ export const ActionModals: React.FC<ActionModalsProps> = ({
       ]);
       if (txErr) throw txErr;
 
-      const account = accounts.find((a) => a.id === effectiveAccountId);
-      if (account) {
-        const cur = parseFloat(account.balance as any);
+      if (targetAccount) {
+        const cur = parseFloat(targetAccount.balance as any);
         const newBal = isSend ? cur - numAmount : cur + numAmount;
         await supabase.from('accounts').update({ balance: newBal }).eq('id', effectiveAccountId);
       }
@@ -142,21 +152,38 @@ export const ActionModals: React.FC<ActionModalsProps> = ({
                 />
               </div>
             </div>
+            {convertedInAccountCurrency !== null && selectedAccount && (
+              <div className="mt-2 px-3 py-1.5 bg-[#F6F5F0] border border-[#EBEAE3] rounded-xl text-[11px] text-[#6B6A66] flex items-center justify-between">
+                <span>Equivalent in {selectedAccount.name} ({selectedAccountCurrency}):</span>
+                <span className="font-bold text-[#141414]">
+                  {formatCurrencyAmount(convertedInAccountCurrency, selectedAccountCurrency, selectedAccountCurrency)}
+                </span>
+              </div>
+            )}
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-[#6B6A66] mb-1">Account</label>
+            <label className="block text-xs font-semibold text-[#6B6A66] mb-1">
+              {isSend ? 'Pay From Wallet / Account' : 'Deposit Into Wallet / Account'}
+            </label>
             <select
               value={effectiveAccountId}
               onChange={(e) => setAccountId(e.target.value)}
               required
               className="w-full bg-[#FAFAF7] border border-[#EAE9E4] rounded-xl px-3 py-2 text-xs font-medium text-[#141414] focus:outline-none focus:border-[#141414]"
             >
-              {accounts.map((acc) => (
-                <option key={acc.id} value={acc.id}>
-                  {acc.name} ({formatCurrencyAmount(Number(acc.balance), modalCurrency, false)})
-                </option>
-              ))}
+              {accounts.map((acc) => {
+                const accCurrency = (acc.currency || 'INR').toUpperCase() as CurrencyCode;
+                const nativeFormatted = formatCurrencyAmount(Number(acc.balance), accCurrency, accCurrency);
+                const convertedFormatted = modalCurrency !== accCurrency
+                  ? ` · ≈ ${formatCurrencyAmount(Number(acc.balance), modalCurrency, accCurrency)}`
+                  : '';
+                return (
+                  <option key={acc.id} value={acc.id}>
+                    {acc.name} ({nativeFormatted}{convertedFormatted})
+                  </option>
+                );
+              })}
             </select>
           </div>
 

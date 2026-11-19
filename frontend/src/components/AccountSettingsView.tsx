@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { supabase } from '../lib/supabase';
 import { Plus, Wallet, Trash2, Shield, LogOut } from 'lucide-react';
 import { CurrencySelector } from './CurrencySelector';
-import { type CurrencyCode } from '../lib/currency';
+import { type CurrencyCode, formatCurrencyAmount, getCurrencySymbol } from '../lib/currency';
 import type { Account } from '../types';
 
 interface AccountSettingsViewProps {
@@ -175,7 +175,9 @@ export const AccountSettingsView: React.FC<AccountSettingsViewProps> = ({
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-semibold text-[#6B6A66] mb-1">Starting Balance ($)</label>
+                  <label className="block text-xs font-semibold text-[#6B6A66] mb-1">
+                    Starting Balance ({getCurrencySymbol(newAccCurrency)})
+                  </label>
                   <input
                     type="number"
                     step="0.01"
@@ -222,35 +224,50 @@ export const AccountSettingsView: React.FC<AccountSettingsViewProps> = ({
               <p className="text-xs text-[#9E9D97] italic py-4">No custom accounts created yet.</p>
             ) : (
               <div className="space-y-3">
-                {accounts.map((acc) => (
-                  <div
-                    key={acc.id}
-                    className="bg-[#FAFAF7] border border-[#EAE9E4] rounded-2xl p-4 flex items-center justify-between"
-                  >
-                    <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-full bg-[#141414] text-white text-xs font-bold flex items-center justify-center">
-                        {acc.currency === 'EUR' ? '€' : acc.currency === 'GBP' ? '£' : '$'}
-                      </div>
-                      <div>
-                        <p className="text-xs font-bold text-[#141414]">{acc.name}</p>
-                        <p className="text-[10px] text-[#9E9D97]">{acc.type} • {acc.currency || 'USD'}</p>
-                      </div>
-                    </div>
+                {accounts.map((acc) => {
+                  const accCurr = (acc.currency || 'INR').toUpperCase();
+                  const symbol = getCurrencySymbol(accCurr);
+                  const nativeBal = formatCurrencyAmount(Number(acc.balance), accCurr as CurrencyCode, accCurr as CurrencyCode);
+                  const isConverted = currency !== accCurr;
+                  const convertedBal = isConverted ? formatCurrencyAmount(Number(acc.balance), currency, accCurr as CurrencyCode) : null;
 
-                    <div className="flex items-center gap-3">
-                      <p className="text-sm font-bold text-[#141414]">
-                        ${Number(acc.balance).toLocaleString('en-US', { minimumFractionDigits: 2 })}
-                      </p>
-                      <button
-                        onClick={() => handleDeleteAccount(acc.id)}
-                        className="p-1.5 text-[#9E9D97] hover:text-[#E74D28] transition cursor-pointer"
-                        title="Delete account"
-                      >
-                        <Trash2 className="w-3.5 h-3.5" />
-                      </button>
+                  return (
+                    <div
+                      key={acc.id}
+                      className="bg-[#FAFAF7] border border-[#EAE9E4] rounded-2xl p-4 flex items-center justify-between"
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-full bg-[#141414] text-white text-xs font-bold flex items-center justify-center">
+                          {symbol}
+                        </div>
+                        <div>
+                          <p className="text-xs font-bold text-[#141414]">{acc.name}</p>
+                          <p className="text-[10px] text-[#9E9D97]">{acc.type} • {accCurr}</p>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-3">
+                        <div className="text-right">
+                          <p className="text-sm font-bold text-[#141414]">
+                            {nativeBal}
+                          </p>
+                          {convertedBal && (
+                            <p className="text-[10px] font-semibold text-[#E74D28]" title="Converted to selected display currency">
+                              ≈ {convertedBal}
+                            </p>
+                          )}
+                        </div>
+                        <button
+                          onClick={() => handleDeleteAccount(acc.id)}
+                          className="p-1.5 text-[#9E9D97] hover:text-[#E74D28] transition cursor-pointer"
+                          title="Delete account"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             )}
           </div>

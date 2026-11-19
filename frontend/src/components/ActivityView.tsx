@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
 import { Search, Download, Check, Trash2, ArrowUpRight, ArrowDownLeft, Layers } from 'lucide-react';
 import { CurrencySelector } from './CurrencySelector';
-import { formatCurrencyAmount, type CurrencyCode } from '../lib/currency';
+import { formatCurrencyAmount, convertCurrency, type CurrencyCode } from '../lib/currency';
 import { getAmountFontSize } from '../lib/dynamicSize';
-import type { Transaction } from '../types';
+import type { Account, Transaction } from '../types';
 
 interface ActivityViewProps {
   transactions: Transaction[];
+  accounts?: Account[];
   currency?: CurrencyCode;
   onCurrencyChange?: (c: CurrencyCode) => void;
   onDeleteTransaction?: (id: string, accountId: string, amount: number, type: string) => void;
@@ -18,6 +19,7 @@ interface ActivityViewProps {
 
 export const ActivityView: React.FC<ActivityViewProps> = ({
   transactions = [],
+  accounts = [],
   currency = 'INR',
   onCurrencyChange,
   onDeleteTransaction,
@@ -57,14 +59,35 @@ export const ActivityView: React.FC<ActivityViewProps> = ({
     return matchesType && matchesSearch;
   });
 
-  // Analytics summary calculations
-  const totalVolume = transactions.reduce((sum, t) => sum + parseFloat(t.amount as any || 0), 0);
+  const getTxCurrency = (t: Transaction): CurrencyCode => {
+    if (t.accounts?.currency) return t.accounts.currency.toUpperCase() as CurrencyCode;
+    const match = accounts.find((a) => a.id === t.account_id);
+    if (match?.currency) return match.currency.toUpperCase() as CurrencyCode;
+    return 'INR';
+  };
+
+  // Analytics summary calculations converted to selected display currency
+  const totalVolume = transactions.reduce((sum, t) => {
+    const amt = parseFloat(t.amount as any || 0);
+    const accCurrency = getTxCurrency(t);
+    return sum + convertCurrency(amt, accCurrency, currency);
+  }, 0);
+
   const totalExpense = transactions
     .filter((t) => t.type === 'expense')
-    .reduce((sum, t) => sum + parseFloat(t.amount as any || 0), 0);
+    .reduce((sum, t) => {
+      const amt = parseFloat(t.amount as any || 0);
+      const accCurrency = getTxCurrency(t);
+      return sum + convertCurrency(amt, accCurrency, currency);
+    }, 0);
+
   const totalIncome = transactions
     .filter((t) => t.type === 'income')
-    .reduce((sum, t) => sum + parseFloat(t.amount as any || 0), 0);
+    .reduce((sum, t) => {
+      const amt = parseFloat(t.amount as any || 0);
+      const accCurrency = getTxCurrency(t);
+      return sum + convertCurrency(amt, accCurrency, currency);
+    }, 0);
 
   // CSV Export
   const exportToCSV = () => {
@@ -136,12 +159,12 @@ export const ActivityView: React.FC<ActivityViewProps> = ({
           <div className="mt-4 overflow-hidden">
             <h3
               className={`${getAmountFontSize(
-                formatCurrencyAmount(totalVolume, currency, false),
+                formatCurrencyAmount(totalVolume, currency, currency),
                 'activitySummary'
               )} font-extrabold tracking-tight leading-tight text-white whitespace-nowrap overflow-hidden text-ellipsis`}
-              title={formatCurrencyAmount(totalVolume, currency, false)}
+              title={formatCurrencyAmount(totalVolume, currency, currency)}
             >
-              {formatCurrencyAmount(totalVolume, currency, false)}
+              {formatCurrencyAmount(totalVolume, currency, currency)}
             </h3>
             <p className="text-xs text-white/70 mt-1">{transactions.length} total entries</p>
           </div>
@@ -158,12 +181,12 @@ export const ActivityView: React.FC<ActivityViewProps> = ({
           <div className="mt-4 overflow-hidden">
             <h3
               className={`${getAmountFontSize(
-                formatCurrencyAmount(totalIncome, currency, false),
+                formatCurrencyAmount(totalIncome, currency, currency),
                 'activitySummary'
               )} font-extrabold text-[#141414] tracking-tight leading-tight whitespace-nowrap overflow-hidden text-ellipsis`}
-              title={formatCurrencyAmount(totalIncome, currency, false)}
+              title={formatCurrencyAmount(totalIncome, currency, currency)}
             >
-              {formatCurrencyAmount(totalIncome, currency, false)}
+              {formatCurrencyAmount(totalIncome, currency, currency)}
             </h3>
             <div className="flex items-center gap-1.5 mt-1 text-xs">
               <span className="font-semibold text-[#16A34A]">↑ Inflow</span>
@@ -183,12 +206,12 @@ export const ActivityView: React.FC<ActivityViewProps> = ({
           <div className="mt-4 overflow-hidden">
             <h3
               className={`${getAmountFontSize(
-                formatCurrencyAmount(totalExpense, currency, false),
+                formatCurrencyAmount(totalExpense, currency, currency),
                 'activitySummary'
               )} font-extrabold text-[#141414] tracking-tight leading-tight whitespace-nowrap overflow-hidden text-ellipsis`}
-              title={formatCurrencyAmount(totalExpense, currency, false)}
+              title={formatCurrencyAmount(totalExpense, currency, currency)}
             >
-              {formatCurrencyAmount(totalExpense, currency, false)}
+              {formatCurrencyAmount(totalExpense, currency, currency)}
             </h3>
             <div className="flex items-center gap-1.5 mt-1 text-xs">
               <span className="font-semibold text-[#E74D28]">↓ Outflow</span>
@@ -363,8 +386,24 @@ export const ActivityView: React.FC<ActivityViewProps> = ({
 
                       {/* Price */}
                       <td className="py-3.5 px-3 text-xs font-bold text-[#141414]">
-                        {item.type === 'income' ? '+' : '-'}
-                        {formatCurrencyAmount(Number(item.amount), currency, false)}
+                        {(() => {
+                          const accCurrency = getTxCurrency(item);
+                          const isDiff = currency !== accCurrency;
+                          return (
+                            <div>
+                              <span>
+                                {item.type === 'income' ? '+' : '-'}
+                                {formatCurrencyAmount(Number(item.amount), currency, accCurrency)}
+                              </span>
+                              {isDiff && (
+                                <span className="block text-[10px] text-[#9E9D97] font-normal" title="Native transaction amount">
+                                  ({item.type === 'income' ? '+' : '-'}
+                                  {formatCurrencyAmount(Number(item.amount), accCurrency, accCurrency)})
+                                </span>
+                              )}
+                            </div>
+                          );
+                        })()}
                       </td>
 
                       {/* Status & Delete Action */}

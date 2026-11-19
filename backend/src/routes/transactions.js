@@ -17,7 +17,7 @@ router.get('/', async (req, res) => {
       description,
       transaction_date,
       created_at,
-      accounts ( id, name, type, color ),
+      accounts ( id, name, type, color, currency ),
       categories ( id, name, type, icon, color )
     `)
     .eq('user_id', req.user.id)
@@ -46,7 +46,7 @@ router.post('/', async (req, res) => {
 
   const { data: account, error: accError } = await supabase
     .from('accounts')
-    .select('id, balance')
+    .select('id, balance, currency')
     .eq('id', account_id)
     .eq('user_id', req.user.id)
     .single();
@@ -55,6 +55,19 @@ router.post('/', async (req, res) => {
     return res.status(404).json({ error: 'Account not found' });
   }
 
+  const accountCurrency = (account.currency || 'USD').toUpperCase();
+  const inputCurrency = (req.body.currency || accountCurrency).toUpperCase();
+
+  let finalAmount = numAmount;
+  if (inputCurrency !== accountCurrency) {
+    if (inputCurrency === 'INR' && accountCurrency === 'USD') {
+      finalAmount = numAmount / 83.5;
+    } else if (inputCurrency === 'USD' && accountCurrency === 'INR') {
+      finalAmount = numAmount * 83.5;
+    }
+  }
+  finalAmount = parseFloat(finalAmount.toFixed(2));
+
   const { data: transaction, error: txError } = await supabase
     .from('transactions')
     .insert([
@@ -62,7 +75,7 @@ router.post('/', async (req, res) => {
         user_id: req.user.id,
         account_id,
         category_id: category_id || null,
-        amount: numAmount,
+        amount: finalAmount,
         type,
         description: description || '',
         transaction_date: transaction_date || new Date().toISOString().split('T')[0],
@@ -74,7 +87,7 @@ router.post('/', async (req, res) => {
   if (txError) return res.status(500).json({ error: txError.message });
 
   const currentBalance = parseFloat(account.balance);
-  const newBalance = type === 'income' ? currentBalance + numAmount : currentBalance - numAmount;
+  const newBalance = type === 'income' ? currentBalance + finalAmount : currentBalance - finalAmount;
 
   await supabase
     .from('accounts')

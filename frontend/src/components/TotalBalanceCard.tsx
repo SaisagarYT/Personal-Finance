@@ -5,9 +5,11 @@ import { getAmountFontSize } from '../lib/dynamicSize';
 import type { CurrencyCode } from '../lib/currency';
 
 interface Wallet {
+  name?: string;
   currency: string;
   symbol: string;
   balance: string;
+  convertedBalance?: string;
   limit: string;
   status: 'Active' | 'Inactive';
 }
@@ -182,11 +184,16 @@ export const TotalBalanceCard: React.FC<TotalBalanceCardProps> = ({
                 className="bg-[#FFFFFF] border border-[#EAE8E0] rounded-[18px] p-4 shadow-[0_1px_3px_rgba(0,0,0,0.02)] flex flex-col justify-between"
               >
                 {/* Currency Icon & Label */}
-                <div className="flex items-center gap-2 mb-3">
-                  <span className="w-5 h-5 rounded-full bg-[#141414] text-white text-[11px] font-bold flex items-center justify-center shrink-0">
-                    {wallet.symbol}
+                <div className="flex items-center justify-between mb-2.5">
+                  <div className="flex items-center gap-2">
+                    <span className="w-5 h-5 rounded-full bg-[#141414] text-white text-[11px] font-bold flex items-center justify-center shrink-0">
+                      {wallet.symbol}
+                    </span>
+                    <span className="text-[13px] font-bold text-[#141414] tracking-tight">{wallet.name || wallet.currency}</span>
+                  </div>
+                  <span className="text-[10px] font-semibold text-[#9E9D97] px-1.5 py-0.5 bg-[#F3F2ED] rounded-md">
+                    {wallet.currency}
                   </span>
-                  <span className="text-[13px] font-bold text-[#141414] tracking-tight">{wallet.currency}</span>
                 </div>
 
                 {/* Balance & Sub-details with Dynamic Scaling */}
@@ -200,11 +207,17 @@ export const TotalBalanceCard: React.FC<TotalBalanceCardProps> = ({
                   >
                     {wallet.balance}
                   </p>
-                  <p className="text-[11px] text-[#9E9D97] mt-1 font-normal">
-                    {wallet.limit}
-                  </p>
+                  {wallet.convertedBalance ? (
+                    <p className="text-[11px] text-[#E74D28] font-semibold mt-0.5" title="Converted to active view currency">
+                      {wallet.convertedBalance}
+                    </p>
+                  ) : (
+                    <p className="text-[11px] text-[#9E9D97] mt-1 font-normal">
+                      {wallet.limit}
+                    </p>
+                  )}
                   <span
-                    className={`inline-block text-[11px] font-semibold mt-3 ${
+                    className={`inline-block text-[11px] font-semibold mt-2.5 ${
                       wallet.status === 'Active' ? 'text-[#16A34A]' : 'text-[#E74D28]'
                     }`}
                   >

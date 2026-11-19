@@ -10,7 +10,7 @@ import { AccountSettingsView } from './components/AccountSettingsView';
 import { ActionModals } from './components/ActionModals';
 import { AuthView } from './components/AuthView';
 import { backendApi } from './lib/api';
-import { formatCurrencyAmount, type CurrencyCode } from './lib/currency';
+import { formatCurrencyAmount, convertCurrency, getCurrencySymbol, type CurrencyCode } from './lib/currency';
 import type { Account, Category, Transaction } from './types';
 
 export function App() {
@@ -82,7 +82,7 @@ export function App() {
         .from('transactions')
         .select(`
           *,
-          accounts ( name, type, color ),
+          accounts ( id, name, type, color, currency ),
           categories ( name, icon, color )
         `)
         .order('transaction_date', { ascending: false })
@@ -141,42 +141,70 @@ export function App() {
   }
 
   // Real dynamic calculations from Supabase database
-  const rawBalance = accounts.reduce((sum, a) => sum + parseFloat(a.balance as any || 0), 0);
-  const totalBalanceFormatted = formatCurrencyAmount(rawBalance, currency, false);
+  // Convert each account balance from its native currency into the selected display currency
+  const rawBalance = accounts.reduce((sum, a) => {
+    const bal = parseFloat(a.balance as any || 0);
+    const accCurrency = (a.currency || 'INR').toUpperCase();
+    return sum + convertCurrency(bal, accCurrency, currency);
+  }, 0);
+  const totalBalanceFormatted = formatCurrencyAmount(rawBalance, currency, currency);
 
   const currentMonth = new Date().toISOString().slice(0, 7);
   const monthTransactions = transactions.filter((t) => t.transaction_date.startsWith(currentMonth));
 
+  const getTxCurrency = (t: Transaction): CurrencyCode => {
+    if (t.accounts?.currency) return t.accounts.currency.toUpperCase() as CurrencyCode;
+    const acc = accounts.find((a) => a.id === t.account_id);
+    if (acc?.currency) return acc.currency.toUpperCase() as CurrencyCode;
+    return 'INR';
+  };
+
   const monthIncomeRaw = monthTransactions
     .filter((t) => t.type === 'income')
-    .reduce((sum, t) => sum + parseFloat(t.amount as any || 0), 0);
+    .reduce((sum, t) => {
+      const amt = parseFloat(t.amount as any || 0);
+      const accCurrency = getTxCurrency(t);
+      return sum + convertCurrency(amt, accCurrency, currency);
+    }, 0);
 
   const monthExpensesRaw = monthTransactions
     .filter((t) => t.type === 'expense')
-    .reduce((sum, t) => sum + parseFloat(t.amount as any || 0), 0);
+    .reduce((sum, t) => {
+      const amt = parseFloat(t.amount as any || 0);
+      const accCurrency = getTxCurrency(t);
+      return sum + convertCurrency(amt, accCurrency, currency);
+    }, 0);
 
   const netRevenue = monthIncomeRaw - monthExpensesRaw;
 
-  const earningsFormatted = formatCurrencyAmount(monthIncomeRaw, currency, false);
-  const spendingFormatted = formatCurrencyAmount(monthExpensesRaw, currency, false);
-  const incomeFormatted = formatCurrencyAmount(monthIncomeRaw, currency, false);
-  const revenueFormatted = formatCurrencyAmount(netRevenue, currency, false);
+  const earningsFormatted = formatCurrencyAmount(monthIncomeRaw, currency, currency);
+  const spendingFormatted = formatCurrencyAmount(monthExpensesRaw, currency, currency);
+  const incomeFormatted = formatCurrencyAmount(monthIncomeRaw, currency, currency);
+  const revenueFormatted = formatCurrencyAmount(netRevenue, currency, currency);
 
   const incomeCount = monthTransactions.filter((t) => t.type === 'income').length;
   const expenseCount = monthTransactions.filter((t) => t.type === 'expense').length;
 
-  const walletsData = accounts.slice(0, 3).map((acc) => ({
-    currency: acc.currency || currency,
-    symbol: acc.currency === 'INR' ? '₹' : acc.currency === 'USD' ? '$' : acc.currency === 'EUR' ? '€' : '₹',
-    balance: formatCurrencyAmount(Number(acc.balance), currency, false),
-    limit: `Limit ${currency === 'INR' ? '₹10L' : '$10k'} / mo`,
-    status: (Number(acc.balance) >= 0 ? 'Active' : 'Inactive') as 'Active' | 'Inactive',
-  }));
+  const walletsData = accounts.slice(0, 3).map((acc) => {
+    const nativeBal = Number(acc.balance);
+    const accCurrency = (acc.currency || 'INR').toUpperCase() as CurrencyCode;
+    return {
+      name: acc.name,
+      currency: accCurrency,
+      symbol: getCurrencySymbol(accCurrency),
+      balance: formatCurrencyAmount(nativeBal, accCurrency, accCurrency),
+      convertedBalance: accCurrency !== currency ? `≈ ${formatCurrencyAmount(nativeBal, currency, accCurrency)}` : undefined,
+      limit: `Limit ${accCurrency === 'INR' ? '₹10L' : '$10k'} / mo`,
+      status: (nativeBal >= 0 ? 'Active' : 'Inactive') as 'Active' | 'Inactive',
+    };
+  });
 
   // Budget calculations derived from real activity
-  const monthlyBudgetLimitNumber = rawBalance > 0 ? Math.max(rawBalance * 0.4, 50000) : 50000;
-  const currentSpentOfLimit = formatCurrencyAmount(monthExpensesRaw, currency, false);
-  const totalLimitFormatted = formatCurrencyAmount(monthlyBudgetLimitNumber, currency, false);
+  const monthlyBudgetLimitNumber = rawBalance > 0
+    ? Math.max(rawBalance * 0.4, currency === 'INR' ? 50000 : 600)
+    : (currency === 'INR' ? 50000 : 600);
+  const currentSpentOfLimit = formatCurrencyAmount(monthExpensesRaw, currency, currency);
+  const totalLimitFormatted = formatCurrencyAmount(monthlyBudgetLimitNumber, currency, currency);
   const spentPercent = monthlyBudgetLimitNumber > 0
     ? Math.min(Math.round((monthExpensesRaw / monthlyBudgetLimitNumber) * 100), 100)
     : 0;
@@ -230,6 +258,7 @@ export function App() {
                 />
                 <RecentActivitiesTable
                   transactions={transactions}
+                  accounts={accounts}
                   currency={currency}
                   onViewAll={() => setActiveTab('Activity')}
                   onDeleteTransaction={handleDeleteTransaction}
@@ -260,6 +289,7 @@ export function App() {
         {activeTab === 'Activity' && (
           <ActivityView
             transactions={transactions}
+            accounts={accounts}
             currency={currency}
             onCurrencyChange={setCurrency}
             onDeleteTransaction={handleDeleteTransaction}
