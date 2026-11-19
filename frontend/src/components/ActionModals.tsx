@@ -12,6 +12,7 @@ interface ActionModalsProps {
   currency?: CurrencyCode;
   onClose: () => void;
   onRefresh: () => void;
+  onNavigateToAccount?: () => void;
 }
 
 export const ActionModals: React.FC<ActionModalsProps> = ({
@@ -21,6 +22,7 @@ export const ActionModals: React.FC<ActionModalsProps> = ({
   currency = 'INR',
   onClose,
   onRefresh,
+  onNavigateToAccount,
 }) => {
   const [amount, setAmount] = useState('');
   const [modalCurrency, setModalCurrency] = useState<CurrencyCode>(currency);
@@ -162,10 +164,16 @@ export const ActionModals: React.FC<ActionModalsProps> = ({
             </p>
             <button
               type="button"
-              onClick={onClose}
+              onClick={() => {
+                if (onNavigateToAccount) {
+                  onNavigateToAccount();
+                } else {
+                  onClose();
+                }
+              }}
               className="mt-3 px-5 py-2.5 bg-[#141414] hover:bg-[#27272A] text-white text-xs font-semibold rounded-full shadow-sm transition cursor-pointer"
             >
-              Close & Setup Wallet
+              Go to Account Settings & Add Wallet
             </button>
           </div>
         ) : (

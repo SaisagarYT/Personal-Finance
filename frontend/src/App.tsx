@@ -320,6 +320,10 @@ export function App() {
         currency={currency}
         onClose={() => setActiveModal(null)}
         onRefresh={fetchData}
+        onNavigateToAccount={() => {
+          setActiveModal(null);
+          setActiveTab('Account');
+        }}
       />
     </div>
   );
