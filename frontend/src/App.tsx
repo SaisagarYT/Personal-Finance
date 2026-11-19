@@ -9,6 +9,7 @@ import { ActivityView } from './components/ActivityView';
 import { AccountSettingsView } from './components/AccountSettingsView';
 import { ActionModals } from './components/ActionModals';
 import { AuthView } from './components/AuthView';
+import { backendApi } from './lib/api';
 import { formatCurrencyAmount, type CurrencyCode } from './lib/currency';
 import type { Account, Category, Transaction } from './types';
 
@@ -47,21 +48,36 @@ export function App() {
     if (!session?.user || !isSupabaseConfigured) return;
 
     try {
-      // 1. Fetch Accounts
+      // 1. Primary path: query via deployed Cloudflare Workers backend API
+      try {
+        const [accData, catData, txData] = await Promise.all([
+          backendApi.getAccounts(),
+          backendApi.getCategories(),
+          backendApi.getTransactions(),
+        ]);
+        if (accData && Array.isArray(accData)) setAccounts(accData);
+        if (catData && Array.isArray(catData)) setCategories(catData);
+        if (txData && Array.isArray(txData)) {
+          setTransactions(txData);
+          return;
+        }
+      } catch (backendErr) {
+        // Fallback to direct client
+      }
+
+      // 2. Direct Supabase client query
       const { data: accData } = await supabase
         .from('accounts')
         .select('*')
         .order('created_at', { ascending: false });
       if (accData) setAccounts(accData);
 
-      // 2. Fetch Categories
       const { data: catData } = await supabase
         .from('categories')
         .select('*')
         .order('name');
       if (catData) setCategories(catData);
 
-      // 3. Fetch Transactions
       const { data: txData } = await supabase
         .from('transactions')
         .select(`
@@ -86,8 +102,12 @@ export function App() {
   const handleDeleteTransaction = async (id: string, accountId: string, amount: number, type: string) => {
     if (!confirm('Delete this transaction?')) return;
     try {
-      const { error } = await supabase.from('transactions').delete().eq('id', id);
-      if (error) throw error;
+      try {
+        await backendApi.deleteTransaction(id);
+      } catch (e) {
+        const { error } = await supabase.from('transactions').delete().eq('id', id);
+        if (error) throw error;
+      }
 
       const account = accounts.find((a) => a.id === accountId);
       if (account) {
