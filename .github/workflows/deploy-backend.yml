@@ -1,3 +1,4 @@
+# CI/CD: Automated Cloudflare Workers backend deployment pipeline
 name: Deploy Backend to Cloudflare Workers
 
 on:
