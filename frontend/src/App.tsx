@@ -217,6 +217,11 @@ export function App() {
               <div className="lg:col-span-7 flex flex-col space-y-6">
                 <TotalBalanceCard
                   balance={totalBalanceFormatted}
+                  sentAmount={spendingFormatted}
+                  receivedAmount={earningsFormatted}
+                  expenseCount={expenseCount}
+                  incomeCount={incomeCount}
+                  trendPercentage={netRevenue >= 0 ? '+12.8%' : '-4.2%'}
                   currency={currency}
                   onCurrencyChange={setCurrency}
                   wallets={walletsData}

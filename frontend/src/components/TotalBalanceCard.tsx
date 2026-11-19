@@ -1,5 +1,5 @@
-import React from 'react';
-import { ArrowUpRight, ArrowDownLeft } from 'lucide-react';
+import React, { useState } from 'react';
+import { ArrowUpRight, ArrowDownLeft, Plus, Wallet as WalletIcon } from 'lucide-react';
 import { CurrencySelector } from './CurrencySelector';
 import { getAmountFontSize } from '../lib/dynamicSize';
 import type { CurrencyCode } from '../lib/currency';
@@ -14,6 +14,10 @@ interface Wallet {
 
 interface TotalBalanceCardProps {
   balance?: string;
+  sentAmount?: string;
+  receivedAmount?: string;
+  expenseCount?: number;
+  incomeCount?: number;
   currency?: CurrencyCode;
   onCurrencyChange?: (c: CurrencyCode) => void;
   trendPercentage?: string;
@@ -26,24 +30,82 @@ interface TotalBalanceCardProps {
 
 export const TotalBalanceCard: React.FC<TotalBalanceCardProps> = ({
   balance = '₹0.00',
+  sentAmount = '₹0.00',
+  receivedAmount = '₹0.00',
+  expenseCount = 0,
+  incomeCount = 0,
   currency = 'INR',
   onCurrencyChange,
-  trendPercentage,
+  trendPercentage = '+12.5%',
   wallets = [],
   onSend,
   onReceive,
   onTransfer,
   onRequest,
 }) => {
+  const [viewMode, setViewMode] = useState<'total' | 'send' | 'receive'>('total');
+
   const handleSend = onSend || onTransfer;
   const handleReceive = onReceive || onRequest;
+
+  // Determine current active display amount and label based on tab
+  const displayAmount =
+    viewMode === 'send'
+      ? `-${sentAmount.replace(/^[+-]/, '')}`
+      : viewMode === 'receive'
+      ? `+${receivedAmount.replace(/^[+-]/, '')}`
+      : balance;
+
+  const displayLabel =
+    viewMode === 'send'
+      ? 'Monthly Outflow (Sent)'
+      : viewMode === 'receive'
+      ? 'Monthly Inflow (Received)'
+      : 'Total Net Balance';
 
   return (
     <div className="bg-[#FFFFFF] border border-[#E7E6DF] rounded-[28px] p-6 sm:p-7 shadow-sm flex flex-col justify-between">
       <div>
-        {/* Top Header & Dropdown */}
-        <div className="flex items-center justify-between">
-          <span className="text-xs font-medium text-[#6B6A66]">Total balance</span>
+        {/* Top Header: Label, Mode Switcher, and Currency Dropdown */}
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          {/* 3-Way Segmented View Switcher: Total | Send | Receive */}
+          <div className="flex items-center gap-1 p-1 bg-[#F3F2ED] rounded-full border border-[#E7E6DF]">
+            <button
+              type="button"
+              onClick={() => setViewMode('total')}
+              className={`px-3 py-1 rounded-full text-xs font-semibold transition cursor-pointer ${
+                viewMode === 'total'
+                  ? 'bg-[#141414] text-white shadow-xs'
+                  : 'text-[#6B6A66] hover:text-[#141414]'
+              }`}
+            >
+              Total
+            </button>
+            <button
+              type="button"
+              onClick={() => setViewMode('send')}
+              className={`flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold transition cursor-pointer ${
+                viewMode === 'send'
+                  ? 'bg-[#141414] text-white shadow-xs'
+                  : 'text-[#6B6A66] hover:text-[#141414]'
+              }`}
+            >
+              <ArrowUpRight className="w-3 h-3" /> Send
+            </button>
+            <button
+              type="button"
+              onClick={() => setViewMode('receive')}
+              className={`flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold transition cursor-pointer ${
+                viewMode === 'receive'
+                  ? 'bg-[#141414] text-white shadow-xs'
+                  : 'text-[#6B6A66] hover:text-[#141414]'
+              }`}
+            >
+              <ArrowDownLeft className="w-3 h-3" /> Receive
+            </button>
+          </div>
+
+          {/* Currency Dropdown Selector */}
           {onCurrencyChange ? (
             <CurrencySelector value={currency} onChange={onCurrencyChange} />
           ) : (
@@ -53,39 +115,106 @@ export const TotalBalanceCard: React.FC<TotalBalanceCardProps> = ({
           )}
         </div>
 
-        {/* Big Balance Number with Dynamic Scaling */}
-        <h2 className={`${getAmountFontSize(balance, 'totalBalance')} font-extrabold text-[#141414] tracking-tight mt-2.5 leading-tight whitespace-nowrap overflow-hidden text-ellipsis`} title={balance}>
-          {balance}
-        </h2>
+        {/* View Mode Description Tag */}
+        <div className="mt-4">
+          <span className="text-xs font-medium text-[#6B6A66] block">{displayLabel}</span>
 
-        {/* Trend Indicator: Clean inline text without background pill */}
-        <div className="flex items-center gap-1.5 mt-1.5 text-xs">
-          <span className="font-semibold text-[#16A34A]">{trendPercentage}</span>
-          <span className="text-[#6B6A66]">vs last month</span>
+          {/* Big Amount Number with Dynamic Auto-Scaling */}
+          <h2
+            className={`${getAmountFontSize(
+              displayAmount,
+              'totalBalance'
+            )} font-extrabold ${
+              viewMode === 'send'
+                ? 'text-[#E74D28]'
+                : viewMode === 'receive'
+                ? 'text-[#16A34A]'
+                : 'text-[#141414]'
+            } tracking-tight mt-1 leading-tight whitespace-nowrap overflow-hidden text-ellipsis transition-colors duration-300`}
+            title={displayAmount}
+          >
+            {displayAmount}
+          </h2>
+
+          {/* Trend & Contextual Metrics */}
+          <div className="flex items-center gap-1.5 mt-1.5 text-xs">
+            {viewMode === 'total' && (
+              <>
+                <span className="font-semibold text-[#16A34A]">{trendPercentage}</span>
+                <span className="text-[#6B6A66]">vs last month</span>
+              </>
+            )}
+            {viewMode === 'send' && (
+              <>
+                <span className="font-semibold text-[#E74D28]">↓ {expenseCount} payments</span>
+                <span className="text-[#6B6A66]">debited this month</span>
+              </>
+            )}
+            {viewMode === 'receive' && (
+              <>
+                <span className="font-semibold text-[#16A34A]">↑ {incomeCount} deposits</span>
+                <span className="text-[#6B6A66]">credited this month</span>
+              </>
+            )}
+          </div>
         </div>
 
-        {/* Action Buttons: Solid dark Send vs soft warm Receive */}
-        <div className="grid grid-cols-2 gap-3 mt-6">
-          <button
-            onClick={handleSend}
-            className="flex items-center justify-center gap-2 py-3 px-4 bg-[#141414] hover:bg-[#27272A] text-white text-xs font-semibold rounded-full shadow-sm transition cursor-pointer"
-          >
-            <ArrowUpRight className="w-3.5 h-3.5" /> Send
-          </button>
-          <button
-            onClick={handleReceive}
-            className="flex items-center justify-center gap-2 py-3 px-4 bg-[#F3F2ED] hover:bg-[#ECEAE3] text-[#141414] text-xs font-semibold rounded-full transition cursor-pointer"
-          >
-            <ArrowDownLeft className="w-3.5 h-3.5" /> Receive
-          </button>
+        {/* Contextual Action Buttons */}
+        <div className="mt-5">
+          {viewMode === 'total' && (
+            <div className="grid grid-cols-2 gap-3">
+              <button
+                type="button"
+                onClick={handleSend}
+                className="flex items-center justify-center gap-1.5 py-2.5 px-4 bg-[#141414] hover:bg-[#27272A] text-white text-xs font-semibold rounded-full shadow-sm transition cursor-pointer"
+              >
+                <Plus className="w-3.5 h-3.5" /> Send Money
+              </button>
+              <button
+                type="button"
+                onClick={handleReceive}
+                className="flex items-center justify-center gap-1.5 py-2.5 px-4 bg-[#FAFAF7] hover:bg-[#F3F2ED] border border-[#E7E6DF] text-[#141414] text-xs font-semibold rounded-full shadow-sm transition cursor-pointer"
+              >
+                <Plus className="w-3.5 h-3.5" /> Receive Money
+              </button>
+            </div>
+          )}
+
+          {viewMode === 'send' && (
+            <button
+              type="button"
+              onClick={handleSend}
+              className="w-full flex items-center justify-center gap-2 py-2.5 px-4 bg-[#141414] hover:bg-[#27272A] text-white text-xs font-semibold rounded-full shadow-sm transition cursor-pointer"
+            >
+              <Plus className="w-3.5 h-3.5" /> + New Send Payment (Expense)
+            </button>
+          )}
+
+          {viewMode === 'receive' && (
+            <button
+              type="button"
+              onClick={handleReceive}
+              className="w-full flex items-center justify-center gap-2 py-2.5 px-4 bg-[#E74D28] hover:bg-[#D43E1B] text-white text-xs font-semibold rounded-full shadow-sm transition cursor-pointer"
+            >
+              <Plus className="w-3.5 h-3.5" /> + New Receive Deposit (Income)
+            </button>
+          )}
         </div>
       </div>
 
       {/* Wallets Recessed Tray Container */}
-      <div className="mt-8 bg-[#F6F5F0] border border-[#EBEAE3] rounded-[24px] p-3.5">
+      <div className="mt-7 bg-[#F6F5F0] border border-[#EBEAE3] rounded-[24px] p-3.5">
         <div className="flex items-center justify-between mb-3 px-1">
-          <span className="text-[13px] font-bold text-[#141414]">
+          <span className="text-[13px] font-bold text-[#141414] flex items-center gap-1.5">
+            <WalletIcon className="w-3.5 h-3.5 text-[#6B6A66]" />
             Wallets <span className="text-[#9E9D97] font-normal ml-0.5">· {wallets.length} total</span>
+          </span>
+          <span className="text-[11px] text-[#9E9D97]">
+            {viewMode === 'send'
+              ? 'Debit accounts'
+              : viewMode === 'receive'
+              ? 'Credit accounts'
+              : 'Active holdings'}
           </span>
         </div>
 
@@ -111,7 +240,13 @@ export const TotalBalanceCard: React.FC<TotalBalanceCardProps> = ({
 
                 {/* Balance & Sub-details with Dynamic Scaling */}
                 <div className="overflow-hidden">
-                  <p className={`${getAmountFontSize(wallet.balance, 'walletTray')} font-bold text-[#141414] tracking-tight leading-tight whitespace-nowrap overflow-hidden text-ellipsis`} title={wallet.balance}>
+                  <p
+                    className={`${getAmountFontSize(
+                      wallet.balance,
+                      'walletTray'
+                    )} font-bold text-[#141414] tracking-tight leading-tight whitespace-nowrap overflow-hidden text-ellipsis`}
+                    title={wallet.balance}
+                  >
                     {wallet.balance}
                   </p>
                   <p className="text-[11px] text-[#9E9D97] mt-1 font-normal">
