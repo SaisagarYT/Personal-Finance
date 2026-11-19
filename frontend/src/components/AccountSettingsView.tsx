@@ -1,12 +1,16 @@
 import React, { useState } from 'react';
 import { supabase } from '../lib/supabase';
 import { Plus, Wallet, Trash2, Shield, LogOut } from 'lucide-react';
+import { CurrencySelector } from './CurrencySelector';
+import { type CurrencyCode } from '../lib/currency';
 import type { Account } from '../types';
 
 interface AccountSettingsViewProps {
   accounts: Account[];
   userName: string;
   userEmail: string;
+  currency?: CurrencyCode;
+  onCurrencyChange?: (c: CurrencyCode) => void;
   onRefresh: () => void;
   onSignOut: () => void;
 }
@@ -15,13 +19,15 @@ export const AccountSettingsView: React.FC<AccountSettingsViewProps> = ({
   accounts,
   userName,
   userEmail,
+  currency = 'INR',
+  onCurrencyChange,
   onRefresh,
   onSignOut,
 }) => {
   const [newAccName, setNewAccName] = useState('');
   const [newAccType, setNewAccType] = useState<Account['type']>('Checking');
   const [newAccBalance, setNewAccBalance] = useState('');
-  const [newAccCurrency, setNewAccCurrency] = useState('USD');
+  const [newAccCurrency, setNewAccCurrency] = useState('INR');
   const [loading, setLoading] = useState(false);
 
   const handleCreateAccount = async (e: React.FormEvent) => {
@@ -68,14 +74,20 @@ export const AccountSettingsView: React.FC<AccountSettingsViewProps> = ({
 
   return (
     <div className="space-y-6 max-w-5xl mx-auto">
-      {/* Title */}
-      <div>
-        <h1 className="text-2xl sm:text-3xl font-extrabold text-[#141414] tracking-tight">
-          Account & Wallets Settings
-        </h1>
-        <p className="text-xs sm:text-sm text-[#6B6A66] mt-1">
-          Manage your personal profile, linked wallets, and security credentials.
-        </p>
+      {/* Title & Actions */}
+      <div className="flex flex-wrap items-center justify-between gap-4">
+        <div>
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-[#141414] tracking-tight">
+            Account & Wallets Settings
+          </h1>
+          <p className="text-xs sm:text-sm text-[#6B6A66] mt-1">
+            Manage your personal profile, linked wallets, and currency preferences.
+          </p>
+        </div>
+
+        {onCurrencyChange && (
+          <CurrencySelector value={currency} onChange={onCurrencyChange} />
+        )}
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-start">
@@ -181,10 +193,10 @@ export const AccountSettingsView: React.FC<AccountSettingsViewProps> = ({
                     onChange={(e) => setNewAccCurrency(e.target.value)}
                     className="w-full bg-[#FAFAF7] border border-[#EAE9E4] rounded-xl px-3 py-2 text-xs font-medium text-[#141414] focus:outline-none focus:border-[#141414]"
                   >
-                    <option value="USD">USD ($)</option>
+                    <option value="INR">INR (₹) - India</option>
+                    <option value="USD">USD ($) - United States</option>
                     <option value="EUR">EUR (€)</option>
                     <option value="GBP">GBP (£)</option>
-                    <option value="INR">INR (₹)</option>
                   </select>
                 </div>
               </div>

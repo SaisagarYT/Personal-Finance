@@ -1,5 +1,7 @@
 import React from 'react';
-import { ArrowLeftRight, ArrowDown, ChevronDown } from 'lucide-react';
+import { ArrowLeftRight, ArrowDown } from 'lucide-react';
+import { CurrencySelector } from './CurrencySelector';
+import type { CurrencyCode } from '../lib/currency';
 
 interface Wallet {
   currency: string;
@@ -11,7 +13,8 @@ interface Wallet {
 
 interface TotalBalanceCardProps {
   balance?: string;
-  currency?: string;
+  currency?: CurrencyCode;
+  onCurrencyChange?: (c: CurrencyCode) => void;
   trendPercentage?: string;
   wallets?: Wallet[];
   onTransfer?: () => void;
@@ -19,6 +22,13 @@ interface TotalBalanceCardProps {
 }
 
 const DEFAULT_WALLETS: Wallet[] = [
+  {
+    currency: 'INR',
+    symbol: '₹',
+    balance: '₹18,93,613.00',
+    limit: 'Limit ₹10L / mo',
+    status: 'Active',
+  },
   {
     currency: 'USD',
     symbol: '$',
@@ -33,18 +43,12 @@ const DEFAULT_WALLETS: Wallet[] = [
     limit: 'Limit €8k / mo',
     status: 'Active',
   },
-  {
-    currency: 'GBP',
-    symbol: '£',
-    balance: '£15,000.00',
-    limit: 'Limit £7.5k / mo',
-    status: 'Inactive',
-  },
 ];
 
 export const TotalBalanceCard: React.FC<TotalBalanceCardProps> = ({
-  balance = '$689,372.00',
-  currency = 'USD',
+  balance = '₹18,93,613.00',
+  currency = 'INR',
+  onCurrencyChange,
   trendPercentage = '↑ 5%',
   wallets = DEFAULT_WALLETS,
   onTransfer,
@@ -56,9 +60,13 @@ export const TotalBalanceCard: React.FC<TotalBalanceCardProps> = ({
         {/* Top Header & Dropdown */}
         <div className="flex items-center justify-between">
           <span className="text-xs font-medium text-[#6B6A66]">Total balance</span>
-          <button className="flex items-center gap-1.5 px-3 py-1 bg-[#FAFAF7] border border-[#EAE9E4] rounded-full text-[11px] font-semibold text-[#141414] hover:bg-[#F3F2ED] transition cursor-pointer">
-            {currency} <ChevronDown className="w-3.5 h-3.5 text-[#6B6A66]" />
-          </button>
+          {onCurrencyChange ? (
+            <CurrencySelector value={currency} onChange={onCurrencyChange} />
+          ) : (
+            <span className="px-3 py-1 bg-[#FAFAF7] border border-[#EAE9E4] rounded-full text-[11px] font-semibold text-[#141414]">
+              {currency}
+            </span>
+          )}
         </div>
 
         {/* Big Balance Number */}

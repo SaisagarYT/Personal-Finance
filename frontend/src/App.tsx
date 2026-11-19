@@ -9,10 +9,12 @@ import { ActivityView } from './components/ActivityView';
 import { AccountSettingsView } from './components/AccountSettingsView';
 import { ActionModals } from './components/ActionModals';
 import { AuthView } from './components/AuthView';
+import { formatCurrencyAmount, type CurrencyCode } from './lib/currency';
 import type { Account, Category, Transaction } from './types';
 
 export function App() {
   const [activeTab, setActiveTab] = useState('Overview');
+  const [currency, setCurrency] = useState<CurrencyCode>('INR');
   const [session, setSession] = useState<any>(null);
   const [authLoading, setAuthLoading] = useState(true);
 
@@ -118,52 +120,57 @@ export function App() {
     return <AuthView onAuthSuccess={() => setAuthLoading(false)} />;
   }
 
-  // Dynamic calculations
-  const totalBalanceNumber = accounts.reduce((sum, a) => sum + parseFloat(a.balance as any || 0), 0);
-  const totalBalanceFormatted = accounts.length > 0
-    ? `$${totalBalanceNumber.toLocaleString('en-US', { minimumFractionDigits: 2 })}`
-    : '$689,372.00';
+  // Dynamic calculations with Indian Rupees (INR) and US Dollar (USD) conversion
+  const rawBalance = accounts.length > 0
+    ? accounts.reduce((sum, a) => sum + parseFloat(a.balance as any || 0), 0)
+    : 22678.00;
+  const totalBalanceFormatted = formatCurrencyAmount(rawBalance, currency, true);
 
   const currentMonth = new Date().toISOString().slice(0, 7);
   const monthTransactions = transactions.filter((t) => t.transaction_date.startsWith(currentMonth));
 
-  const monthIncome = monthTransactions
+  const monthIncomeRaw = monthTransactions
     .filter((t) => t.type === 'income')
     .reduce((sum, t) => sum + parseFloat(t.amount as any), 0);
+  const effectiveIncome = monthIncomeRaw > 0 ? monthIncomeRaw : 1050;
 
-  const monthExpenses = monthTransactions
+  const monthExpensesRaw = monthTransactions
     .filter((t) => t.type === 'expense')
     .reduce((sum, t) => sum + parseFloat(t.amount as any), 0);
+  const effectiveExpenses = monthExpensesRaw > 0 ? monthExpensesRaw : 700;
 
-  const earningsFormatted = monthIncome > 0 ? `$${monthIncome.toLocaleString('en-US')}` : '$950';
-  const spendingFormatted = monthExpenses > 0 ? `$${monthExpenses.toLocaleString('en-US')}` : '$700';
-  const incomeFormatted = monthIncome > 0 ? `$${monthIncome.toLocaleString('en-US')}` : '$1,050';
-  const revenueFormatted = monthIncome > 0 ? `$${(monthIncome * 0.8).toFixed(0)}` : '$850';
+  const earningsFormatted = formatCurrencyAmount(effectiveIncome * 0.9, currency, true);
+  const spendingFormatted = formatCurrencyAmount(effectiveExpenses, currency, true);
+  const incomeFormatted = formatCurrencyAmount(effectiveIncome, currency, true);
+  const revenueFormatted = formatCurrencyAmount(effectiveIncome * 0.8, currency, true);
 
   const walletsData = accounts.length > 0
     ? accounts.slice(0, 3).map((acc) => ({
-        currency: acc.currency || 'USD',
-        symbol: acc.currency === 'EUR' ? '€' : acc.currency === 'GBP' ? '£' : '$',
-        balance: `$${Number(acc.balance).toLocaleString('en-US', { minimumFractionDigits: 2 })}`,
-        limit: `Limit $10k / mo`,
+        currency: currency,
+        symbol: currency === 'INR' ? '₹' : '$',
+        balance: formatCurrencyAmount(Number(acc.balance), currency, true),
+        limit: `Limit ${currency === 'INR' ? '₹10L' : '$10k'} / mo`,
         status: (acc.balance >= 0 ? 'Active' : 'Inactive') as 'Active' | 'Inactive',
       }))
     : undefined;
 
-  const currentSpentOfLimit = monthExpenses > 0 ? `$${monthExpenses.toFixed(2)}` : '$1,400.00';
-  const spentPercent = Math.min(Math.round((monthExpenses / 5500) * 100) || 26, 100);
+  const currentSpentOfLimit = formatCurrencyAmount(effectiveExpenses * 2, currency, true);
+  const totalLimitFormatted = formatCurrencyAmount(5500, currency, true);
+  const spentPercent = Math.min(Math.round(((effectiveExpenses * 2) / 5500) * 100) || 26, 100);
 
   const currentUserName = session?.user?.user_metadata?.full_name || 'Amara Okello';
   const currentUserEmail = session?.user?.email || 'amara@kova.app';
 
   return (
     <div className="min-h-screen bg-[#F3F2ED] text-[#141414] flex flex-col font-sans antialiased pb-12">
-      {/* 1. Header Navigation Bar with Tab Switcher */}
+      {/* 1. Header Navigation Bar with Tab Switcher & Global Currency Dropdown */}
       <Navbar
         activeTab={activeTab}
         onTabChange={setActiveTab}
         userName={currentUserName}
         userEmail={currentUserEmail}
+        currency={currency}
+        onCurrencyChange={setCurrency}
       />
 
       {/* Main Content View Switcher */}
@@ -185,12 +192,15 @@ export function App() {
               <div className="lg:col-span-7 flex flex-col space-y-6">
                 <TotalBalanceCard
                   balance={totalBalanceFormatted}
+                  currency={currency}
+                  onCurrencyChange={setCurrency}
                   wallets={walletsData}
                   onTransfer={() => setActiveModal('transfer')}
                   onRequest={() => setActiveModal('request')}
                 />
                 <RecentActivitiesTable
                   transactions={transactions.length > 0 ? transactions : undefined}
+                  currency={currency}
                   onDeleteTransaction={handleDeleteTransaction}
                 />
               </div>
@@ -205,7 +215,7 @@ export function App() {
                 />
                 <IncomeChartWithLimitCard
                   spentAmount={currentSpentOfLimit}
-                  totalLimit="$5,500.00"
+                  totalLimit={totalLimitFormatted}
                   spentPercentage={spentPercent}
                 />
               </div>
@@ -217,6 +227,8 @@ export function App() {
         {activeTab === 'Activity' && (
           <ActivityView
             transactions={transactions}
+            currency={currency}
+            onCurrencyChange={setCurrency}
             onDeleteTransaction={handleDeleteTransaction}
             onOpenTransfer={() => setActiveModal('transfer')}
             onOpenRequest={() => setActiveModal('request')}
@@ -229,17 +241,20 @@ export function App() {
             accounts={accounts}
             userName={currentUserName}
             userEmail={currentUserEmail}
+            currency={currency}
+            onCurrencyChange={setCurrency}
             onRefresh={fetchData}
             onSignOut={handleSignOut}
           />
         )}
       </main>
 
-      {/* Action Modals */}
+      {/* Action Modals with Currency Dropdown */}
       <ActionModals
         accounts={accounts}
         categories={categories}
         activeModal={activeModal}
+        currency={currency}
         onClose={() => setActiveModal(null)}
         onRefresh={fetchData}
       />

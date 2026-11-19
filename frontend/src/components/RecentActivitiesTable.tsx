@@ -1,14 +1,17 @@
 import React, { useState } from 'react';
 import { Search, SlidersHorizontal, Check, Trash2 } from 'lucide-react';
+import { formatCurrencyAmount, type CurrencyCode } from '../lib/currency';
 import type { Transaction } from '../types';
 
 interface RecentActivitiesTableProps {
   transactions?: Transaction[];
+  currency?: CurrencyCode;
   onDeleteTransaction?: (id: string, accountId: string, amount: number, type: string) => void;
 }
 
 export const RecentActivitiesTable: React.FC<RecentActivitiesTableProps> = ({
   transactions = [],
+  currency = 'INR',
   onDeleteTransaction,
 }) => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -124,8 +127,8 @@ export const RecentActivitiesTable: React.FC<RecentActivitiesTableProps> = ({
                     </td>
 
                     <td className="py-3 px-3 text-xs font-bold text-[#141414]">
-                      {item.type === 'income' ? '+' : '-'}$
-                      {Number(item.amount).toLocaleString('en-US', { minimumFractionDigits: 2 })}
+                      {item.type === 'income' ? '+' : '-'}
+                      {formatCurrencyAmount(Number(item.amount), currency, true)}
                     </td>
 
                     <td className="py-3 pr-2 pl-3">
@@ -143,7 +146,7 @@ export const RecentActivitiesTable: React.FC<RecentActivitiesTableProps> = ({
                                 item.type
                               )
                             }
-                            className="p-1 text-[#9E9D97] hover:text-[#DC2626] transition cursor-pointer"
+                            className="p-1 text-[#9E9D97] hover:text-[#E74D28] transition cursor-pointer"
                             title="Delete transaction"
                           >
                             <Trash2 className="w-3.5 h-3.5" />

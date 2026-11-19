@@ -1,12 +1,15 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
 import { X, Plus, ArrowDownLeft, ArrowUpRight } from 'lucide-react';
+import { CurrencySelector } from './CurrencySelector';
+import { USD_TO_INR_RATE, type CurrencyCode } from '../lib/currency';
 import type { Account, Category } from '../types';
 
 interface ActionModalsProps {
   accounts: Account[];
   categories: Category[];
   activeModal: 'transfer' | 'request' | null;
+  currency?: CurrencyCode;
   onClose: () => void;
   onRefresh: () => void;
 }
@@ -15,14 +18,20 @@ export const ActionModals: React.FC<ActionModalsProps> = ({
   accounts,
   categories,
   activeModal,
+  currency = 'INR',
   onClose,
   onRefresh,
 }) => {
   const [amount, setAmount] = useState('');
+  const [modalCurrency, setModalCurrency] = useState<CurrencyCode>(currency);
   const [description, setDescription] = useState('');
   const [accountId, setAccountId] = useState(accounts[0]?.id || '');
   const [categoryId, setCategoryId] = useState('');
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    setModalCurrency(currency);
+  }, [currency, activeModal]);
 
   if (!activeModal) return null;
 
@@ -31,11 +40,14 @@ export const ActionModals: React.FC<ActionModalsProps> = ({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const numAmount = parseFloat(amount);
-    if (!accountId || isNaN(numAmount) || numAmount <= 0) {
+    const rawNum = parseFloat(amount);
+    if (!accountId || isNaN(rawNum) || rawNum <= 0) {
       alert('Please enter a valid amount and account');
       return;
     }
+
+    // Normalize amount to base storage (USD base: if entered in INR, normalize by USD_TO_INR_RATE)
+    const numAmount = modalCurrency === 'INR' ? parseFloat((rawNum / USD_TO_INR_RATE).toFixed(2)) : rawNum;
 
     setLoading(true);
     try {
@@ -97,16 +109,31 @@ export const ActionModals: React.FC<ActionModalsProps> = ({
 
         <form onSubmit={handleSubmit} className="space-y-4 mt-5">
           <div>
-            <label className="block text-xs font-semibold text-[#6B6A66] mb-1">Amount ($)</label>
-            <input
-              type="number"
-              step="0.01"
-              required
-              value={amount}
-              onChange={(e) => setAmount(e.target.value)}
-              placeholder="0.00"
-              className="w-full bg-[#FAFAF7] border border-[#EAE9E4] rounded-2xl px-4 py-2.5 text-xl font-bold text-[#141414] placeholder-[#9E9D97] focus:outline-none focus:border-[#141414]"
-            />
+            <div className="flex items-center justify-between mb-1">
+              <label className="block text-xs font-semibold text-[#6B6A66]">Amount</label>
+              <span className="text-[10px] text-[#9E9D97]">Select currency</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <CurrencySelector
+                value={modalCurrency}
+                onChange={setModalCurrency}
+                variant="input-addon"
+              />
+              <div className="relative flex-1">
+                <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-sm font-bold text-[#9E9D97]">
+                  {modalCurrency === 'INR' ? '₹' : '$'}
+                </span>
+                <input
+                  type="number"
+                  step="0.01"
+                  required
+                  value={amount}
+                  onChange={(e) => setAmount(e.target.value)}
+                  placeholder="0.00"
+                  className="w-full pl-8 pr-4 py-2.5 bg-[#FAFAF7] border border-[#EAE9E4] rounded-xl text-lg font-bold text-[#141414] placeholder-[#9E9D97] focus:outline-none focus:border-[#141414]"
+                />
+              </div>
+            </div>
           </div>
 
           <div>

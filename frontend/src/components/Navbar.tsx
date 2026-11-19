@@ -1,11 +1,15 @@
 import React from 'react';
 import { Search, Bell, HelpCircle, ChevronDown } from 'lucide-react';
+import { CurrencySelector } from './CurrencySelector';
+import type { CurrencyCode } from '../lib/currency';
 
 interface NavbarProps {
   activeTab?: string;
   onTabChange?: (tab: string) => void;
   userName?: string;
   userEmail?: string;
+  currency?: CurrencyCode;
+  onCurrencyChange?: (c: CurrencyCode) => void;
 }
 
 export const Navbar: React.FC<NavbarProps> = ({
@@ -13,6 +17,8 @@ export const Navbar: React.FC<NavbarProps> = ({
   onTabChange,
   userName = 'Amara Okello',
   userEmail = 'amara@kova.app',
+  currency = 'INR',
+  onCurrencyChange,
 }) => {
   const tabs = ['Overview', 'Activity', 'Account'];
 
@@ -47,10 +53,15 @@ export const Navbar: React.FC<NavbarProps> = ({
           })}
         </nav>
 
-        {/* Right: Actions & User Chip */}
-        <div className="flex items-center gap-3">
+        {/* Right: Actions, Currency Selector & User Chip */}
+        <div className="flex items-center gap-2.5">
+          {/* Global Currency Selector Dropdown */}
+          {onCurrencyChange && (
+            <CurrencySelector value={currency} onChange={onCurrencyChange} />
+          )}
+
           {/* Action Icons Pill */}
-          <div className="flex items-center gap-1 bg-[#FFFFFF] border border-[#E7E6DF] rounded-full px-2 py-1 shadow-sm">
+          <div className="hidden sm:flex items-center gap-1 bg-[#FFFFFF] border border-[#E7E6DF] rounded-full px-2 py-1 shadow-sm">
             <button className="p-1.5 rounded-full text-[#6B6A66] hover:text-[#141414] hover:bg-[#FAFAF7] transition cursor-pointer">
               <Search className="w-4 h-4" />
             </button>

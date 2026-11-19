@@ -1,9 +1,13 @@
 import React, { useState } from 'react';
 import { Search, Download, Check, Trash2, ArrowUpRight, ArrowDownLeft, Layers } from 'lucide-react';
+import { CurrencySelector } from './CurrencySelector';
+import { formatCurrencyAmount, type CurrencyCode } from '../lib/currency';
 import type { Transaction } from '../types';
 
 interface ActivityViewProps {
   transactions: Transaction[];
+  currency?: CurrencyCode;
+  onCurrencyChange?: (c: CurrencyCode) => void;
   onDeleteTransaction?: (id: string, accountId: string, amount: number, type: string) => void;
   onOpenTransfer?: () => void;
   onOpenRequest?: () => void;
@@ -11,6 +15,8 @@ interface ActivityViewProps {
 
 export const ActivityView: React.FC<ActivityViewProps> = ({
   transactions = [],
+  currency = 'INR',
+  onCurrencyChange,
   onDeleteTransaction,
   onOpenTransfer,
   onOpenRequest,
@@ -84,6 +90,9 @@ export const ActivityView: React.FC<ActivityViewProps> = ({
         </div>
 
         <div className="flex items-center gap-2.5">
+          {onCurrencyChange && (
+            <CurrencySelector value={currency} onChange={onCurrencyChange} />
+          )}
           <button
             onClick={onOpenTransfer}
             className="flex items-center gap-2 py-2.5 px-4 bg-[#141414] hover:bg-[#27272A] text-white text-xs font-semibold rounded-full shadow-sm transition cursor-pointer"
@@ -118,7 +127,7 @@ export const ActivityView: React.FC<ActivityViewProps> = ({
           </div>
           <div className="mt-4">
             <h3 className="text-[32px] sm:text-[36px] font-extrabold tracking-tight leading-tight text-white">
-              ${totalVolume.toLocaleString('en-US', { minimumFractionDigits: 2 })}
+              {formatCurrencyAmount(totalVolume, currency, true)}
             </h3>
             <p className="text-xs text-white/70 mt-1">{transactions.length} total entries</p>
           </div>
@@ -134,7 +143,7 @@ export const ActivityView: React.FC<ActivityViewProps> = ({
           </div>
           <div className="mt-4">
             <h3 className="text-[32px] sm:text-[36px] font-extrabold text-[#141414] tracking-tight leading-tight">
-              ${totalIncome.toLocaleString('en-US', { minimumFractionDigits: 2 })}
+              {formatCurrencyAmount(totalIncome, currency, true)}
             </h3>
             <div className="flex items-center gap-1.5 mt-1 text-xs">
               <span className="font-semibold text-[#16A34A]">↑ Inflow</span>
@@ -153,7 +162,7 @@ export const ActivityView: React.FC<ActivityViewProps> = ({
           </div>
           <div className="mt-4">
             <h3 className="text-[32px] sm:text-[36px] font-extrabold text-[#141414] tracking-tight leading-tight">
-              ${totalExpense.toLocaleString('en-US', { minimumFractionDigits: 2 })}
+              {formatCurrencyAmount(totalExpense, currency, true)}
             </h3>
             <div className="flex items-center gap-1.5 mt-1 text-xs">
               <span className="font-semibold text-[#E74D28]">↓ Outflow</span>
@@ -328,8 +337,8 @@ export const ActivityView: React.FC<ActivityViewProps> = ({
 
                       {/* Price */}
                       <td className="py-3.5 px-3 text-xs font-bold text-[#141414]">
-                        {item.type === 'income' ? '+' : '-'}$
-                        {Number(item.amount).toLocaleString('en-US', { minimumFractionDigits: 2 })}
+                        {item.type === 'income' ? '+' : '-'}
+                        {formatCurrencyAmount(Number(item.amount), currency, true)}
                       </td>
 
                       {/* Status & Delete Action */}
