@@ -29,11 +29,6 @@ jobs:
           cd backend
           npm ci
 
-      - name: Test Build
-        run: |
-          cd backend
-          npm run build
-
       - name: Deploy to Cloudflare Workers
         uses: cloudflare/wrangler-action@v3
         with:

@@ -1,5 +1,6 @@
 name = "personal-finance-api"
 main = "src/worker.js"
+account_id = "6fec937205af72c40195599d73b7e491"
 compatibility_date = "2026-08-04"
 compatibility_flags = ["nodejs_compat_v2"]
 
