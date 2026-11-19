@@ -1,5 +1,5 @@
 import React from 'react';
-import { Wallet, CreditCard, Coins, TrendingUp } from 'lucide-react';
+import { Wallet, CreditCard, Link2, TrendingUp } from 'lucide-react';
 import { getAmountFontSize } from '../lib/dynamicSize';
 
 interface MetricItem {
@@ -73,7 +73,7 @@ export const MetricCardsGrid: React.FC<MetricCardsGridProps> = ({
       case 'spending':
         return <CreditCard className={iconClass} />;
       case 'income':
-        return <Coins className={iconClass} />;
+        return <Link2 className={iconClass} />;
       default:
         return <TrendingUp className={iconClass} />;
     }
