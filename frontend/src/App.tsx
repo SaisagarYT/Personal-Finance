@@ -6,7 +6,6 @@ import { MetricCardsGrid } from './components/MetricCardsGrid';
 import { IncomeChartWithLimitCard } from './components/IncomeChartWithLimitCard';
 import { RecentActivitiesTable } from './components/RecentActivitiesTable';
 import { ActivityView } from './components/ActivityView';
-import { ReportsView } from './components/ReportsView';
 import { AccountSettingsView } from './components/AccountSettingsView';
 import { ActionModals } from './components/ActionModals';
 import { AuthView } from './components/AuthView';
@@ -224,15 +223,7 @@ export function App() {
           />
         )}
 
-        {/* TAB 3: REPORTS (Visual Analytics Summary) */}
-        {activeTab === 'Reports' && (
-          <ReportsView
-            transactions={transactions}
-            accounts={accounts}
-          />
-        )}
-
-        {/* TAB 4: ACCOUNT (User Profile & Wallets Management) */}
+        {/* TAB 3: ACCOUNT (User Profile & Wallets Management) */}
         {activeTab === 'Account' && (
           <AccountSettingsView
             accounts={accounts}

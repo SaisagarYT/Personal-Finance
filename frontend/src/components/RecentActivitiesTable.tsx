@@ -20,12 +20,10 @@ export const RecentActivitiesTable: React.FC<RecentActivitiesTableProps> = ({
 
   const getInitialStyle = (index: number) => {
     const styles = [
-      { bg: 'bg-[#E0F2FE]', color: 'text-[#0284C7]' },
-      { bg: 'bg-[#EDE9FE]', color: 'text-[#7C3AED]' },
-      { bg: 'bg-[#F3E8FF]', color: 'text-[#9333EA]' },
-      { bg: 'bg-[#FEF3C7]', color: 'text-[#D97706]' },
-      { bg: 'bg-[#FEE2E2]', color: 'text-[#DC2626]' },
-      { bg: 'bg-[#DCFCE7]', color: 'text-[#16A34A]' },
+      { bg: 'bg-[#141414]', color: 'text-white border-transparent' },
+      { bg: 'bg-[#FAFAF7]', color: 'text-[#141414] border-[#EAE9E4]' },
+      { bg: 'bg-[#E74D28]', color: 'text-white border-transparent' },
+      { bg: 'bg-[#F3F2ED]', color: 'text-[#141414] border-[#E7E6DF]' },
     ];
     return styles[index % styles.length];
   };
@@ -112,7 +110,7 @@ export const RecentActivitiesTable: React.FC<RecentActivitiesTableProps> = ({
                     <td className="py-3 px-3">
                       <div className="flex items-center gap-2.5">
                         <span
-                          className={`w-6 h-6 rounded-md flex items-center justify-center font-bold text-[11px] ${style.bg} ${style.color}`}
+                          className={`w-6 h-6 rounded-md flex items-center justify-center font-bold text-[11px] border ${style.bg} ${style.color}`}
                         >
                           {initial}
                         </span>

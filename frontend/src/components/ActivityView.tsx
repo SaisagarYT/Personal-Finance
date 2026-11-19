@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Search, Download, Check, Trash2, ArrowUpRight, ArrowDownLeft } from 'lucide-react';
+import { Search, Download, Check, Trash2, ArrowUpRight, ArrowDownLeft, Layers } from 'lucide-react';
 import type { Transaction } from '../types';
 
 interface ActivityViewProps {
@@ -25,12 +25,10 @@ export const ActivityView: React.FC<ActivityViewProps> = ({
 
   const getInitialStyle = (index: number) => {
     const styles = [
-      { bg: 'bg-[#E0F2FE]', color: 'text-[#0284C7]' },
-      { bg: 'bg-[#EDE9FE]', color: 'text-[#7C3AED]' },
-      { bg: 'bg-[#F3E8FF]', color: 'text-[#9333EA]' },
-      { bg: 'bg-[#FEF3C7]', color: 'text-[#D97706]' },
-      { bg: 'bg-[#FEE2E2]', color: 'text-[#DC2626]' },
-      { bg: 'bg-[#DCFCE7]', color: 'text-[#16A34A]' },
+      { bg: 'bg-[#141414]', color: 'text-white border-transparent' },
+      { bg: 'bg-[#FAFAF7]', color: 'text-[#141414] border-[#EAE9E4]' },
+      { bg: 'bg-[#E74D28]', color: 'text-white border-transparent' },
+      { bg: 'bg-[#F3F2ED]', color: 'text-[#141414] border-[#E7E6DF]' },
     ];
     return styles[index % styles.length];
   };
@@ -108,35 +106,59 @@ export const ActivityView: React.FC<ActivityViewProps> = ({
         </div>
       </div>
 
-      {/* Top 3 Summary Cards */}
+      {/* Top 3 Summary Cards - 100% Theme Consistent with Dashboard */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
-        <div className="bg-[#FFFFFF] border border-[#E7E6DF] rounded-[28px] p-6 shadow-sm flex flex-col justify-between">
-          <span className="text-xs font-medium text-[#6B6A66]">Total Volume</span>
-          <div className="mt-3">
-            <h3 className="text-[30px] sm:text-[34px] font-extrabold text-[#141414] tracking-tight leading-tight">
+        {/* Total Volume - Hero Dark Ink Card */}
+        <div className="bg-[#141414] text-white rounded-[28px] p-6 shadow-sm flex flex-col justify-between">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-medium text-white/80">Total Volume</span>
+            <div className="w-8 h-8 rounded-full bg-white/15 flex items-center justify-center">
+              <Layers className="w-4 h-4 text-white" />
+            </div>
+          </div>
+          <div className="mt-4">
+            <h3 className="text-[32px] sm:text-[36px] font-extrabold tracking-tight leading-tight text-white">
               ${totalVolume.toLocaleString('en-US', { minimumFractionDigits: 2 })}
             </h3>
-            <p className="text-xs text-[#9E9D97] mt-1">{transactions.length} total entries</p>
+            <p className="text-xs text-white/70 mt-1">{transactions.length} total entries</p>
           </div>
         </div>
 
+        {/* Total Inflow */}
         <div className="bg-[#FFFFFF] border border-[#E7E6DF] rounded-[28px] p-6 shadow-sm flex flex-col justify-between">
-          <span className="text-xs font-medium text-[#6B6A66]">Total Inflow (Income)</span>
-          <div className="mt-3">
-            <h3 className="text-[30px] sm:text-[34px] font-extrabold text-[#16A34A] tracking-tight leading-tight">
-              +${totalIncome.toLocaleString('en-US', { minimumFractionDigits: 2 })}
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-medium text-[#6B6A66]">Total Inflow</span>
+            <div className="w-8 h-8 rounded-full bg-[#FAFAF7] border border-[#EAE9E4] flex items-center justify-center">
+              <ArrowDownLeft className="w-4 h-4 text-[#141414]" />
+            </div>
+          </div>
+          <div className="mt-4">
+            <h3 className="text-[32px] sm:text-[36px] font-extrabold text-[#141414] tracking-tight leading-tight">
+              ${totalIncome.toLocaleString('en-US', { minimumFractionDigits: 2 })}
             </h3>
-            <p className="text-xs text-[#16A34A] font-semibold mt-1">↑ Active cashflow</p>
+            <div className="flex items-center gap-1.5 mt-1 text-xs">
+              <span className="font-semibold text-[#16A34A]">↑ Inflow</span>
+              <span className="text-[#6B6A66]">active deposits</span>
+            </div>
           </div>
         </div>
 
+        {/* Total Outflow */}
         <div className="bg-[#FFFFFF] border border-[#E7E6DF] rounded-[28px] p-6 shadow-sm flex flex-col justify-between">
-          <span className="text-xs font-medium text-[#6B6A66]">Total Outflow (Expenses)</span>
-          <div className="mt-3">
-            <h3 className="text-[30px] sm:text-[34px] font-extrabold text-[#E74D28] tracking-tight leading-tight">
-              -${totalExpense.toLocaleString('en-US', { minimumFractionDigits: 2 })}
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-medium text-[#6B6A66]">Total Outflow</span>
+            <div className="w-8 h-8 rounded-full bg-[#FAFAF7] border border-[#EAE9E4] flex items-center justify-center">
+              <ArrowUpRight className="w-4 h-4 text-[#141414]" />
+            </div>
+          </div>
+          <div className="mt-4">
+            <h3 className="text-[32px] sm:text-[36px] font-extrabold text-[#141414] tracking-tight leading-tight">
+              ${totalExpense.toLocaleString('en-US', { minimumFractionDigits: 2 })}
             </h3>
-            <p className="text-xs text-[#6B6A66] mt-1">All debit operations</p>
+            <div className="flex items-center gap-1.5 mt-1 text-xs">
+              <span className="font-semibold text-[#E74D28]">↓ Outflow</span>
+              <span className="text-[#6B6A66]">total expenses</span>
+            </div>
           </div>
         </div>
       </div>
@@ -284,7 +306,7 @@ export const ActivityView: React.FC<ActivityViewProps> = ({
                       <td className="py-3.5 px-3">
                         <div className="flex items-center gap-3">
                           <span
-                            className={`w-7 h-7 rounded-lg flex items-center justify-center font-bold text-xs ${style.bg} ${style.color} shrink-0`}
+                            className={`w-7 h-7 rounded-lg flex items-center justify-center font-bold text-xs border ${style.bg} ${style.color} shrink-0`}
                           >
                             {initial}
                           </span>
@@ -326,7 +348,7 @@ export const ActivityView: React.FC<ActivityViewProps> = ({
                                   item.type
                                 )
                               }
-                              className="p-1.5 text-[#9E9D97] hover:text-[#DC2626] transition cursor-pointer"
+                              className="p-1.5 text-[#9E9D97] hover:text-[#E74D28] transition cursor-pointer"
                               title="Delete transaction"
                             >
                               <Trash2 className="w-3.5 h-3.5" />

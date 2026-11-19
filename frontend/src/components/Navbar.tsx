@@ -14,7 +14,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   userName = 'Amara Okello',
   userEmail = 'amara@kova.app',
 }) => {
-  const tabs = ['Overview', 'Activity', 'Reports', 'Account'];
+  const tabs = ['Overview', 'Activity', 'Account'];
 
   return (
     <header className="w-full pt-4 pb-3 px-4 sm:px-8">
@@ -63,7 +63,10 @@ export const Navbar: React.FC<NavbarProps> = ({
           </div>
 
           {/* User Profile Chip */}
-          <div className="flex items-center gap-2 bg-[#FFFFFF] border border-[#E7E6DF] rounded-full pl-1 pr-3 py-1 shadow-sm cursor-pointer hover:border-[#D8D6CE] transition">
+          <div
+            onClick={() => onTabChange?.('Account')}
+            className="flex items-center gap-2 bg-[#FFFFFF] border border-[#E7E6DF] rounded-full pl-1 pr-3 py-1 shadow-sm cursor-pointer hover:border-[#D8D6CE] transition"
+          >
             <div className="w-8 h-8 rounded-full bg-[#141414] text-white text-[11px] font-bold flex items-center justify-center">
               AO
             </div>

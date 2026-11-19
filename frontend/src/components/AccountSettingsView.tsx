@@ -96,14 +96,16 @@ export const AccountSettingsView: React.FC<AccountSettingsViewProps> = ({
               </div>
               <div className="w-[1px] h-8 bg-[#F0EFEA]" />
               <div>
-                <p className="font-extrabold text-[#16A34A] text-base">Active</p>
+                <p className="font-extrabold text-[#141414] text-base flex items-center justify-center gap-1.5">
+                  <span className="w-2 h-2 rounded-full bg-[#16A34A]" /> Active
+                </p>
                 <p className="text-[#9E9D97] text-[11px]">Cloud Synced</p>
               </div>
             </div>
 
             <button
               onClick={onSignOut}
-              className="w-full mt-6 py-2.5 px-4 bg-[#FAFAF7] hover:bg-[#FEE2E2] hover:text-[#DC2626] border border-[#E7E6DF] rounded-full text-xs font-semibold text-[#141414] transition flex items-center justify-center gap-2 cursor-pointer"
+              className="w-full mt-6 py-2.5 px-4 bg-[#FAFAF7] hover:bg-[#F3F2ED] hover:border-[#141414] hover:text-[#E74D28] border border-[#E7E6DF] rounded-full text-xs font-semibold text-[#141414] transition flex items-center justify-center gap-2 cursor-pointer"
             >
               <LogOut className="w-3.5 h-3.5" /> Sign Out
             </button>
@@ -112,7 +114,7 @@ export const AccountSettingsView: React.FC<AccountSettingsViewProps> = ({
           {/* Quick Info Box */}
           <div className="bg-[#FAFAF7] border border-[#EAE9E4] rounded-[24px] p-5 text-xs text-[#6B6A66] space-y-2">
             <div className="flex items-center gap-2 text-[#141414] font-semibold">
-              <Shield className="w-4 h-4 text-[#16A34A]" />
+              <Shield className="w-4 h-4 text-[#E74D28]" />
               <span>Security & Encryption</span>
             </div>
             <p className="text-[11px] leading-relaxed text-[#9E9D97]">
@@ -229,7 +231,7 @@ export const AccountSettingsView: React.FC<AccountSettingsViewProps> = ({
                       </p>
                       <button
                         onClick={() => handleDeleteAccount(acc.id)}
-                        className="p-1.5 text-[#9E9D97] hover:text-[#DC2626] transition cursor-pointer"
+                        className="p-1.5 text-[#9E9D97] hover:text-[#E74D28] transition cursor-pointer"
                         title="Delete account"
                       >
                         <Trash2 className="w-3.5 h-3.5" />
