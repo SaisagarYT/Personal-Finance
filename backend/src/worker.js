@@ -1,10 +1,11 @@
+import { createServer } from 'node:http';
 import { httpServerHandler } from 'cloudflare:node';
 import app from './app.js';
 
-const WORKER_PORT = 3000;
-app.listen(WORKER_PORT);
+const server = createServer(app);
+server.listen(3000);
 
-const workerBridge = httpServerHandler({ port: WORKER_PORT });
+const workerBridge = httpServerHandler(server);
 
 export default {
   async fetch(request, env, ctx) {
