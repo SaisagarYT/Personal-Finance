@@ -5,6 +5,9 @@ import { TotalBalanceCard } from './components/TotalBalanceCard';
 import { MetricCardsGrid } from './components/MetricCardsGrid';
 import { IncomeChartWithLimitCard } from './components/IncomeChartWithLimitCard';
 import { RecentActivitiesTable } from './components/RecentActivitiesTable';
+import { ActivityView } from './components/ActivityView';
+import { ReportsView } from './components/ReportsView';
+import { AccountSettingsView } from './components/AccountSettingsView';
 import { ActionModals } from './components/ActionModals';
 import { AuthView } from './components/AuthView';
 import type { Account, Category, Transaction } from './types';
@@ -43,18 +46,21 @@ export function App() {
     if (!session?.user || !isSupabaseConfigured) return;
 
     try {
+      // 1. Fetch Accounts
       const { data: accData } = await supabase
         .from('accounts')
         .select('*')
         .order('created_at', { ascending: false });
       if (accData) setAccounts(accData);
 
+      // 2. Fetch Categories
       const { data: catData } = await supabase
         .from('categories')
         .select('*')
         .order('name');
       if (catData) setCategories(catData);
 
+      // 3. Fetch Transactions
       const { data: txData } = await supabase
         .from('transactions')
         .select(`
@@ -63,7 +69,7 @@ export function App() {
           categories ( name, icon, color )
         `)
         .order('transaction_date', { ascending: false })
-        .limit(20);
+        .limit(50);
       if (txData) setTransactions(txData);
     } catch (e) {
       console.error(e);
@@ -95,6 +101,11 @@ export function App() {
     }
   };
 
+  const handleSignOut = async () => {
+    await supabase.auth.signOut();
+    setSession(null);
+  };
+
   if (authLoading) {
     return (
       <div className="min-h-screen bg-[#F3F2ED] flex items-center justify-center text-xs font-semibold text-[#6B6A66]">
@@ -103,7 +114,7 @@ export function App() {
     );
   }
 
-  // If user is not authenticated, display the exact login UI
+  // If user is not authenticated, show fullscreen AuthView
   if (!session?.user) {
     return <AuthView onAuthSuccess={() => setAuthLoading(false)} />;
   }
@@ -143,65 +154,94 @@ export function App() {
   const currentSpentOfLimit = monthExpenses > 0 ? `$${monthExpenses.toFixed(2)}` : '$1,400.00';
   const spentPercent = Math.min(Math.round((monthExpenses / 5500) * 100) || 26, 100);
 
+  const currentUserName = session?.user?.user_metadata?.full_name || 'Amara Okello';
+  const currentUserEmail = session?.user?.email || 'amara@kova.app';
+
   return (
     <div className="min-h-screen bg-[#F3F2ED] text-[#141414] flex flex-col font-sans antialiased pb-12">
-      {/* 1. Header Navigation Bar */}
+      {/* 1. Header Navigation Bar with Tab Switcher */}
       <Navbar
         activeTab={activeTab}
         onTabChange={setActiveTab}
-        userName={session?.user?.user_metadata?.full_name || 'Amara Okello'}
-        userEmail={session?.user?.email || 'amara@kova.app'}
+        userName={currentUserName}
+        userEmail={currentUserEmail}
       />
 
-      {/* Main Content Area */}
+      {/* Main Content View Switcher */}
       <main className="max-w-7xl w-full mx-auto px-4 sm:px-8 py-6 space-y-6">
-        {/* Welcome Section Header */}
-        <div>
-          <h1 className="text-2xl sm:text-3xl font-extrabold text-[#141414] tracking-tight">
-            Good morning, {session?.user?.user_metadata?.full_name?.split(' ')[0] || 'Amara'}
-          </h1>
-          <p className="text-xs sm:text-sm text-[#6B6A66] mt-1">
-            Here's where your money stands today — balances, cash flow and recent activity.
-          </p>
-        </div>
+        {/* TAB 1: OVERVIEW (Main Dashboard) */}
+        {activeTab === 'Overview' && (
+          <>
+            <div>
+              <h1 className="text-2xl sm:text-3xl font-extrabold text-[#141414] tracking-tight">
+                Good morning, {currentUserName.split(' ')[0]}
+              </h1>
+              <p className="text-xs sm:text-sm text-[#6B6A66] mt-1">
+                Here's where your money stands today — balances, cash flow and recent activity.
+              </p>
+            </div>
 
-        {/* Master 60/40 Asymmetric 2-Column Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-          {/* ================= LEFT WIDER COLUMN (~58-60%, 7 of 12 cols) ================= */}
-          <div className="lg:col-span-7 flex flex-col space-y-6">
-            {/* 1. Total Balance Card */}
-            <TotalBalanceCard
-              balance={totalBalanceFormatted}
-              wallets={walletsData}
-              onTransfer={() => setActiveModal('transfer')}
-              onRequest={() => setActiveModal('request')}
-            />
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+              {/* Left Column (7 of 12) */}
+              <div className="lg:col-span-7 flex flex-col space-y-6">
+                <TotalBalanceCard
+                  balance={totalBalanceFormatted}
+                  wallets={walletsData}
+                  onTransfer={() => setActiveModal('transfer')}
+                  onRequest={() => setActiveModal('request')}
+                />
+                <RecentActivitiesTable
+                  transactions={transactions.length > 0 ? transactions : undefined}
+                  onDeleteTransaction={handleDeleteTransaction}
+                />
+              </div>
 
-            {/* 2. Recent Activities Table */}
-            <RecentActivitiesTable
-              transactions={transactions.length > 0 ? transactions : undefined}
-              onDeleteTransaction={handleDeleteTransaction}
-            />
-          </div>
+              {/* Right Column (5 of 12) */}
+              <div className="lg:col-span-5 flex flex-col space-y-6">
+                <MetricCardsGrid
+                  earnings={earningsFormatted}
+                  spending={spendingFormatted}
+                  income={incomeFormatted}
+                  revenue={revenueFormatted}
+                />
+                <IncomeChartWithLimitCard
+                  spentAmount={currentSpentOfLimit}
+                  totalLimit="$5,500.00"
+                  spentPercentage={spentPercent}
+                />
+              </div>
+            </div>
+          </>
+        )}
 
-          {/* ================= RIGHT COMPACT COLUMN (~40-42%, 5 of 12 cols) ================= */}
-          <div className="lg:col-span-5 flex flex-col space-y-6">
-            {/* 1. 2x2 Metric Cards Grid */}
-            <MetricCardsGrid
-              earnings={earningsFormatted}
-              spending={spendingFormatted}
-              income={incomeFormatted}
-              revenue={revenueFormatted}
-            />
+        {/* TAB 2: ACTIVITY (Full Transaction Ledger & Filters) */}
+        {activeTab === 'Activity' && (
+          <ActivityView
+            transactions={transactions}
+            onDeleteTransaction={handleDeleteTransaction}
+            onOpenTransfer={() => setActiveModal('transfer')}
+            onOpenRequest={() => setActiveModal('request')}
+          />
+        )}
 
-            {/* 2. Total Income Profit & Loss Chart + Monthly Spending Limit */}
-            <IncomeChartWithLimitCard
-              spentAmount={currentSpentOfLimit}
-              totalLimit="$5,500.00"
-              spentPercentage={spentPercent}
-            />
-          </div>
-        </div>
+        {/* TAB 3: REPORTS (Visual Analytics Summary) */}
+        {activeTab === 'Reports' && (
+          <ReportsView
+            transactions={transactions}
+            accounts={accounts}
+          />
+        )}
+
+        {/* TAB 4: ACCOUNT (User Profile & Wallets Management) */}
+        {activeTab === 'Account' && (
+          <AccountSettingsView
+            accounts={accounts}
+            userName={currentUserName}
+            userEmail={currentUserEmail}
+            onRefresh={fetchData}
+            onSignOut={handleSignOut}
+          />
+        )}
       </main>
 
       {/* Action Modals */}
