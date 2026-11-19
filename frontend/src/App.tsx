@@ -209,6 +209,35 @@ export function App() {
     ? Math.min(Math.round((monthExpensesRaw / monthlyBudgetLimitNumber) * 100), 100)
     : 0;
 
+  // Dynamically compute the last 6 months of Profit & Loss for the chart
+  const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  const now = new Date();
+  const pastMonths: { key: string; month: string }[] = [];
+  for (let i = 5; i >= 0; i--) {
+    const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+    const key = d.toISOString().slice(0, 7);
+    pastMonths.push({ key, month: monthNames[d.getMonth()] });
+  }
+
+  const chartData = pastMonths.map(({ key, month }) => {
+    const txsInMonth = transactions.filter((t) => t.transaction_date.startsWith(key));
+    const profitRaw = txsInMonth
+      .filter((t) => t.type === 'income')
+      .reduce((sum, t) => sum + convertCurrency(parseFloat(t.amount as any || 0), getTxCurrency(t), currency), 0);
+    const lossRaw = txsInMonth
+      .filter((t) => t.type === 'expense')
+      .reduce((sum, t) => sum + convertCurrency(parseFloat(t.amount as any || 0), getTxCurrency(t), currency), 0);
+
+    return {
+      month,
+      profit: profitRaw,
+      loss: lossRaw,
+      total: profitRaw + lossRaw,
+      profitFormatted: formatCurrencyAmount(profitRaw, currency, currency),
+      lossFormatted: formatCurrencyAmount(lossRaw, currency, currency),
+    };
+  });
+
   // Real user identity from authenticated Supabase session
   const currentUserName = session?.user?.user_metadata?.full_name ||
                           (session?.user?.email ? session.user.email.split('@')[0] : 'My Account');
@@ -279,6 +308,8 @@ export function App() {
                   spentAmount={currentSpentOfLimit}
                   totalLimit={totalLimitFormatted}
                   spentPercentage={spentPercent}
+                  chartData={chartData}
+                  currency={currency}
                 />
               </div>
             </div>
