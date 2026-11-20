@@ -24,12 +24,12 @@ const NOTCHED_CARD_PATH = `
   M 24 0
   H ${CARD_WIDTH - 24}
   A 24 24 0 0 1 ${CARD_WIDTH} 24
-  V 128
-  A 24 24 0 0 1 ${CARD_WIDTH - 24} 152
-  H 216
-  A 20 20 0 0 0 196 172
-  V 190
-  A 24 24 0 0 1 172 214
+  V 136
+  A 24 24 0 0 1 ${CARD_WIDTH - 24} 160
+  H 236
+  A 16 16 0 0 0 220 176
+  V 196
+  A 18 18 0 0 1 202 214
   H 24
   A 24 24 0 0 1 0 190
   V 24
@@ -404,35 +404,35 @@ const styles = StyleSheet.create({
   /* Add Card Pill Button */
   addCardButton: {
     position: 'absolute',
-    bottom: 12,
+    bottom: 0,
     right: 0,
-    height: 48,
-    borderRadius: 24,
+    height: 44,
+    borderRadius: 22,
     backgroundColor: '#0C0C0D',
     flexDirection: 'row',
     alignItems: 'center',
-    paddingLeft: 12,
-    paddingRight: 18,
-    gap: 8,
+    paddingLeft: 8,
+    paddingRight: 15,
+    gap: 7,
     shadowColor: '#000000',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.2,
+    shadowOpacity: 0.16,
     shadowRadius: 8,
     elevation: 4,
     borderWidth: 1,
     borderColor: 'rgba(255,255,255,0.1)',
   },
   addCardIconCircle: {
-    width: 26,
-    height: 26,
-    borderRadius: 13,
+    width: 28,
+    height: 28,
+    borderRadius: 14,
     backgroundColor: '#FFFFFF',
     alignItems: 'center',
     justifyContent: 'center',
   },
   addCardText: {
     color: '#FFFFFF',
-    fontSize: 13,
+    fontSize: 12.5,
     fontWeight: '700',
     letterSpacing: -0.2,
   },
