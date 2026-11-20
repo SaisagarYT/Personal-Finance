@@ -61,7 +61,7 @@ export const LIGHT_THEME: ThemeColors = {
   surface: '#FFFFFF',
   surfaceSubtle: '#FAFAF7',
   cardContainer: '#FFFFFF',
-  cardContainerBorder: 'transparent',
+  cardContainerBorder: '#EAE9E2',
   borderSubtle: '#E7E6DF',
   borderDelicate: '#EAE9E4',
 
@@ -75,7 +75,8 @@ export const LIGHT_THEME: ThemeColors = {
 
   goldChampagneStart: '#F9D678',
   goldChampagneEnd: '#E6B84F',
-  primaryCardGradient: ['#222226', '#141416', '#0B0B0D'],
+  // Royal purple gradient in both modes matching Johannes Solhaug reference
+  primaryCardGradient: ['#A244E3', '#8328D4', '#5916A8'],
   addCardBg: '#0C0C0D',
   addCardBorder: 'rgba(255,255,255,0.1)',
   addCardIconBg: '#FFFFFF',
@@ -87,12 +88,14 @@ export const LIGHT_THEME: ThemeColors = {
   iconColor: '#141414',
   avatarInnerBg: '#1E1E22',
 
-  actionPillBg: '#FFFFFF',
+  // Soft circular disc matching reference (flat, no 3D bevels)
+  actionPillBg: '#F0EFEA',
   actionPillBorder: '#ECEAE2',
-  actionPillLip: '#E2E0D8',
+  actionPillLip: '#F0EFEA',
   actionPillLabel: '#141414',
 
-  expenseIconCircleBg: '#F4F3EE',
+  // Expense circular disc matching action pill
+  expenseIconCircleBg: '#F0EFEA',
   expenseIconColor: '#141414',
 
   dockShellBg: '#0C0C0D',
@@ -105,11 +108,11 @@ export const LIGHT_THEME: ThemeColors = {
 
 export const DARK_THEME: ThemeColors = {
   isDark: true,
-  canvas: '#010101', // Pitch Black OLED canvas matching reference
+  canvas: '#010101', // Pitch Black OLED
   surface: '#161616',
   surfaceSubtle: '#1C1C1E',
   cardContainer: '#161616', // Sampled directly from reference #161616
-  cardContainerBorder: 'rgba(255, 255, 255, 0.07)',
+  cardContainerBorder: '#262628',
   borderSubtle: '#27272A',
   borderDelicate: '#1F1F23',
 
@@ -123,29 +126,31 @@ export const DARK_THEME: ThemeColors = {
 
   goldChampagneStart: '#F5C544',
   goldChampagneEnd: '#DDA326',
-  // Luminous Royal Purple gradient sampled from reference #9D40D9 in dark mode
+  // Royal purple gradient in both modes matching Johannes Solhaug reference
   primaryCardGradient: ['#A244E3', '#8328D4', '#5916A8'],
-  addCardBg: '#1A1A1C',
+  addCardBg: '#0C0C0D',
   addCardBorder: 'rgba(255,255,255,0.14)',
   addCardIconBg: '#FFFFFF',
   addCardIconColor: '#000000',
   addCardTextColor: '#FFFFFF',
 
-  iconButtonBg: '#18181A',
+  iconButtonBg: '#161616',
   iconButtonBorder: '#27272A',
   iconColor: '#FFFFFF',
   avatarInnerBg: '#27272A',
 
-  actionPillBg: '#222225',
-  actionPillBorder: '#2D2D32',
-  actionPillLip: '#141416',
+  // Soft dark circular disc matching reference (flat, no 3D bevels)
+  actionPillBg: '#08080A',
+  actionPillBorder: '#1E1E22',
+  actionPillLip: '#08080A',
   actionPillLabel: '#FFFFFF',
 
-  expenseIconCircleBg: '#27272A', // Sampled directly from reference
+  // Expense circular disc matching action pill
+  expenseIconCircleBg: '#08080A',
   expenseIconColor: '#FFFFFF',
 
-  dockShellBg: '#141416',
-  dockShellBorder: '#27272A',
+  dockShellBg: '#0C0C0D',
+  dockShellBorder: '#242426',
   dockActivePillBg: '#FFFFFF',
   dockActivePillText: '#0C0C0D',
   dockInactiveTabBg: 'rgba(255, 255, 255, 0.09)',

@@ -1,6 +1,5 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
 import { ArrowUpRight, ArrowDownLeft, CreditCard, MoreHorizontal } from 'lucide-react-native';
 import { useAppTheme } from '../theme/colors';
 
@@ -53,7 +52,6 @@ export const ActionPills: React.FC<ActionPillsProps> = ({
         {
           backgroundColor: theme.cardContainer,
           borderColor: theme.cardContainerBorder,
-          borderWidth: theme.isDark ? 1 : 0,
         },
       ]}
     >
@@ -64,25 +62,14 @@ export const ActionPills: React.FC<ActionPillsProps> = ({
               activeOpacity={0.8}
               onPress={action.onPress}
               style={[
-                styles.buttonShadowWrapper,
-                { backgroundColor: theme.actionPillLip },
+                styles.circleButton,
+                {
+                  backgroundColor: theme.actionPillBg,
+                  borderColor: theme.actionPillBorder,
+                },
               ]}
             >
-              {/* SaaS 3D Tactile Disc Surface */}
-              <LinearGradient
-                colors={theme.isDark ? ['#2A2A2E', '#1C1C1F'] : ['#FFFFFF', '#F8F7F3']}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 0, y: 1 }}
-                style={[
-                  styles.circleButton,
-                  {
-                    borderColor: theme.actionPillBorder,
-                    borderTopColor: theme.isDark ? '#3D3D44' : '#FFFFFF',
-                  },
-                ]}
-              >
-                {action.icon}
-              </LinearGradient>
+              {action.icon}
             </TouchableOpacity>
             <Text style={[styles.actionLabel, { color: theme.actionPillLabel }]}>
               {action.label}
@@ -99,13 +86,14 @@ const styles = StyleSheet.create({
     marginHorizontal: 20,
     marginTop: 20,
     borderRadius: 28,
+    borderWidth: 1,
     paddingVertical: 16,
     paddingHorizontal: 8,
     shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.04,
-    shadowRadius: 10,
-    elevation: 2,
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.02,
+    shadowRadius: 4,
+    elevation: 1,
   },
   container: {
     width: '100%',
@@ -117,21 +105,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 8,
   },
-  /* SaaS 3D Tactile Keycap Shadow & Bottom Lip */
-  buttonShadowWrapper: {
-    width: 54,
-    height: 54,
-    borderRadius: 27,
-    shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.08,
-    shadowRadius: 2,
-    elevation: 2,
-    paddingBottom: 2.5, // Creates the physical 3D thickness
-  },
+  /* Clean Apple Wallet Circular Disc (Flat, minimal, matching symbol background) */
   circleButton: {
-    flex: 1,
-    borderRadius: 27,
+    width: 52,
+    height: 52,
+    borderRadius: 26,
     borderWidth: 1,
     alignItems: 'center',
     justifyContent: 'center',

@@ -78,7 +78,6 @@ export const ExpenseLedger: React.FC<ExpenseLedgerProps> = ({
         {
           backgroundColor: theme.cardContainer,
           borderColor: theme.cardContainerBorder,
-          borderWidth: theme.isDark ? 1 : 0,
         },
       ]}
     >
@@ -133,16 +132,17 @@ export const ExpenseLedger: React.FC<ExpenseLedgerProps> = ({
 const styles = StyleSheet.create({
   card: {
     borderRadius: 28,
+    borderWidth: 1,
     marginHorizontal: 20,
     marginTop: 18,
     paddingHorizontal: 20,
     paddingTop: 22,
     paddingBottom: 22,
     shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.04,
-    shadowRadius: 10,
-    elevation: 2,
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.02,
+    shadowRadius: 4,
+    elevation: 1,
   },
   headerRow: {
     flexDirection: 'row',
