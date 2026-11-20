@@ -6,9 +6,10 @@ import { CardStack } from './src/components/CardStack';
 import { ActionPills } from './src/components/ActionPills';
 import { ExpenseLedger } from './src/components/ExpenseLedger';
 import { BottomCapsuleDock, NavTabId } from './src/components/BottomCapsuleDock';
-import { SINANCE_COLORS } from './src/theme/colors';
+import { useAppTheme } from './src/theme/colors';
 
 export default function App() {
+  const theme = useAppTheme();
   const [currency, setCurrency] = useState<'USD' | 'INR'>('USD');
   const [activeTab, setActiveTab] = useState<NavTabId>('home');
 
@@ -93,12 +94,12 @@ export default function App() {
   ];
 
   return (
-    <View style={styles.outerWrapper}>
-      <SafeAreaView style={styles.safeArea}>
-        <StatusBar style="dark" />
+    <View style={[styles.outerWrapper, { backgroundColor: theme.canvas }]}>
+      <SafeAreaView style={[styles.safeArea, { backgroundColor: theme.canvas }]}>
+        <StatusBar style={theme.isDark ? 'light' : 'dark'} />
         <View style={styles.mainContainer}>
           <ScrollView
-            style={styles.container}
+            style={[styles.container, { backgroundColor: theme.canvas }]}
             contentContainerStyle={styles.contentContainer}
             showsVerticalScrollIndicator={false}
           >
@@ -159,7 +160,6 @@ export default function App() {
 const styles = StyleSheet.create({
   outerWrapper: {
     flex: 1,
-    backgroundColor: SINANCE_COLORS.canvas,
     alignItems: 'center',
     justifyContent: 'center',
     width: '100%',
@@ -168,7 +168,6 @@ const styles = StyleSheet.create({
     flex: 1,
     width: '100%',
     maxWidth: 420,
-    backgroundColor: SINANCE_COLORS.canvas,
     paddingTop: Platform.OS === 'android' ? RNStatusBar.currentHeight : 0,
   },
   mainContainer: {
@@ -178,7 +177,6 @@ const styles = StyleSheet.create({
   },
   container: {
     flex: 1,
-    backgroundColor: SINANCE_COLORS.canvas,
     width: '100%',
   },
   contentContainer: {

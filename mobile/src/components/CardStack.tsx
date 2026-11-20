@@ -3,7 +3,7 @@ import { View, Text, TouchableOpacity, StyleSheet, Animated } from 'react-native
 import Svg, { Path, Defs, LinearGradient as SvgLinearGradient, Stop } from 'react-native-svg';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Plus } from 'lucide-react-native';
-import { SINANCE_COLORS } from '../theme/colors';
+import { SINANCE_COLORS, useAppTheme } from '../theme/colors';
 
 interface CardStackProps {
   balance?: string;
@@ -47,6 +47,8 @@ export const CardStack: React.FC<CardStackProps> = ({
   onPressAddCard,
   onPressCard,
 }) => {
+  const theme = useAppTheme();
+
   // Spring Physics for Upper Gold Card and Primary Card
   const upperElasticAnim = useRef(new Animated.Value(0)).current;
   const primaryElasticAnim = useRef(new Animated.Value(0)).current;
@@ -120,7 +122,7 @@ export const CardStack: React.FC<CardStackProps> = ({
           style={styles.secondaryCardTouchable}
         >
           <LinearGradient
-            colors={['#F9D678', '#E6B84F']}
+            colors={[theme.goldChampagneStart, theme.goldChampagneEnd]}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 1 }}
             style={styles.secondaryCard}
@@ -172,9 +174,9 @@ export const CardStack: React.FC<CardStackProps> = ({
                 y2={CARD_HEIGHT}
                 gradientUnits="userSpaceOnUse"
               >
-                <Stop offset="0%" stopColor="#222226" />
-                <Stop offset="55%" stopColor="#141416" />
-                <Stop offset="100%" stopColor="#0B0B0D" />
+                <Stop offset="0%" stopColor={theme.primaryCardGradient[0]} />
+                <Stop offset="55%" stopColor={theme.primaryCardGradient[1]} />
+                <Stop offset="100%" stopColor={theme.primaryCardGradient[2]} />
               </SvgLinearGradient>
             </Defs>
 
@@ -182,7 +184,7 @@ export const CardStack: React.FC<CardStackProps> = ({
             <Path
               d={NOTCHED_CARD_PATH}
               fill="url(#titaniumGradient)"
-              stroke="rgba(255,255,255,0.14)"
+              stroke={theme.isDark ? 'rgba(255,255,255,0.22)' : 'rgba(255,255,255,0.14)'}
               strokeWidth="1"
             />
           </Svg>
@@ -226,12 +228,18 @@ export const CardStack: React.FC<CardStackProps> = ({
         <TouchableOpacity
           activeOpacity={0.8}
           onPress={onPressAddCard}
-          style={styles.addCardButton}
+          style={[
+            styles.addCardButton,
+            {
+              backgroundColor: theme.addCardBg,
+              borderColor: theme.addCardBorder,
+            },
+          ]}
         >
-          <View style={styles.addCardIconCircle}>
-            <Plus size={13} color="#000000" strokeWidth={3} />
+          <View style={[styles.addCardIconCircle, { backgroundColor: theme.addCardIconBg }]}>
+            <Plus size={13} color={theme.addCardIconColor} strokeWidth={3} />
           </View>
-          <Text style={styles.addCardText}>Add Card</Text>
+          <Text style={[styles.addCardText, { color: theme.addCardTextColor }]}>Add Card</Text>
         </TouchableOpacity>
       </Animated.View>
     </View>

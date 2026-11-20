@@ -2,7 +2,7 @@ import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { ArrowUpRight, ArrowDownLeft, CreditCard, MoreHorizontal } from 'lucide-react-native';
-import { SINANCE_COLORS } from '../theme/colors';
+import { useAppTheme } from '../theme/colors';
 
 interface ActionPillsProps {
   onPressSend?: () => void;
@@ -17,54 +17,76 @@ export const ActionPills: React.FC<ActionPillsProps> = ({
   onPressTopUp,
   onPressMore,
 }) => {
+  const theme = useAppTheme();
+
   const actions = [
     {
       id: 'send',
       label: 'Send',
-      icon: <ArrowUpRight size={19} color={SINANCE_COLORS.textMain} strokeWidth={2.4} />,
+      icon: <ArrowUpRight size={19} color={theme.iconColor} strokeWidth={2.4} />,
       onPress: onPressSend,
     },
     {
       id: 'request',
       label: 'Request',
-      icon: <ArrowDownLeft size={19} color={SINANCE_COLORS.textMain} strokeWidth={2.4} />,
+      icon: <ArrowDownLeft size={19} color={theme.iconColor} strokeWidth={2.4} />,
       onPress: onPressRequest,
     },
     {
       id: 'topup',
       label: 'TopUp',
-      icon: <CreditCard size={19} color={SINANCE_COLORS.textMain} strokeWidth={2.2} />,
+      icon: <CreditCard size={19} color={theme.iconColor} strokeWidth={2.2} />,
       onPress: onPressTopUp,
     },
     {
       id: 'more',
       label: 'More',
-      icon: <MoreHorizontal size={19} color={SINANCE_COLORS.textMain} strokeWidth={2.4} />,
+      icon: <MoreHorizontal size={19} color={theme.iconColor} strokeWidth={2.4} />,
       onPress: onPressMore,
     },
   ];
 
   return (
-    <View style={styles.cardWrapper}>
+    <View
+      style={[
+        styles.cardWrapper,
+        {
+          backgroundColor: theme.cardContainer,
+          borderColor: theme.cardContainerBorder,
+          borderWidth: theme.isDark ? 1 : 0,
+        },
+      ]}
+    >
       <View style={styles.container}>
         {actions.map((action) => (
           <View key={action.id} style={styles.actionItem}>
             <TouchableOpacity
               activeOpacity={0.8}
               onPress={action.onPress}
-              style={styles.buttonShadowWrapper}
+              style={[
+                styles.buttonShadowWrapper,
+                { backgroundColor: theme.actionPillLip },
+              ]}
             >
               {/* SaaS 3D Tactile Disc Surface */}
               <LinearGradient
-                colors={['#FFFFFF', '#F8F7F3']}
+                colors={theme.isDark ? ['#2A2A2E', '#1C1C1F'] : ['#FFFFFF', '#F8F7F3']}
                 start={{ x: 0, y: 0 }}
                 end={{ x: 0, y: 1 }}
-                style={styles.circleButton}
+                style={[
+                  styles.circleButton,
+                  {
+                    borderColor: theme.actionPillBorder,
+                    borderTopColor: theme.isDark ? '#3D3D44' : '#FFFFFF',
+                  },
+                ]}
               >
                 {action.icon}
               </LinearGradient>
             </TouchableOpacity>
-            <Text style={styles.actionLabel}>{action.label}</Text>
+            <Text style={[styles.actionLabel, { color: theme.actionPillLabel }]}>
+              {action.label}
+            </Text>
           </View>
         ))}
       </View>
@@ -76,7 +98,6 @@ const styles = StyleSheet.create({
   cardWrapper: {
     marginHorizontal: 20,
     marginTop: 20,
-    backgroundColor: '#FFFFFF',
     borderRadius: 28,
     paddingVertical: 16,
     paddingHorizontal: 8,
@@ -101,7 +122,6 @@ const styles = StyleSheet.create({
     width: 54,
     height: 54,
     borderRadius: 27,
-    backgroundColor: '#E2E0D8', // The 3D bottom bevel lip
     shadowColor: '#000000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.08,
@@ -113,15 +133,12 @@ const styles = StyleSheet.create({
     flex: 1,
     borderRadius: 27,
     borderWidth: 1,
-    borderColor: '#ECEAE2',
-    borderTopColor: '#FFFFFF',
     alignItems: 'center',
     justifyContent: 'center',
   },
   actionLabel: {
     fontSize: 12,
     fontWeight: '500',
-    color: SINANCE_COLORS.textMain,
     letterSpacing: -0.2,
   },
 });

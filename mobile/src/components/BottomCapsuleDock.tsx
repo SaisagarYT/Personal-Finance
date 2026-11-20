@@ -1,6 +1,7 @@
 import React, { useRef, useEffect } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Platform, Animated } from 'react-native';
 import { Home, Wallet, BarChart2, User } from 'lucide-react-native';
+import { useAppTheme } from '../theme/colors';
 
 export type NavTabId = 'home' | 'cards' | 'analytics' | 'profile';
 
@@ -13,6 +14,7 @@ export const BottomCapsuleDock: React.FC<BottomCapsuleDockProps> = ({
   activeTab = 'home',
   onSelectTab,
 }) => {
+  const theme = useAppTheme();
   const pillSpring = useRef(new Animated.Value(1)).current;
 
   useEffect(() => {
@@ -32,8 +34,8 @@ export const BottomCapsuleDock: React.FC<BottomCapsuleDockProps> = ({
       icon: (isActive: boolean) => (
         <Home
           size={18}
-          color={isActive ? '#0C0C0D' : '#FFFFFF'}
-          fill={isActive ? '#0C0C0D' : 'none'}
+          color={isActive ? theme.dockActivePillText : theme.dockInactiveIconColor}
+          fill={isActive ? theme.dockActivePillText : 'none'}
           strokeWidth={isActive ? 2.4 : 1.8}
         />
       ),
@@ -44,7 +46,7 @@ export const BottomCapsuleDock: React.FC<BottomCapsuleDockProps> = ({
       icon: (isActive: boolean) => (
         <Wallet
           size={18}
-          color={isActive ? '#0C0C0D' : '#FFFFFF'}
+          color={isActive ? theme.dockActivePillText : theme.dockInactiveIconColor}
           strokeWidth={isActive ? 2.4 : 1.8}
         />
       ),
@@ -55,7 +57,7 @@ export const BottomCapsuleDock: React.FC<BottomCapsuleDockProps> = ({
       icon: (isActive: boolean) => (
         <BarChart2
           size={18}
-          color={isActive ? '#0C0C0D' : '#FFFFFF'}
+          color={isActive ? theme.dockActivePillText : theme.dockInactiveIconColor}
           strokeWidth={isActive ? 2.4 : 1.8}
         />
       ),
@@ -66,7 +68,7 @@ export const BottomCapsuleDock: React.FC<BottomCapsuleDockProps> = ({
       icon: (isActive: boolean) => (
         <User
           size={18}
-          color={isActive ? '#0C0C0D' : '#FFFFFF'}
+          color={isActive ? theme.dockActivePillText : theme.dockInactiveIconColor}
           strokeWidth={isActive ? 2.4 : 1.8}
         />
       ),
@@ -75,7 +77,15 @@ export const BottomCapsuleDock: React.FC<BottomCapsuleDockProps> = ({
 
   return (
     <View pointerEvents="box-none" style={styles.dockOuterContainer}>
-      <View style={styles.dockShell}>
+      <View
+        style={[
+          styles.dockShell,
+          {
+            backgroundColor: theme.dockShellBg,
+            borderColor: theme.dockShellBorder,
+          },
+        ]}
+      >
         {tabs.map((tab) => {
           const isActive = activeTab === tab.id;
           return (
@@ -87,12 +97,18 @@ export const BottomCapsuleDock: React.FC<BottomCapsuleDockProps> = ({
               <Animated.View
                 style={[
                   styles.tabBase,
-                  isActive ? styles.activeTabPill : styles.inactiveTabCircle,
+                  isActive
+                    ? [styles.activeTabPill, { backgroundColor: theme.dockActivePillBg }]
+                    : [styles.inactiveTabCircle, { backgroundColor: theme.dockInactiveTabBg }],
                   isActive && { transform: [{ scale: pillSpring }] },
                 ]}
               >
                 {tab.icon(isActive)}
-                {isActive && <Text style={styles.activeTabLabel}>{tab.label}</Text>}
+                {isActive && (
+                  <Text style={[styles.activeTabLabel, { color: theme.dockActivePillText }]}>
+                    {tab.label}
+                  </Text>
+                )}
               </Animated.View>
             </TouchableOpacity>
           );
@@ -115,7 +131,6 @@ const styles = StyleSheet.create({
   dockShell: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#0C0C0D',
     borderRadius: 36,
     padding: 6,
     gap: 6,
@@ -125,7 +140,6 @@ const styles = StyleSheet.create({
     shadowRadius: 20,
     elevation: 12,
     borderWidth: 1,
-    borderColor: '#1E1E22',
   },
   tabBase: {
     height: 48,
@@ -135,7 +149,6 @@ const styles = StyleSheet.create({
   activeTabPill: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#FFFFFF',
     borderRadius: 26,
     paddingHorizontal: 18,
     gap: 7,
@@ -143,12 +156,10 @@ const styles = StyleSheet.create({
   activeTabLabel: {
     fontSize: 13,
     fontWeight: '700',
-    color: '#0C0C0D',
     letterSpacing: -0.2,
   },
   inactiveTabCircle: {
     width: 48,
     borderRadius: 24,
-    backgroundColor: 'rgba(255, 255, 255, 0.08)',
   },
 });

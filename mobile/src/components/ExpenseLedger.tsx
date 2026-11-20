@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { Home, Globe, ShoppingCart, Receipt } from 'lucide-react-native';
-import { SINANCE_COLORS } from '../theme/colors';
+import { useAppTheme } from '../theme/colors';
 
 export interface ExpenseItem {
   id: string;
@@ -22,6 +22,8 @@ export const ExpenseLedger: React.FC<ExpenseLedgerProps> = ({
   onPressViewAll,
   onPressItem,
 }) => {
+  const theme = useAppTheme();
+
   const defaultItems: ExpenseItem[] = [
     {
       id: '1',
@@ -56,25 +58,35 @@ export const ExpenseLedger: React.FC<ExpenseLedgerProps> = ({
   const displayList = items && items.length > 0 ? items : defaultItems;
 
   const renderIcon = (type: ExpenseItem['icon']) => {
+    const iconColor = theme.expenseIconColor;
     switch (type) {
       case 'rent':
-        return <Home size={18} color={SINANCE_COLORS.textMain} strokeWidth={2.2} />;
+        return <Home size={18} color={iconColor} strokeWidth={2.2} />;
       case 'internet':
-        return <Globe size={18} color={SINANCE_COLORS.textMain} strokeWidth={2.2} />;
+        return <Globe size={18} color={iconColor} strokeWidth={2.2} />;
       case 'groceries':
-        return <ShoppingCart size={18} color={SINANCE_COLORS.textMain} strokeWidth={2.2} />;
+        return <ShoppingCart size={18} color={iconColor} strokeWidth={2.2} />;
       case 'taxes':
-        return <Receipt size={18} color={SINANCE_COLORS.textMain} strokeWidth={2.2} />;
+        return <Receipt size={18} color={iconColor} strokeWidth={2.2} />;
     }
   };
 
   return (
-    <View style={styles.card}>
+    <View
+      style={[
+        styles.card,
+        {
+          backgroundColor: theme.cardContainer,
+          borderColor: theme.cardContainerBorder,
+          borderWidth: theme.isDark ? 1 : 0,
+        },
+      ]}
+    >
       {/* Header Row: Title & View All */}
       <View style={styles.headerRow}>
-        <Text style={styles.title}>Manage Expenses</Text>
+        <Text style={[styles.title, { color: theme.textMain }]}>Manage Expenses</Text>
         <TouchableOpacity activeOpacity={0.7} onPress={onPressViewAll}>
-          <Text style={styles.viewAllText}>View All</Text>
+          <Text style={[styles.viewAllText, { color: theme.textDim }]}>View All</Text>
         </TouchableOpacity>
       </View>
 
@@ -89,16 +101,27 @@ export const ExpenseLedger: React.FC<ExpenseLedgerProps> = ({
               onPress={() => onPressItem?.(item)}
               style={[styles.itemRow, isLast && styles.lastRow]}
             >
-              <View style={styles.iconCircle}>
+              <View
+                style={[
+                  styles.iconCircle,
+                  { backgroundColor: theme.expenseIconCircleBg },
+                ]}
+              >
                 {renderIcon(item.icon)}
               </View>
 
               <View style={styles.infoCol}>
-                <Text style={styles.itemTitle}>{item.title}</Text>
-                <Text style={styles.itemDate}>{item.date}</Text>
+                <Text style={[styles.itemTitle, { color: theme.textMain }]}>
+                  {item.title}
+                </Text>
+                <Text style={[styles.itemDate, { color: theme.textMuted }]}>
+                  {item.date}
+                </Text>
               </View>
 
-              <Text style={styles.itemAmount}>{item.amount}</Text>
+              <Text style={[styles.itemAmount, { color: theme.textMain }]}>
+                {item.amount}
+              </Text>
             </TouchableOpacity>
           );
         })}
@@ -109,7 +132,6 @@ export const ExpenseLedger: React.FC<ExpenseLedgerProps> = ({
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: '#FFFFFF',
     borderRadius: 28,
     marginHorizontal: 20,
     marginTop: 18,
@@ -131,13 +153,11 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 16,
     fontWeight: '700',
-    color: SINANCE_COLORS.textMain,
     letterSpacing: -0.3,
   },
   viewAllText: {
     fontSize: 12,
     fontWeight: '500',
-    color: SINANCE_COLORS.textDim,
   },
   listContainer: {
     gap: 12,
@@ -154,7 +174,6 @@ const styles = StyleSheet.create({
     width: 44,
     height: 44,
     borderRadius: 22,
-    backgroundColor: '#F4F3EE',
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: 14,
@@ -167,18 +186,15 @@ const styles = StyleSheet.create({
   itemTitle: {
     fontSize: 15,
     fontWeight: '600',
-    color: SINANCE_COLORS.textMain,
     letterSpacing: -0.2,
   },
   itemDate: {
     fontSize: 11.5,
     fontWeight: '400',
-    color: SINANCE_COLORS.textMuted,
   },
   itemAmount: {
     fontSize: 15,
     fontWeight: '700',
-    color: SINANCE_COLORS.textMain,
     letterSpacing: -0.2,
   },
 });

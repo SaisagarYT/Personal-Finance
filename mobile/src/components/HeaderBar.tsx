@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { Menu, Bell } from 'lucide-react-native';
-import { SINANCE_COLORS } from '../theme/colors';
+import { useAppTheme } from '../theme/colors';
 
 interface HeaderBarProps {
   userName?: string;
@@ -18,6 +18,8 @@ export const HeaderBar: React.FC<HeaderBarProps> = ({
   onPressNotifications,
   onPressProfile,
 }) => {
+  const theme = useAppTheme();
+
   return (
     <View style={styles.container}>
       {/* 1. Top Icons Bar: Menu on Left, Notifications & Avatar on Right */}
@@ -26,9 +28,15 @@ export const HeaderBar: React.FC<HeaderBarProps> = ({
         <TouchableOpacity
           activeOpacity={0.7}
           onPress={onPressMenu}
-          style={styles.iconButton}
+          style={[
+            styles.iconButton,
+            {
+              backgroundColor: theme.iconButtonBg,
+              borderColor: theme.iconButtonBorder,
+            },
+          ]}
         >
-          <Menu size={18} color={SINANCE_COLORS.textMain} strokeWidth={2.2} />
+          <Menu size={18} color={theme.iconColor} strokeWidth={2.2} />
         </TouchableOpacity>
 
         {/* Right: Bell & Avatar Profile */}
@@ -36,17 +44,29 @@ export const HeaderBar: React.FC<HeaderBarProps> = ({
           <TouchableOpacity
             activeOpacity={0.7}
             onPress={onPressNotifications}
-            style={styles.iconButton}
+            style={[
+              styles.iconButton,
+              {
+                backgroundColor: theme.iconButtonBg,
+                borderColor: theme.iconButtonBorder,
+              },
+            ]}
           >
-            <Bell size={17} color={SINANCE_COLORS.textMain} strokeWidth={2.2} />
+            <Bell size={17} color={theme.iconColor} strokeWidth={2.2} />
           </TouchableOpacity>
 
           <TouchableOpacity
             activeOpacity={0.7}
             onPress={onPressProfile}
-            style={styles.avatarButton}
+            style={[
+              styles.avatarButton,
+              {
+                backgroundColor: theme.iconButtonBg,
+                borderColor: theme.iconButtonBorder,
+              },
+            ]}
           >
-            <View style={styles.avatarInner}>
+            <View style={[styles.avatarInner, { backgroundColor: theme.avatarInnerBg }]}>
               <Text style={styles.avatarText}>
                 {userName.charAt(0).toUpperCase()}
               </Text>
@@ -57,8 +77,8 @@ export const HeaderBar: React.FC<HeaderBarProps> = ({
 
       {/* 2. Main Greeting Section: Bold Greeting + Soft Subtitle */}
       <View style={styles.greetingSection}>
-        <Text style={styles.greetingTitle}>Hello {userName}!</Text>
-        <Text style={styles.greetingSubtitle}>{subtitle}</Text>
+        <Text style={[styles.greetingTitle, { color: theme.textMain }]}>Hello {userName}!</Text>
+        <Text style={[styles.greetingSubtitle, { color: theme.textMuted }]}>{subtitle}</Text>
       </View>
     </View>
   );
@@ -81,9 +101,7 @@ const styles = StyleSheet.create({
     width: 42,
     height: 42,
     borderRadius: 21,
-    backgroundColor: SINANCE_COLORS.surface,
     borderWidth: 1,
-    borderColor: SINANCE_COLORS.borderSubtle,
     alignItems: 'center',
     justifyContent: 'center',
     shadowColor: '#000000',
@@ -101,9 +119,7 @@ const styles = StyleSheet.create({
     width: 42,
     height: 42,
     borderRadius: 21,
-    backgroundColor: SINANCE_COLORS.surface,
     borderWidth: 1,
-    borderColor: SINANCE_COLORS.borderSubtle,
     alignItems: 'center',
     justifyContent: 'center',
     shadowColor: '#000000',
@@ -116,7 +132,6 @@ const styles = StyleSheet.create({
   avatarInner: {
     width: '100%',
     height: '100%',
-    backgroundColor: '#1E1E22',
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -132,12 +147,10 @@ const styles = StyleSheet.create({
     fontSize: 26,
     fontWeight: '800',
     letterSpacing: -0.6,
-    color: SINANCE_COLORS.textMain,
   },
   greetingSubtitle: {
     fontSize: 13,
     fontWeight: '500',
-    color: SINANCE_COLORS.textMuted,
     letterSpacing: -0.2,
   },
 });
