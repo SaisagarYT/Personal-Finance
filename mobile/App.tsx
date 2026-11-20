@@ -5,10 +5,12 @@ import { HeaderBar } from './src/components/HeaderBar';
 import { CardStack } from './src/components/CardStack';
 import { ActionPills } from './src/components/ActionPills';
 import { ExpenseLedger } from './src/components/ExpenseLedger';
+import { BottomCapsuleDock, NavTabId } from './src/components/BottomCapsuleDock';
 import { KOVA_COLORS } from './src/theme/colors';
 
 export default function App() {
   const [currency, setCurrency] = useState<'USD' | 'INR'>('USD');
+  const [activeTab, setActiveTab] = useState<NavTabId>('home');
 
   const balance = currency === 'USD' ? '$3,922.40' : '₹2,40,250.00';
 
@@ -76,46 +78,57 @@ export default function App() {
     <View style={styles.outerWrapper}>
       <SafeAreaView style={styles.safeArea}>
         <StatusBar style="dark" />
-        <ScrollView
-          style={styles.container}
-          contentContainerStyle={styles.contentContainer}
-          showsVerticalScrollIndicator={false}
-        >
-          {/* ================= SECTION 1: TOP ICONS & GREETING ================= */}
-          <HeaderBar
-            userName="Sagar"
-            subtitle="Let's save your money."
-            onPressMenu={() => console.log('Menu pressed')}
-            onPressNotifications={() => console.log('Notifications pressed')}
-            onPressProfile={() => console.log('Profile pressed')}
-          />
+        <View style={styles.mainContainer}>
+          <ScrollView
+            style={styles.container}
+            contentContainerStyle={styles.contentContainer}
+            showsVerticalScrollIndicator={false}
+          >
+            {/* ================= SECTION 1: TOP ICONS & GREETING ================= */}
+            <HeaderBar
+              userName="Sagar"
+              subtitle="Let's save your money."
+              onPressMenu={() => console.log('Menu pressed')}
+              onPressNotifications={() => console.log('Notifications pressed')}
+              onPressProfile={() => console.log('Profile pressed')}
+            />
 
-          {/* ================= SECTION 2: PHYSICAL STACKED CARD DECK ================= */}
-          <CardStack
-            balance={balance}
-            secondaryCardNumber="•••• •••• 7216"
-            primaryCardNumber="•••• •••• 4364"
-            cardHolderName="Sagar Sylada"
-            expiryDate="08/28"
-            onPressAddCard={() => console.log('Add Card pressed')}
-            onPressCard={() => setCurrency((prev) => (prev === 'USD' ? 'INR' : 'USD'))}
-          />
+            {/* ================= SECTION 2: PHYSICAL STACKED CARD DECK ================= */}
+            <CardStack
+              balance={balance}
+              secondaryCardNumber="•••• •••• 7216"
+              primaryCardNumber="•••• •••• 4364"
+              cardHolderName="Sagar Sylada"
+              expiryDate="08/28"
+              onPressAddCard={() => console.log('Add Card pressed')}
+              onPressCard={() => setCurrency((prev) => (prev === 'USD' ? 'INR' : 'USD'))}
+            />
 
-          {/* ================= SECTION 3: 4 CIRCULAR ACTION PILLS ================= */}
-          <ActionPills
-            onPressSend={() => console.log('Send pressed')}
-            onPressRequest={() => console.log('Request pressed')}
-            onPressTopUp={() => console.log('TopUp pressed')}
-            onPressMore={() => console.log('More pressed')}
-          />
+            {/* ================= SECTION 3: 4 CIRCULAR ACTION PILLS ================= */}
+            <ActionPills
+              onPressSend={() => console.log('Send pressed')}
+              onPressRequest={() => console.log('Request pressed')}
+              onPressTopUp={() => console.log('TopUp pressed')}
+              onPressMore={() => console.log('More pressed')}
+            />
 
-          {/* ================= SECTION 4: MANAGE EXPENSES / RECENT ACTIVITY LEDGER ================= */}
-          <ExpenseLedger
-            items={expenses}
-            onPressViewAll={() => console.log('View All pressed')}
-            onPressItem={(item) => console.log('Pressed item:', item.title)}
+            {/* ================= SECTION 4: MANAGE EXPENSES / RECENT ACTIVITY LEDGER ================= */}
+            <ExpenseLedger
+              items={expenses}
+              onPressViewAll={() => console.log('View All pressed')}
+              onPressItem={(item) => console.log('Pressed item:', item.title)}
+            />
+          </ScrollView>
+
+          {/* ================= SECTION 5: FLOATING CAPSULE BOTTOM NAVIGATION DOCK ================= */}
+          <BottomCapsuleDock
+            activeTab={activeTab}
+            onSelectTab={(tab) => {
+              console.log('Navigated to:', tab);
+              setActiveTab(tab);
+            }}
           />
-        </ScrollView>
+        </View>
       </SafeAreaView>
     </View>
   );
@@ -136,12 +149,17 @@ const styles = StyleSheet.create({
     backgroundColor: KOVA_COLORS.canvas,
     paddingTop: Platform.OS === 'android' ? RNStatusBar.currentHeight : 0,
   },
+  mainContainer: {
+    flex: 1,
+    width: '100%',
+    position: 'relative',
+  },
   container: {
     flex: 1,
     backgroundColor: KOVA_COLORS.canvas,
     width: '100%',
   },
   contentContainer: {
-    paddingBottom: 60,
+    paddingBottom: 110,
   },
 });
