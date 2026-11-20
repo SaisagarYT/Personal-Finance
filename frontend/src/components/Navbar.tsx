@@ -35,9 +35,9 @@ export const Navbar: React.FC<NavbarProps> = ({
         {/* Left: Brand Logo */}
         <div className="flex items-center gap-2.5">
           <div className="w-9 h-9 rounded-full bg-[#E74D28] text-white flex items-center justify-center font-bold text-sm shadow-sm">
-            N
+            S
           </div>
-          <span className="font-bold text-lg text-[#141414] tracking-tight">Kova</span>
+          <span className="font-bold text-lg text-[#141414] tracking-tight">Sinance</span>
         </div>
 
         {/* Center: Floating Navigation Pills */}

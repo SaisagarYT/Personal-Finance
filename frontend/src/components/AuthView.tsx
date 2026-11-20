@@ -51,11 +51,11 @@ export const AuthView: React.FC<AuthViewProps> = ({ onAuthSuccess }) => {
       <header className="w-full max-w-5xl mx-auto flex items-center justify-between">
         <div className="flex items-center gap-3">
           <div className="w-8 h-8 rounded-full bg-[#E74D28] text-white font-extrabold text-sm flex items-center justify-center shadow-xs select-none">
-            K
+            S
           </div>
           <div className="flex flex-col">
             <span className="font-extrabold text-base tracking-tight text-[#141414] leading-tight">
-              Kova
+              Sinance
             </span>
             <span className="text-[11px] text-[#8E8D88] font-medium tracking-tight">
               Personal Finance
@@ -281,7 +281,7 @@ export const AuthView: React.FC<AuthViewProps> = ({ onAuthSuccess }) => {
                 </>
               ) : (
                 <>
-                  New to Kova? <span className="text-[#141414] font-semibold underline underline-offset-2">Create an account</span>
+                  New to Sinance? <span className="text-[#141414] font-semibold underline underline-offset-2">Create an account</span>
                 </>
               )}
             </button>

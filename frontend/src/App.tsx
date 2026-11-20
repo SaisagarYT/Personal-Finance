@@ -130,7 +130,7 @@ export function App() {
   if (authLoading) {
     return (
       <div className="min-h-screen bg-[#F3F2ED] flex items-center justify-center text-xs font-semibold text-[#6B6A66]">
-        Loading Kova...
+        Loading Sinance...
       </div>
     );
   }
