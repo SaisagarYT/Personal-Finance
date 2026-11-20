@@ -3,6 +3,7 @@ import { StyleSheet, View, SafeAreaView, Platform, StatusBar as RNStatusBar, Scr
 import { StatusBar } from 'expo-status-bar';
 import { HeaderBar } from './src/components/HeaderBar';
 import { CardStack } from './src/components/CardStack';
+import { ActionPills } from './src/components/ActionPills';
 import { KOVA_COLORS } from './src/theme/colors';
 
 export default function App() {
@@ -39,7 +40,15 @@ export default function App() {
             onPressCard={() => console.log('Card tapped')}
           />
 
-          {/* Section 3 (Circular Quick Action Pills) will follow upon approval */}
+          {/* ================= SECTION 3: 4 CIRCULAR ACTION PILLS ================= */}
+          <ActionPills
+            onPressSend={() => console.log('Send pressed')}
+            onPressRequest={() => console.log('Request pressed')}
+            onPressTopUp={() => console.log('TopUp pressed')}
+            onPressMore={() => console.log('More pressed')}
+          />
+
+          {/* Section 4 (Manage Expenses / Recent Activity Ledger) will follow upon approval */}
         </ScrollView>
       </SafeAreaView>
     </View>
