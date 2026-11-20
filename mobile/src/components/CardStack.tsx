@@ -3,7 +3,7 @@ import { View, Text, TouchableOpacity, StyleSheet, Animated } from 'react-native
 import Svg, { Path, Defs, LinearGradient as SvgLinearGradient, Stop } from 'react-native-svg';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Plus } from 'lucide-react-native';
-import { KOVA_COLORS } from '../theme/colors';
+import { SINANCE_COLORS } from '../theme/colors';
 
 interface CardStackProps {
   balance?: string;
@@ -193,9 +193,9 @@ export const CardStack: React.FC<CardStackProps> = ({
             <View style={styles.primaryTopRow}>
               <View style={styles.brandRow}>
                 <View style={styles.brandBadge}>
-                  <Text style={styles.brandBadgeText}>K</Text>
+                  <Text style={styles.brandBadgeText}>S</Text>
                 </View>
-                <Text style={styles.brandTitle}>KOVA</Text>
+                <Text style={styles.brandTitle}>SINANCE</Text>
               </View>
 
               <Text style={styles.primaryCardNumber}>{primaryCardNumber}</Text>
@@ -334,7 +334,7 @@ const styles = StyleSheet.create({
     width: 22,
     height: 22,
     borderRadius: 11,
-    backgroundColor: KOVA_COLORS.brand,
+    backgroundColor: SINANCE_COLORS.brand,
     alignItems: 'center',
     justifyContent: 'center',
   },

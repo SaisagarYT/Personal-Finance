@@ -2,7 +2,7 @@ import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { ArrowUpRight, ArrowDownLeft, CreditCard, MoreHorizontal } from 'lucide-react-native';
-import { KOVA_COLORS } from '../theme/colors';
+import { SINANCE_COLORS } from '../theme/colors';
 
 interface ActionPillsProps {
   onPressSend?: () => void;
@@ -21,25 +21,25 @@ export const ActionPills: React.FC<ActionPillsProps> = ({
     {
       id: 'send',
       label: 'Send',
-      icon: <ArrowUpRight size={19} color={KOVA_COLORS.textMain} strokeWidth={2.4} />,
+      icon: <ArrowUpRight size={19} color={SINANCE_COLORS.textMain} strokeWidth={2.4} />,
       onPress: onPressSend,
     },
     {
       id: 'request',
       label: 'Request',
-      icon: <ArrowDownLeft size={19} color={KOVA_COLORS.textMain} strokeWidth={2.4} />,
+      icon: <ArrowDownLeft size={19} color={SINANCE_COLORS.textMain} strokeWidth={2.4} />,
       onPress: onPressRequest,
     },
     {
       id: 'topup',
       label: 'TopUp',
-      icon: <CreditCard size={19} color={KOVA_COLORS.textMain} strokeWidth={2.2} />,
+      icon: <CreditCard size={19} color={SINANCE_COLORS.textMain} strokeWidth={2.2} />,
       onPress: onPressTopUp,
     },
     {
       id: 'more',
       label: 'More',
-      icon: <MoreHorizontal size={19} color={KOVA_COLORS.textMain} strokeWidth={2.4} />,
+      icon: <MoreHorizontal size={19} color={SINANCE_COLORS.textMain} strokeWidth={2.4} />,
       onPress: onPressMore,
     },
   ];
@@ -121,7 +121,7 @@ const styles = StyleSheet.create({
   actionLabel: {
     fontSize: 12,
     fontWeight: '500',
-    color: KOVA_COLORS.textMain,
+    color: SINANCE_COLORS.textMain,
     letterSpacing: -0.2,
   },
 });

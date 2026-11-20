@@ -1,4 +1,4 @@
-export const KOVA_COLORS = {
+export const SINANCE_COLORS = {
   // Canvas & Backgrounds
   canvas: '#F4F3EE',
   surface: '#FFFFFF',

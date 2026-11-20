@@ -6,7 +6,7 @@ import { CardStack } from './src/components/CardStack';
 import { ActionPills } from './src/components/ActionPills';
 import { ExpenseLedger } from './src/components/ExpenseLedger';
 import { BottomCapsuleDock, NavTabId } from './src/components/BottomCapsuleDock';
-import { KOVA_COLORS } from './src/theme/colors';
+import { SINANCE_COLORS } from './src/theme/colors';
 
 export default function App() {
   const [currency, setCurrency] = useState<'USD' | 'INR'>('USD');
@@ -159,7 +159,7 @@ export default function App() {
 const styles = StyleSheet.create({
   outerWrapper: {
     flex: 1,
-    backgroundColor: KOVA_COLORS.canvas,
+    backgroundColor: SINANCE_COLORS.canvas,
     alignItems: 'center',
     justifyContent: 'center',
     width: '100%',
@@ -168,7 +168,7 @@ const styles = StyleSheet.create({
     flex: 1,
     width: '100%',
     maxWidth: 420,
-    backgroundColor: KOVA_COLORS.canvas,
+    backgroundColor: SINANCE_COLORS.canvas,
     paddingTop: Platform.OS === 'android' ? RNStatusBar.currentHeight : 0,
   },
   mainContainer: {
@@ -178,7 +178,7 @@ const styles = StyleSheet.create({
   },
   container: {
     flex: 1,
-    backgroundColor: KOVA_COLORS.canvas,
+    backgroundColor: SINANCE_COLORS.canvas,
     width: '100%',
   },
   contentContainer: {

@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { Menu, Bell } from 'lucide-react-native';
-import { KOVA_COLORS } from '../theme/colors';
+import { SINANCE_COLORS } from '../theme/colors';
 
 interface HeaderBarProps {
   userName?: string;
@@ -28,7 +28,7 @@ export const HeaderBar: React.FC<HeaderBarProps> = ({
           onPress={onPressMenu}
           style={styles.iconButton}
         >
-          <Menu size={18} color={KOVA_COLORS.textMain} strokeWidth={2.2} />
+          <Menu size={18} color={SINANCE_COLORS.textMain} strokeWidth={2.2} />
         </TouchableOpacity>
 
         {/* Right: Bell & Avatar Profile */}
@@ -38,7 +38,7 @@ export const HeaderBar: React.FC<HeaderBarProps> = ({
             onPress={onPressNotifications}
             style={styles.iconButton}
           >
-            <Bell size={17} color={KOVA_COLORS.textMain} strokeWidth={2.2} />
+            <Bell size={17} color={SINANCE_COLORS.textMain} strokeWidth={2.2} />
           </TouchableOpacity>
 
           <TouchableOpacity
@@ -81,9 +81,9 @@ const styles = StyleSheet.create({
     width: 42,
     height: 42,
     borderRadius: 21,
-    backgroundColor: KOVA_COLORS.surface,
+    backgroundColor: SINANCE_COLORS.surface,
     borderWidth: 1,
-    borderColor: KOVA_COLORS.borderSubtle,
+    borderColor: SINANCE_COLORS.borderSubtle,
     alignItems: 'center',
     justifyContent: 'center',
     shadowColor: '#000000',
@@ -101,9 +101,9 @@ const styles = StyleSheet.create({
     width: 42,
     height: 42,
     borderRadius: 21,
-    backgroundColor: KOVA_COLORS.surface,
+    backgroundColor: SINANCE_COLORS.surface,
     borderWidth: 1,
-    borderColor: KOVA_COLORS.borderSubtle,
+    borderColor: SINANCE_COLORS.borderSubtle,
     alignItems: 'center',
     justifyContent: 'center',
     shadowColor: '#000000',
@@ -132,12 +132,12 @@ const styles = StyleSheet.create({
     fontSize: 26,
     fontWeight: '800',
     letterSpacing: -0.6,
-    color: KOVA_COLORS.textMain,
+    color: SINANCE_COLORS.textMain,
   },
   greetingSubtitle: {
     fontSize: 13,
     fontWeight: '500',
-    color: KOVA_COLORS.textMuted,
+    color: SINANCE_COLORS.textMuted,
     letterSpacing: -0.2,
   },
 });

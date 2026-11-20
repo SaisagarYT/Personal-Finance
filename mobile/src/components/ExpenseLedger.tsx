@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { Home, Globe, ShoppingCart, Receipt } from 'lucide-react-native';
-import { KOVA_COLORS } from '../theme/colors';
+import { SINANCE_COLORS } from '../theme/colors';
 
 export interface ExpenseItem {
   id: string;
@@ -58,13 +58,13 @@ export const ExpenseLedger: React.FC<ExpenseLedgerProps> = ({
   const renderIcon = (type: ExpenseItem['icon']) => {
     switch (type) {
       case 'rent':
-        return <Home size={18} color={KOVA_COLORS.textMain} strokeWidth={2.2} />;
+        return <Home size={18} color={SINANCE_COLORS.textMain} strokeWidth={2.2} />;
       case 'internet':
-        return <Globe size={18} color={KOVA_COLORS.textMain} strokeWidth={2.2} />;
+        return <Globe size={18} color={SINANCE_COLORS.textMain} strokeWidth={2.2} />;
       case 'groceries':
-        return <ShoppingCart size={18} color={KOVA_COLORS.textMain} strokeWidth={2.2} />;
+        return <ShoppingCart size={18} color={SINANCE_COLORS.textMain} strokeWidth={2.2} />;
       case 'taxes':
-        return <Receipt size={18} color={KOVA_COLORS.textMain} strokeWidth={2.2} />;
+        return <Receipt size={18} color={SINANCE_COLORS.textMain} strokeWidth={2.2} />;
     }
   };
 
@@ -85,7 +85,7 @@ export const ExpenseLedger: React.FC<ExpenseLedgerProps> = ({
           return (
             <TouchableOpacity
               key={item.id}
-              activeOpacity={0.7}
+              activeOpacity={0.75}
               onPress={() => onPressItem?.(item)}
               style={[styles.itemRow, isLast && styles.lastRow]}
             >
@@ -131,13 +131,13 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 16,
     fontWeight: '700',
-    color: KOVA_COLORS.textMain,
+    color: SINANCE_COLORS.textMain,
     letterSpacing: -0.3,
   },
   viewAllText: {
     fontSize: 12,
     fontWeight: '500',
-    color: KOVA_COLORS.textDim,
+    color: SINANCE_COLORS.textDim,
   },
   listContainer: {
     gap: 12,
@@ -167,18 +167,18 @@ const styles = StyleSheet.create({
   itemTitle: {
     fontSize: 15,
     fontWeight: '600',
-    color: KOVA_COLORS.textMain,
+    color: SINANCE_COLORS.textMain,
     letterSpacing: -0.2,
   },
   itemDate: {
     fontSize: 11.5,
     fontWeight: '400',
-    color: KOVA_COLORS.textMuted,
+    color: SINANCE_COLORS.textMuted,
   },
   itemAmount: {
     fontSize: 15,
     fontWeight: '700',
-    color: KOVA_COLORS.textMain,
+    color: SINANCE_COLORS.textMain,
     letterSpacing: -0.2,
   },
 });
