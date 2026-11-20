@@ -1,15 +1,24 @@
-import React from 'react';
-import { StyleSheet, View, SafeAreaView, Platform, StatusBar as RNStatusBar } from 'react-native';
+import React, { useState } from 'react';
+import { StyleSheet, View, SafeAreaView, Platform, StatusBar as RNStatusBar, ScrollView } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { HeaderBar } from './src/components/HeaderBar';
+import { CardStack } from './src/components/CardStack';
 import { KOVA_COLORS } from './src/theme/colors';
 
 export default function App() {
+  const [currency, setCurrency] = useState<'INR' | 'USD'>('INR');
+
+  const balance = currency === 'INR' ? '₹2,40,250.00' : '$2,885.00';
+
   return (
     <View style={styles.outerWrapper}>
       <SafeAreaView style={styles.safeArea}>
         <StatusBar style="dark" />
-        <View style={styles.container}>
+        <ScrollView
+          style={styles.container}
+          contentContainerStyle={styles.contentContainer}
+          showsVerticalScrollIndicator={false}
+        >
           {/* ================= SECTION 1: TOP ICONS & GREETING ================= */}
           <HeaderBar
             userName="Sagar"
@@ -19,9 +28,19 @@ export default function App() {
             onPressProfile={() => console.log('Profile pressed')}
           />
 
-          {/* Section 2 (Stacked Card Deck) will be added upon Section 1 approval */}
-          <View style={styles.sectionPlaceholder} />
-        </View>
+          {/* ================= SECTION 2: PHYSICAL STACKED CARD DECK ================= */}
+          <CardStack
+            balance={balance}
+            secondaryCardNumber="•••• •••• 7216"
+            primaryCardNumber="•••• •••• 4364"
+            cardHolderName="Sagar Sylada"
+            expiryDate="08/28"
+            onPressAddCard={() => console.log('Add Card pressed')}
+            onPressCard={() => console.log('Card tapped')}
+          />
+
+          {/* Section 3 (Circular Quick Action Pills) will follow upon approval */}
+        </ScrollView>
       </SafeAreaView>
     </View>
   );
@@ -47,7 +66,7 @@ const styles = StyleSheet.create({
     backgroundColor: KOVA_COLORS.canvas,
     width: '100%',
   },
-  sectionPlaceholder: {
-    flex: 1,
+  contentContainer: {
+    paddingBottom: 40,
   },
 });
