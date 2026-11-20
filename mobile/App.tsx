@@ -4,12 +4,73 @@ import { StatusBar } from 'expo-status-bar';
 import { HeaderBar } from './src/components/HeaderBar';
 import { CardStack } from './src/components/CardStack';
 import { ActionPills } from './src/components/ActionPills';
+import { ExpenseLedger } from './src/components/ExpenseLedger';
 import { KOVA_COLORS } from './src/theme/colors';
 
 export default function App() {
-  const [currency, setCurrency] = useState<'INR' | 'USD'>('INR');
+  const [currency, setCurrency] = useState<'USD' | 'INR'>('USD');
 
-  const balance = currency === 'INR' ? '₹2,40,250.00' : '$2,885.00';
+  const balance = currency === 'USD' ? '$3,922.40' : '₹2,40,250.00';
+
+  const expenses = currency === 'USD' ? [
+    {
+      id: '1',
+      title: 'House Rent',
+      date: '09:00 am • 12 September, 2025',
+      amount: '$400.00',
+      icon: 'rent' as const,
+    },
+    {
+      id: '2',
+      title: 'Internet Bill',
+      date: '14:21 pm • 11 September, 2025',
+      amount: '$55.00',
+      icon: 'internet' as const,
+    },
+    {
+      id: '3',
+      title: 'Groceries',
+      date: '18:00 pm • 10 September, 2025',
+      amount: '$78.00',
+      icon: 'groceries' as const,
+    },
+    {
+      id: '4',
+      title: 'Taxes',
+      date: '11:15 am • 08 September, 2025',
+      amount: '$230.00',
+      icon: 'taxes' as const,
+    },
+  ] : [
+    {
+      id: '1',
+      title: 'House Rent',
+      date: '09:00 am • 12 September, 2025',
+      amount: '₹24,000.00',
+      icon: 'rent' as const,
+    },
+    {
+      id: '2',
+      title: 'Internet Bill',
+      date: '14:21 pm • 11 September, 2025',
+      amount: '₹1,499.00',
+      icon: 'internet' as const,
+    },
+    {
+      id: '3',
+      title: 'Groceries',
+      date: '18:00 pm • 10 September, 2025',
+      amount: '₹4,850.00',
+      icon: 'groceries' as const,
+    },
+    {
+      id: '4',
+      title: 'Taxes',
+      date: '11:15 am • 08 September, 2025',
+      amount: '₹18,500.00',
+      icon: 'taxes' as const,
+    },
+  ];
 
   return (
     <View style={styles.outerWrapper}>
@@ -37,7 +98,7 @@ export default function App() {
             cardHolderName="Sagar Sylada"
             expiryDate="08/28"
             onPressAddCard={() => console.log('Add Card pressed')}
-            onPressCard={() => console.log('Card tapped')}
+            onPressCard={() => setCurrency((prev) => (prev === 'USD' ? 'INR' : 'USD'))}
           />
 
           {/* ================= SECTION 3: 4 CIRCULAR ACTION PILLS ================= */}
@@ -48,7 +109,12 @@ export default function App() {
             onPressMore={() => console.log('More pressed')}
           />
 
-          {/* Section 4 (Manage Expenses / Recent Activity Ledger) will follow upon approval */}
+          {/* ================= SECTION 4: MANAGE EXPENSES / RECENT ACTIVITY LEDGER ================= */}
+          <ExpenseLedger
+            items={expenses}
+            onPressViewAll={() => console.log('View All pressed')}
+            onPressItem={(item) => console.log('Pressed item:', item.title)}
+          />
         </ScrollView>
       </SafeAreaView>
     </View>
@@ -76,6 +142,6 @@ const styles = StyleSheet.create({
     width: '100%',
   },
   contentContainer: {
-    paddingBottom: 40,
+    paddingBottom: 60,
   },
 });
