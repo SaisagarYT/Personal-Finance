@@ -45,40 +45,52 @@ export const ActionPills: React.FC<ActionPillsProps> = ({
   ];
 
   return (
-    <View style={styles.container}>
-      {actions.map((action) => (
-        <View key={action.id} style={styles.actionItem}>
-          <TouchableOpacity
-            activeOpacity={0.8}
-            onPress={action.onPress}
-            style={styles.buttonShadowWrapper}
-          >
-            {/* SaaS 3D Tactile Disc Surface */}
-            <LinearGradient
-              colors={['#FFFFFF', '#F8F7F3']}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 0, y: 1 }}
-              style={styles.circleButton}
+    <View style={styles.cardWrapper}>
+      <View style={styles.container}>
+        {actions.map((action) => (
+          <View key={action.id} style={styles.actionItem}>
+            <TouchableOpacity
+              activeOpacity={0.8}
+              onPress={action.onPress}
+              style={styles.buttonShadowWrapper}
             >
-              {action.icon}
-            </LinearGradient>
-          </TouchableOpacity>
-          <Text style={styles.actionLabel}>{action.label}</Text>
-        </View>
-      ))}
+              {/* SaaS 3D Tactile Disc Surface */}
+              <LinearGradient
+                colors={['#FFFFFF', '#F8F7F3']}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 0, y: 1 }}
+                style={styles.circleButton}
+              >
+                {action.icon}
+              </LinearGradient>
+            </TouchableOpacity>
+            <Text style={styles.actionLabel}>{action.label}</Text>
+          </View>
+        ))}
+      </View>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
+  cardWrapper: {
+    marginHorizontal: 20,
+    marginTop: 20,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 28,
+    paddingVertical: 16,
+    paddingHorizontal: 8,
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.04,
+    shadowRadius: 10,
+    elevation: 2,
+  },
   container: {
     width: '100%',
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 26,
-    marginTop: 18,
-    marginBottom: 24,
+    justifyContent: 'space-around',
   },
   actionItem: {
     alignItems: 'center',
@@ -86,10 +98,10 @@ const styles = StyleSheet.create({
   },
   /* SaaS 3D Tactile Keycap Shadow & Bottom Lip */
   buttonShadowWrapper: {
-    width: 58,
-    height: 58,
-    borderRadius: 29,
-    backgroundColor: '#DCDAD1', // The 3D bottom bevel lip
+    width: 54,
+    height: 54,
+    borderRadius: 27,
+    backgroundColor: '#E2E0D8', // The 3D bottom bevel lip
     shadowColor: '#000000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.08,
@@ -99,17 +111,17 @@ const styles = StyleSheet.create({
   },
   circleButton: {
     flex: 1,
-    borderRadius: 29,
+    borderRadius: 27,
     borderWidth: 1,
-    borderColor: '#E6E4DC',
+    borderColor: '#ECEAE2',
     borderTopColor: '#FFFFFF',
     alignItems: 'center',
     justifyContent: 'center',
   },
   actionLabel: {
     fontSize: 12,
-    fontWeight: '600',
-    color: KOVA_COLORS.textMuted,
+    fontWeight: '500',
+    color: KOVA_COLORS.textMain,
     letterSpacing: -0.2,
   },
 });
