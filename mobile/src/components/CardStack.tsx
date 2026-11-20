@@ -1,5 +1,5 @@
-import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import React, { useRef, useEffect } from 'react';
+import { View, Text, TouchableOpacity, StyleSheet, Animated } from 'react-native';
 import Svg, { Path, Defs, LinearGradient as SvgLinearGradient, Stop } from 'react-native-svg';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Plus } from 'lucide-react-native';
@@ -11,6 +11,7 @@ interface CardStackProps {
   primaryCardNumber?: string;
   cardHolderName?: string;
   expiryDate?: string;
+  activeTab?: string;
   onPressAddCard?: () => void;
   onPressCard?: () => void;
 }
@@ -42,34 +43,114 @@ export const CardStack: React.FC<CardStackProps> = ({
   primaryCardNumber = '•••• •••• 4364',
   cardHolderName = 'Sagar Sylada',
   expiryDate = '08/28',
+  activeTab = 'home',
   onPressAddCard,
   onPressCard,
 }) => {
+  // Spring Physics for Upper Gold Card and Primary Card
+  const upperElasticAnim = useRef(new Animated.Value(0)).current;
+  const primaryElasticAnim = useRef(new Animated.Value(0)).current;
+
+  // Track tab switch changes to trigger spring elastic recoil
+  useEffect(() => {
+    // Reset and trigger high-energy spring physics
+    upperElasticAnim.setValue(0);
+    primaryElasticAnim.setValue(0);
+
+    Animated.parallel([
+      // Upper Card (Gold Card): Elastic spring oscillation
+      Animated.spring(upperElasticAnim, {
+        toValue: 1,
+        friction: 4,      // Low friction produces signature rubber-band spring recoil
+        tension: 90,     // Energetic spring tension
+        useNativeDriver: true,
+      }),
+      // Primary Card: Subtle physical breathing spring
+      Animated.spring(primaryElasticAnim, {
+        toValue: 1,
+        friction: 5,
+        tension: 100,
+        useNativeDriver: true,
+      }),
+    ]).start();
+  }, [activeTab]);
+
+  // If "cards" tab is selected, upper card expands further upwards, otherwise subtle elastic bounce
+  const isCardsTab = activeTab === 'cards';
+
+  const upperTranslateY = upperElasticAnim.interpolate({
+    inputRange: [0, 0.45, 0.75, 1],
+    outputRange: isCardsTab
+      ? [0, -42, -32, -36]    // Expanded cards view with bouncy overshoot
+      : [0, -16, 4, 0],       // Elastic pop-up and settle on tab switch
+  });
+
+  const upperScale = upperElasticAnim.interpolate({
+    inputRange: [0, 0.5, 1],
+    outputRange: isCardsTab ? [0.98, 1.01, 1] : [0.98, 1.015, 1],
+  });
+
+  const primaryScale = primaryElasticAnim.interpolate({
+    inputRange: [0, 0.5, 1],
+    outputRange: [0.985, 1.008, 1],
+  });
+
+  const primaryTranslateY = primaryElasticAnim.interpolate({
+    inputRange: [0, 0.5, 1],
+    outputRange: [0, 4, 0],
+  });
+
   return (
     <View style={styles.container}>
-      {/* ================= 1. SECONDARY CARD (PEEKING FROM BEHIND) ================= */}
-      <View style={styles.secondaryCardWrapper}>
-        <LinearGradient
-          colors={['#F9D678', '#E6B84F']}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 1 }}
-          style={styles.secondaryCard}
+      {/* ================= 1. SECONDARY UPPER CARD (ELASTIC SPRING PEEKING) ================= */}
+      <Animated.View
+        style={[
+          styles.secondaryCardWrapper,
+          {
+            transform: [
+              { translateY: upperTranslateY },
+              { scale: upperScale },
+            ],
+          },
+        ]}
+      >
+        <TouchableOpacity
+          activeOpacity={0.85}
+          onPress={onPressCard}
+          style={styles.secondaryCardTouchable}
         >
-          <View style={styles.secondaryCardHeader}>
-            {/* Left: Interlocking Mastercard / Contactless Symbol */}
-            <View style={styles.interlockingCircles}>
-              <View style={[styles.circle, { backgroundColor: 'rgba(0,0,0,0.3)' }]} />
-              <View style={[styles.circle, { backgroundColor: 'rgba(0,0,0,0.18)', marginLeft: -6 }]} />
-            </View>
+          <LinearGradient
+            colors={['#F9D678', '#E6B84F']}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={styles.secondaryCard}
+          >
+            <View style={styles.secondaryCardHeader}>
+              {/* Left: Interlocking Mastercard / Contactless Symbol */}
+              <View style={styles.interlockingCircles}>
+                <View style={[styles.circle, { backgroundColor: 'rgba(0,0,0,0.3)' }]} />
+                <View style={[styles.circle, { backgroundColor: 'rgba(0,0,0,0.18)', marginLeft: -6 }]} />
+              </View>
 
-            {/* Right: Masked Secondary Number */}
-            <Text style={styles.secondaryCardNumber}>{secondaryCardNumber}</Text>
-          </View>
-        </LinearGradient>
-      </View>
+              {/* Right: Masked Secondary Number */}
+              <Text style={styles.secondaryCardNumber}>{secondaryCardNumber}</Text>
+            </View>
+          </LinearGradient>
+        </TouchableOpacity>
+      </Animated.View>
 
       {/* ================= 2. PRIMARY CARD WITH CUSTOM CUTOUT NOTCH ================= */}
-      <View style={styles.primaryCardContainer}>
+      <Animated.View
+        style={[
+          styles.primaryCardContainer,
+          {
+            transform: [
+              { translateY: primaryTranslateY },
+              { scale: primaryScale },
+            ],
+          },
+        ]}
+      >
         {/* SVG Background Path with Notched Dent */}
         <TouchableOpacity
           activeOpacity={0.95}
@@ -142,7 +223,6 @@ export const CardStack: React.FC<CardStackProps> = ({
         </TouchableOpacity>
 
         {/* ================= 3. STANDALONE [+ Add Card] FLOATING PILL BUTTON ================= */}
-        {/* Positioned inside the transparent cutout notch on the warm stone canvas */}
         <TouchableOpacity
           activeOpacity={0.8}
           onPress={onPressAddCard}
@@ -153,7 +233,7 @@ export const CardStack: React.FC<CardStackProps> = ({
           </View>
           <Text style={styles.addCardText}>Add Card</Text>
         </TouchableOpacity>
-      </View>
+      </Animated.View>
     </View>
   );
 };
@@ -163,7 +243,7 @@ const styles = StyleSheet.create({
     width: '100%',
     alignItems: 'center',
     position: 'relative',
-    marginTop: 6,
+    marginTop: 22,
     marginBottom: 14,
   },
   /* Secondary Gold Peeking Card */
@@ -171,8 +251,12 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: 0,
     width: CARD_WIDTH - 20,
-    height: 70,
+    height: 85,
     zIndex: 1,
+  },
+  secondaryCardTouchable: {
+    width: '100%',
+    height: '100%',
   },
   secondaryCard: {
     width: '100%',
@@ -309,37 +393,39 @@ const styles = StyleSheet.create({
     letterSpacing: 0.2,
   },
 
-  /* Standalone Floating [+ Add Card] Pill Button in the Notch */
+  /* Add Card Pill Button */
   addCardButton: {
     position: 'absolute',
-    bottom: 0,
+    bottom: 12,
     right: 0,
     height: 48,
-    paddingLeft: 7,
-    paddingRight: 16,
     borderRadius: 24,
-    backgroundColor: '#000000',
+    backgroundColor: '#0C0C0D',
     flexDirection: 'row',
     alignItems: 'center',
+    paddingLeft: 12,
+    paddingRight: 18,
     gap: 8,
     shadowColor: '#000000',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.25,
-    shadowRadius: 10,
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
     elevation: 4,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.1)',
   },
   addCardIconCircle: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
+    width: 26,
+    height: 26,
+    borderRadius: 13,
     backgroundColor: '#FFFFFF',
     alignItems: 'center',
     justifyContent: 'center',
   },
   addCardText: {
     color: '#FFFFFF',
-    fontSize: 12,
+    fontSize: 13,
     fontWeight: '700',
-    letterSpacing: 0.2,
+    letterSpacing: -0.2,
   },
 });

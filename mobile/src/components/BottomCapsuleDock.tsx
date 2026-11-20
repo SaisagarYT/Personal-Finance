@@ -1,5 +1,5 @@
-import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Platform } from 'react-native';
+import React, { useRef, useEffect } from 'react';
+import { View, Text, TouchableOpacity, StyleSheet, Platform, Animated } from 'react-native';
 import { Home, Wallet, BarChart2, User } from 'lucide-react-native';
 
 export type NavTabId = 'home' | 'cards' | 'analytics' | 'profile';
@@ -13,6 +13,18 @@ export const BottomCapsuleDock: React.FC<BottomCapsuleDockProps> = ({
   activeTab = 'home',
   onSelectTab,
 }) => {
+  const pillSpring = useRef(new Animated.Value(1)).current;
+
+  useEffect(() => {
+    pillSpring.setValue(0.86);
+    Animated.spring(pillSpring, {
+      toValue: 1,
+      friction: 4,
+      tension: 120,
+      useNativeDriver: true,
+    }).start();
+  }, [activeTab]);
+
   const tabs = [
     {
       id: 'home' as NavTabId,
@@ -71,13 +83,17 @@ export const BottomCapsuleDock: React.FC<BottomCapsuleDockProps> = ({
               key={tab.id}
               activeOpacity={0.85}
               onPress={() => onSelectTab?.(tab.id)}
-              style={[
-                styles.tabBase,
-                isActive ? styles.activeTabPill : styles.inactiveTabCircle,
-              ]}
             >
-              {tab.icon(isActive)}
-              {isActive && <Text style={styles.activeTabLabel}>{tab.label}</Text>}
+              <Animated.View
+                style={[
+                  styles.tabBase,
+                  isActive ? styles.activeTabPill : styles.inactiveTabCircle,
+                  isActive && { transform: [{ scale: pillSpring }] },
+                ]}
+              >
+                {tab.icon(isActive)}
+                {isActive && <Text style={styles.activeTabLabel}>{tab.label}</Text>}
+              </Animated.View>
             </TouchableOpacity>
           );
         })}
