@@ -32,10 +32,12 @@ reference_screens/
 │   │   └── thumb_stats_reference.png         # Thumbnail reference
 │   ├── 04_cards/
 │   │   └── wallet_cards_reference.png        # Physical stacked cards reference
-│   └── 05_profile/
-│       ├── profile_sheet_reference.png       # User profile bottom sheet
-│       ├── profile_nova_reference.png        # Alternative profile layout
-│       └── profile_spec_reference.png        # Profile specifications
+│   ├── 05_profile/
+│   │   ├── profile_sheet_reference.png       # User profile bottom sheet
+│   │   ├── profile_nova_reference.png        # Alternative profile layout
+│   │   └── profile_spec_reference.png        # Profile specifications
+│   └── 06_task_manager/
+│       └── kanban_board_reference.jpg        # User Kanban board & task manager reference mockup
 └── web/
     └── (External design mockups for Web)
 ```

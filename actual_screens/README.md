@@ -17,8 +17,15 @@ actual_screens/
 │   │   └── stats_screen.png                  # Live Stats view (Capsule charts, Category pills, Trend metrics)
 │   ├── 04_profile/
 │   │   └── profile_screen.png                # Live Profile modal (Identity, Cloud Sync, Currency switch)
-│   └── 05_auth/
-│       └── auth_screen.png                   # Live Auth screen (Supabase sign in & sign up)
+│   ├── 05_auth/
+│   │   └── auth_screen.png                   # Live Auth screen (Supabase sign in & sign up)
+│   └── 06_task_manager/
+│       ├── 01_section1_dark.png              # Header & Calendar Week Strip (Dark mode)
+│       ├── 01_section1_light.png             # Header & Calendar Week Strip (Light mode)
+│       ├── 02_section2_dark.png              # Pinned Projects 2x2 Grid (Dark mode)
+│       ├── 02_section2_light.png             # Pinned Projects 2x2 Grid (Light mode)
+│       ├── 03_section3_dark.png              # Task List & Today Dropdown (Dark mode)
+│       └── 03_section3_light.png             # Task List & Today Dropdown (Light mode)
 └── web/                                      # Real screenshots of web desktop app (1440x900)
     ├── 01_dashboard/
     │   └── dashboard_screen.png              # Live Executive Overview dashboard
