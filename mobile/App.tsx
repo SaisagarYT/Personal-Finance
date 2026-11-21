@@ -252,10 +252,14 @@ function AppContent() {
             }}
           />
 
-          {/* ================= PROFILE MODAL ================= */}
+          {/* ================= PROFILE & PREFERENCES HUB MODAL ================= */}
           <ProfileModal
             visible={isProfileModalOpen}
             onClose={() => setIsProfileModalOpen(false)}
+            currency={currency}
+            onToggleCurrency={(newCurr) => setCurrency(newCurr)}
+            isSetupDismissed={isSetupDismissed}
+            onToggleSetupDismissed={() => setIsSetupDismissed((prev) => !prev)}
             onOpenAuth={() => {
               setIsProfileModalOpen(false);
               setIsAuthModalOpen(true);
