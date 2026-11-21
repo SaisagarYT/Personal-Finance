@@ -5,7 +5,9 @@ import { HeaderBar } from './src/components/HeaderBar';
 import { CardStack } from './src/components/CardStack';
 import { ActionPills } from './src/components/ActionPills';
 import { ExpenseLedger } from './src/components/ExpenseLedger';
+import { EcoFinHeroCard } from './src/components/EcoFinHeroCard';
 import { BottomCapsuleDock, NavTabId } from './src/components/BottomCapsuleDock';
+import { StatsView } from './src/screens/StatsView';
 import { useAppTheme } from './src/theme/colors';
 
 export default function App() {
@@ -94,56 +96,40 @@ export default function App() {
   ];
 
   return (
-    <View style={[styles.outerWrapper, { backgroundColor: theme.canvas }]}>
-      <SafeAreaView style={[styles.safeArea, { backgroundColor: theme.canvas }]}>
-        <StatusBar style={theme.isDark ? 'light' : 'dark'} />
-        <View style={styles.mainContainer}>
-          <ScrollView
-            style={[styles.container, { backgroundColor: theme.canvas }]}
-            contentContainerStyle={styles.contentContainer}
-            showsVerticalScrollIndicator={false}
-          >
-            {/* ================= UPPER SECTION WITH SPRING ELASTIC TRANSLATION ================= */}
-            <Animated.View style={{ transform: [{ translateY: upperTranslateY }] }}>
-              {/* SECTION 1: TOP ICONS & GREETING */}
-              <HeaderBar
-                userName="Sagar"
-                subtitle="Let's save your money."
-                onPressMenu={() => console.log('Menu pressed')}
-                onPressNotifications={() => console.log('Notifications pressed')}
-                onPressProfile={() => console.log('Profile pressed')}
+    <View style={[styles.outerWrapper, { backgroundColor: '#000000' }]}>
+      <SafeAreaView style={[styles.safeArea, { backgroundColor: '#23F07D' }]}>
+        <StatusBar style="dark" />
+        <View style={[styles.mainContainer, { backgroundColor: '#000000' }]}>
+          {activeTab === 'analytics' ? (
+            <StatsView
+              onBack={() => setActiveTab('home')}
+              currency={currency}
+            />
+          ) : (
+            <ScrollView
+              style={[styles.container, { backgroundColor: '#000000' }]}
+              contentContainerStyle={styles.contentContainer}
+              showsVerticalScrollIndicator={false}
+              bounces={false}
+            >
+              {/* ================= SECTION 1: ECOFIN HERO CARD ================= */}
+              <EcoFinHeroCard
+                userName="Esther"
+                balance="$142.83"
+                pastWeekDiff="+$23.91 past week"
+                onboardingStep="2 of 5 complete"
+                onboardingText="is a crucial phase in the onboarding process"
+                onPressNotification={() => setActiveTab('analytics')}
+                onPressDismissSetup={() => console.log('Dismiss setup')}
+                onPressGetSetUp={() => console.log('Get Set Up clicked')}
+                onPressBalance={() => setCurrency((prev) => (prev === 'USD' ? 'INR' : 'USD'))}
               />
 
-              {/* SECTION 2: PHYSICAL STACKED CARD DECK (WITH SPRING ELASTIC UPPER CARD) */}
-              <CardStack
-                balance={balance}
-                secondaryCardNumber="•••• •••• 7216"
-                primaryCardNumber="•••• •••• 4364"
-                cardHolderName="Sagar Sylada"
-                expiryDate="08/28"
-                activeTab={activeTab}
-                onPressAddCard={() => console.log('Add Card pressed')}
-                onPressCard={() => setCurrency((prev) => (prev === 'USD' ? 'INR' : 'USD'))}
-              />
-            </Animated.View>
+              {/* SECTION 2 & 3 will be placed here next */}
+            </ScrollView>
+          )}
 
-            {/* ================= SECTION 3: 4 CIRCULAR ACTION PILLS ================= */}
-            <ActionPills
-              onPressSend={() => console.log('Send pressed')}
-              onPressRequest={() => console.log('Request pressed')}
-              onPressTopUp={() => console.log('TopUp pressed')}
-              onPressMore={() => console.log('More pressed')}
-            />
-
-            {/* ================= SECTION 4: MANAGE EXPENSES / RECENT ACTIVITY LEDGER ================= */}
-            <ExpenseLedger
-              items={expenses}
-              onPressViewAll={() => console.log('View All pressed')}
-              onPressItem={(item) => console.log('Pressed item:', item.title)}
-            />
-          </ScrollView>
-
-          {/* ================= SECTION 5: FLOATING CAPSULE BOTTOM NAVIGATION DOCK ================= */}
+          {/* ================= FLOATING CAPSULE BOTTOM NAVIGATION DOCK (PRESERVED) ================= */}
           <BottomCapsuleDock
             activeTab={activeTab}
             onSelectTab={(tab) => {
