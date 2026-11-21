@@ -10,6 +10,7 @@ interface SinanceHeroCardProps {
   onboardingStep?: string;
   onboardingText?: string;
   onPressNotification?: () => void;
+  onPressAvatar?: () => void;
   onPressDismissSetup?: () => void;
   onPressGetSetUp?: () => void;
   onPressBalance?: () => void;
@@ -22,6 +23,7 @@ export const SinanceHeroCard: React.FC<SinanceHeroCardProps> = ({
   onboardingStep = '2 of 5 complete',
   onboardingText = 'is a crucial phase in the onboarding process',
   onPressNotification,
+  onPressAvatar,
   onPressDismissSetup,
   onPressGetSetUp,
   onPressBalance,
@@ -32,7 +34,11 @@ export const SinanceHeroCard: React.FC<SinanceHeroCardProps> = ({
     <View style={[styles.cardContainer, { backgroundColor: theme.heroCardBg }]}>
       {/* 1. Header Greeting & Notification Row */}
       <View style={styles.headerRow}>
-        <View style={styles.userInfoRow}>
+        <TouchableOpacity
+          activeOpacity={0.8}
+          onPress={onPressAvatar}
+          style={styles.userInfoRow}
+        >
           {/* Avatar with circular ring */}
           <View style={[styles.avatarWrapper, { borderColor: theme.surface, backgroundColor: theme.avatarInnerBg }]}>
             <Image
@@ -50,7 +56,7 @@ export const SinanceHeroCard: React.FC<SinanceHeroCardProps> = ({
             </View>
             <Text style={[styles.userNameText, { color: theme.forestDark }]}>{userName}</Text>
           </View>
-        </View>
+        </TouchableOpacity>
 
         {/* Dark Circle Notification Bell */}
         <TouchableOpacity

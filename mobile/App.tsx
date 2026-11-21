@@ -1,23 +1,33 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { StyleSheet, View, SafeAreaView, Platform, StatusBar as RNStatusBar, ScrollView, Animated } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
-import { HeaderBar } from './src/components/HeaderBar';
-import { CardStack } from './src/components/CardStack';
-import { ActionPills } from './src/components/ActionPills';
-import { ExpenseLedger } from './src/components/ExpenseLedger';
 import { SinanceHeroCard } from './src/components/SinanceHeroCard';
 import { SinanceActivitySection } from './src/components/SinanceActivitySection';
 import { SinanceSavingsRulesSection } from './src/components/SinanceSavingsRulesSection';
 import { BottomCapsuleDock, NavTabId } from './src/components/BottomCapsuleDock';
 import { StatsView } from './src/screens/StatsView';
 import { SinancePocketScreen } from './src/screens/SinancePocketScreen';
+import { AuthScreen } from './src/screens/AuthScreen';
+import { ProfileModal } from './src/components/ProfileModal';
+import { AuthProvider, useAuth } from './src/context/AuthContext';
+import { FinanceService, Account, Transaction } from './src/services/financeService';
 import { useAppTheme } from './src/theme/colors';
 
-export default function App() {
+function AppContent() {
   const theme = useAppTheme();
-  const [currency, setCurrency] = useState<'USD' | 'INR'>('USD');
+  const { user, session } = useAuth();
+
+  const [currency, setCurrency] = useState<'INR' | 'USD'>('INR');
   const [activeTab, setActiveTab] = useState<NavTabId>('home');
   const [isPocketOpen, setIsPocketOpen] = useState(false);
+  const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+
+  // Cloud Financial Data State
+  const [accounts, setAccounts] = useState<Account[]>([]);
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [totalBalance, setTotalBalance] = useState<number>(240250);
+  const [loadingData, setLoadingData] = useState<boolean>(true);
 
   // Upper section synchronized spring elastic effect when switching tabs
   const upperSpring = useRef(new Animated.Value(0)).current;
@@ -32,72 +42,58 @@ export default function App() {
     }).start();
   }, [activeTab]);
 
-  const upperTranslateY = upperSpring.interpolate({
-    inputRange: [0, 0.45, 1],
-    outputRange: [-8, 2, 0],
-  });
+  // Load Real Data from Supabase & Cache
+  useEffect(() => {
+    let isMounted = true;
 
-  const balance = currency === 'USD' ? '$3,922.40' : '₹2,40,250.00';
+    async function fetchCloudData() {
+      try {
+        setLoadingData(true);
+        const [accRes, txRes] = await Promise.all([
+          FinanceService.getAccounts(user?.id),
+          FinanceService.getTransactions(user?.id, 15),
+        ]);
 
-  const expenses = currency === 'USD' ? [
-    {
-      id: '1',
-      title: 'House Rent',
-      date: '09:00 am • 12 September, 2025',
-      amount: '$400.00',
-      icon: 'rent' as const,
-    },
-    {
-      id: '2',
-      title: 'Internet Bill',
-      date: '14:21 pm • 11 September, 2025',
-      amount: '$55.00',
-      icon: 'internet' as const,
-    },
-    {
-      id: '3',
-      title: 'Groceries',
-      date: '18:00 pm • 10 September, 2025',
-      amount: '$78.00',
-      icon: 'groceries' as const,
-    },
-    {
-      id: '4',
-      title: 'Taxes',
-      date: '11:15 am • 08 September, 2025',
-      amount: '$230.00',
-      icon: 'taxes' as const,
-    },
-  ] : [
-    {
-      id: '1',
-      title: 'House Rent',
-      date: '09:00 am • 12 September, 2025',
-      amount: '₹24,000.00',
-      icon: 'rent' as const,
-    },
-    {
-      id: '2',
-      title: 'Internet Bill',
-      date: '14:21 pm • 11 September, 2025',
-      amount: '₹1,499.00',
-      icon: 'internet' as const,
-    },
-    {
-      id: '3',
-      title: 'Groceries',
-      date: '18:00 pm • 10 September, 2025',
-      amount: '₹4,850.00',
-      icon: 'groceries' as const,
-    },
-    {
-      id: '4',
-      title: 'Taxes',
-      date: '11:15 am • 08 September, 2025',
-      amount: '₹18,500.00',
-      icon: 'taxes' as const,
-    },
-  ];
+        if (isMounted) {
+          if (accRes.data && accRes.data.length > 0) {
+            setAccounts(accRes.data);
+            const total = FinanceService.calculateTotalBalance(accRes.data);
+            setTotalBalance(total);
+          } else {
+            // Default demo balance if new empty account
+            setTotalBalance(240250);
+          }
+
+          if (txRes.data && txRes.data.length > 0) {
+            setTransactions(txRes.data);
+          }
+        }
+      } catch (err) {
+        console.warn('Failed to load cloud finance data:', err);
+      } finally {
+        if (isMounted) setLoadingData(false);
+      }
+    }
+
+    fetchCloudData();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [user]);
+
+  // Format currency display string
+  const formatBalance = (amount: number) => {
+    if (currency === 'INR') {
+      return `₹${amount.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    }
+    // Approx USD conversion for demo
+    const usd = (amount / 86.5).toFixed(2);
+    return `$${Number(usd).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  };
+
+  const formattedBalance = formatBalance(totalBalance);
+  const userName = user?.user_metadata?.full_name?.split(' ')[0] || (user ? 'Member' : 'Sagar');
 
   return (
     <View style={[styles.outerWrapper, { backgroundColor: theme.canvas }]}>
@@ -110,8 +106,8 @@ export default function App() {
                 setIsPocketOpen(false);
                 setActiveTab('home');
               }}
-              balance="$142.83"
-              availableBalance="$0 Available"
+              balance={formattedBalance}
+              availableBalance="₹0 Available"
             />
           ) : activeTab === 'analytics' ? (
             <StatsView
@@ -127,14 +123,25 @@ export default function App() {
             >
               {/* ================= SECTION 1: SINANCE HERO CARD ================= */}
               <SinanceHeroCard
-                userName="Sagar"
-                balance="$142.83"
-                pastWeekDiff="+$23.91 past week"
-                onboardingStep="2 of 5 complete"
-                onboardingText="is a crucial phase in the onboarding process"
-                onPressNotification={() => setActiveTab('analytics')}
+                userName={userName}
+                balance={formattedBalance}
+                pastWeekDiff="+₹1,940 past week"
+                onboardingStep={user ? 'Cloud Synced' : '2 of 5 complete'}
+                onboardingText={
+                  user
+                    ? 'Your data is connected to Supabase and synced across devices.'
+                    : 'is a crucial phase in the onboarding process'
+                }
+                onPressAvatar={() => setIsProfileModalOpen(true)}
+                onPressNotification={() => setIsProfileModalOpen(true)}
                 onPressDismissSetup={() => console.log('Dismiss setup')}
-                onPressGetSetUp={() => console.log('Get Set Up clicked')}
+                onPressGetSetUp={() => {
+                  if (!user) {
+                    setIsAuthModalOpen(true);
+                  } else {
+                    setActiveTab('cards');
+                  }
+                }}
                 onPressBalance={() => {
                   setIsPocketOpen(true);
                   setActiveTab('cards');
@@ -143,9 +150,9 @@ export default function App() {
 
               {/* ================= SECTION 2: TWO-COLUMN ACTIVITY & BRAIN CARDS ================= */}
               <SinanceActivitySection
-                brainAmount="$142.83"
+                brainAmount={formattedBalance}
                 sinceAllTimeLabel="Since All Time"
-                dailyCashSubtitle="+$15.43 Daily Cash"
+                dailyCashSubtitle="+₹1,250 Daily Cash"
                 isBrainActive={isPocketOpen}
                 onPressBrainCard={() => {
                   setIsPocketOpen(true);
@@ -156,18 +163,17 @@ export default function App() {
 
               {/* ================= SECTION 3: SAVINGS RULES & 1P CHALLENGE ================= */}
               <SinanceSavingsRulesSection
-                automaticAmount="$150.87"
+                automaticAmount="₹12,450.00"
                 onPressAutomaticRule={() => console.log('Automatic saving rule pressed')}
                 onPressChallenge={() => console.log('1P Challenge pressed')}
               />
             </ScrollView>
           )}
 
-          {/* ================= FLOATING CAPSULE BOTTOM NAVIGATION DOCK (PRESERVED) ================= */}
+          {/* ================= FLOATING CAPSULE BOTTOM NAVIGATION DOCK ================= */}
           <BottomCapsuleDock
             activeTab={activeTab}
             onSelectTab={(tab) => {
-              console.log('Navigated to:', tab);
               setActiveTab(tab);
               if (tab === 'cards') {
                 setIsPocketOpen(true);
@@ -176,9 +182,34 @@ export default function App() {
               }
             }}
           />
+
+          {/* ================= PROFILE & CLOUD SYNC SHEET ================= */}
+          <ProfileModal
+            visible={isProfileModalOpen}
+            onClose={() => setIsProfileModalOpen(false)}
+            onOpenAuth={() => {
+              setIsProfileModalOpen(false);
+              setIsAuthModalOpen(true);
+            }}
+          />
+
+          {/* ================= AUTH MODAL (SIGN IN / SIGN UP) ================= */}
+          {isAuthModalOpen && (
+            <View style={StyleSheet.absoluteFill}>
+              <AuthScreen onDismiss={() => setIsAuthModalOpen(false)} />
+            </View>
+          )}
         </View>
       </SafeAreaView>
     </View>
+  );
+}
+
+export default function App() {
+  return (
+    <AuthProvider>
+      <AppContent />
+    </AuthProvider>
   );
 }
 
