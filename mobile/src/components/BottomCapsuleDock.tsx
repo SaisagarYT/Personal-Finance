@@ -1,9 +1,9 @@
 import React, { useRef, useEffect } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Platform, Animated } from 'react-native';
-import { Home, Wallet, BarChart2, User } from 'lucide-react-native';
+import { Wallet, ListTodo } from 'lucide-react-native';
 import { useAppTheme } from '../theme/colors';
 
-export type NavTabId = 'home' | 'cards' | 'analytics' | 'profile';
+export type NavTabId = 'sinance' | 'tasks' | 'home' | 'cards' | 'analytics' | 'profile';
 
 interface BottomCapsuleDockProps {
   activeTab?: NavTabId;
@@ -11,64 +11,45 @@ interface BottomCapsuleDockProps {
 }
 
 export const BottomCapsuleDock: React.FC<BottomCapsuleDockProps> = ({
-  activeTab = 'home',
+  activeTab = 'sinance',
   onSelectTab,
 }) => {
   const theme = useAppTheme();
   const pillSpring = useRef(new Animated.Value(1)).current;
+
+  // Normalize tab to 'sinance' or 'tasks'
+  const normalizedActive: 'sinance' | 'tasks' =
+    activeTab === 'tasks' ? 'tasks' : 'sinance';
 
   useEffect(() => {
     pillSpring.setValue(0.86);
     Animated.spring(pillSpring, {
       toValue: 1,
       friction: 4,
-      tension: 120,
+      tension: 130,
       useNativeDriver: true,
     }).start();
   }, [activeTab]);
 
   const tabs = [
     {
-      id: 'home' as NavTabId,
-      label: 'Home',
-      icon: (isActive: boolean) => (
-        <Home
-          size={18}
-          color={isActive ? theme.dockActivePillText : theme.dockInactiveIconColor}
-          fill={isActive ? theme.dockActivePillText : 'none'}
-          strokeWidth={isActive ? 2.4 : 1.8}
-        />
-      ),
-    },
-    {
-      id: 'cards' as NavTabId,
-      label: 'Cards',
+      id: 'sinance' as NavTabId,
+      label: 'Sinance',
       icon: (isActive: boolean) => (
         <Wallet
           size={18}
-          color={isActive ? theme.dockActivePillText : theme.dockInactiveIconColor}
+          color={isActive ? theme.dockActivePillText : '#FFFFFF'}
           strokeWidth={isActive ? 2.4 : 1.8}
         />
       ),
     },
     {
-      id: 'analytics' as NavTabId,
-      label: 'Stats',
+      id: 'tasks' as NavTabId,
+      label: 'Tasks',
       icon: (isActive: boolean) => (
-        <BarChart2
+        <ListTodo
           size={18}
-          color={isActive ? theme.dockActivePillText : theme.dockInactiveIconColor}
-          strokeWidth={isActive ? 2.4 : 1.8}
-        />
-      ),
-    },
-    {
-      id: 'profile' as NavTabId,
-      label: 'Profile',
-      icon: (isActive: boolean) => (
-        <User
-          size={18}
-          color={isActive ? theme.dockActivePillText : theme.dockInactiveIconColor}
+          color={isActive ? theme.dockActivePillText : '#FFFFFF'}
           strokeWidth={isActive ? 2.4 : 1.8}
         />
       ),
@@ -87,7 +68,7 @@ export const BottomCapsuleDock: React.FC<BottomCapsuleDockProps> = ({
         ]}
       >
         {tabs.map((tab) => {
-          const isActive = activeTab === tab.id;
+          const isActive = normalizedActive === tab.id;
           return (
             <TouchableOpacity
               key={tab.id}
@@ -104,6 +85,7 @@ export const BottomCapsuleDock: React.FC<BottomCapsuleDockProps> = ({
                 ]}
               >
                 {tab.icon(isActive)}
+                {/* Only display name when tab is selected */}
                 {isActive && (
                   <Text style={[styles.activeTabLabel, { color: theme.dockActivePillText }]}>
                     {tab.label}
@@ -135,10 +117,10 @@ const styles = StyleSheet.create({
     padding: 6,
     gap: 6,
     shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.12,
-    shadowRadius: 8,
-    elevation: 3,
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.35,
+    shadowRadius: 12,
+    elevation: 6,
     borderWidth: 1,
   },
   tabBase: {
@@ -149,13 +131,13 @@ const styles = StyleSheet.create({
   activeTabPill: {
     flexDirection: 'row',
     alignItems: 'center',
-    borderRadius: 26,
-    paddingHorizontal: 18,
-    gap: 7,
+    borderRadius: 24,
+    paddingHorizontal: 20,
+    gap: 8,
   },
   activeTabLabel: {
     fontSize: 13,
-    fontWeight: '700',
+    fontWeight: '800',
     letterSpacing: -0.2,
   },
   inactiveTabCircle: {

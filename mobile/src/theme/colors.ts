@@ -1,4 +1,4 @@
-import { useColorScheme } from 'react-native';
+import { useColorScheme, Platform } from 'react-native';
 
 /**
  * Sovereign Sinance (EcoFin) Theme System
@@ -116,7 +116,7 @@ export const DARK_THEME: ThemeColors = {
   // Brand: Signature Sinance Mint Green
   brand: '#23F07D',
   brandMedium: '#1DDC74',
-  brandLight: '#E9FDF2',
+  brandLight: 'rgba(35, 240, 125, 0.15)',
   brandDark: '#1CD870',
 
   // Forest Ink on Green
@@ -194,11 +194,11 @@ export const LIGHT_THEME: ThemeColors = {
   textDim: '#71717A',
   textInverse: '#FFFFFF',
 
-  // Brand: Signature Sinance Mint Green
-  brand: '#23F07D',
-  brandMedium: '#1DDC74',
-  brandLight: '#E9FDF2',
-  brandDark: '#1CD870',
+  // Brand: Signature Sinance Green (High-contrast rich emerald for text & accents in light mode)
+  brand: '#059669',
+  brandMedium: '#047857',
+  brandLight: '#ECFDF5',
+  brandDark: '#065F46',
 
   // Forest Ink on Green
   forestDark: '#07170D',
@@ -258,11 +258,19 @@ export const LIGHT_THEME: ThemeColors = {
 };
 
 /**
- * Reactive theme hook that detects device/OS color scheme
+ * Reactive theme hook that automatically detects device/OS color scheme
+ * Supports light and dark mode dynamically
  */
 export function useAppTheme(): ThemeColors {
-  const scheme = useColorScheme();
-  return scheme === 'dark' ? DARK_THEME : LIGHT_THEME;
+  const systemScheme = useColorScheme();
+
+  if (Platform.OS === 'web' && typeof globalThis !== 'undefined' && (globalThis as any).window) {
+    const urlTheme = new URLSearchParams((globalThis as any).window.location.search).get('theme');
+    if (urlTheme === 'light') return LIGHT_THEME;
+    if (urlTheme === 'dark') return DARK_THEME;
+  }
+
+  return systemScheme === 'light' ? LIGHT_THEME : DARK_THEME;
 }
 
 // Static default export for compatibility
