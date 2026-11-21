@@ -40,6 +40,7 @@ export interface ProfileScreenProps {
   onToggleSetupDismissed?: () => void;
   onOpenAuth?: () => void;
   animProgress?: Animated.Value;
+  isAvatarHidden?: boolean;
 }
 
 export const ProfileScreen: React.FC<ProfileScreenProps> = ({
@@ -50,6 +51,7 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
   onToggleSetupDismissed,
   onOpenAuth,
   animProgress,
+  isAvatarHidden = false,
 }) => {
   const theme = useAppTheme();
   const { user, signOut } = useAuth();
@@ -153,6 +155,7 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
               {
                 borderColor: theme.borderSubtle,
                 backgroundColor: theme.surfaceSubtle,
+                opacity: isAvatarHidden ? 0 : 1,
                 transform: [
                   { scale: avatarScale },
                   { translateX: avatarTranslateX },

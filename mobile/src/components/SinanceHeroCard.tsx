@@ -15,6 +15,7 @@ interface SinanceHeroCardProps {
   onPressDismissSetup?: () => void;
   onPressGetSetUp?: () => void;
   onPressBalance?: () => void;
+  isAvatarHidden?: boolean;
 }
 
 export const SinanceHeroCard: React.FC<SinanceHeroCardProps> = ({
@@ -29,6 +30,7 @@ export const SinanceHeroCard: React.FC<SinanceHeroCardProps> = ({
   onPressDismissSetup,
   onPressGetSetUp,
   onPressBalance,
+  isAvatarHidden = false,
 }) => {
   const theme = useAppTheme();
 
@@ -42,7 +44,16 @@ export const SinanceHeroCard: React.FC<SinanceHeroCardProps> = ({
           style={styles.userInfoRow}
         >
           {/* Avatar with circular ring */}
-          <View style={[styles.avatarWrapper, { borderColor: theme.surface, backgroundColor: theme.avatarInnerBg }]}>
+          <View
+            style={[
+              styles.avatarWrapper,
+              {
+                borderColor: theme.surface,
+                backgroundColor: theme.avatarInnerBg,
+                opacity: isAvatarHidden ? 0 : 1,
+              },
+            ]}
+          >
             <Image
               source={require('../../assets/esther_avatar.png')}
               style={styles.avatarImage}

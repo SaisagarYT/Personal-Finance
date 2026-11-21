@@ -8,6 +8,7 @@ import {
   ScrollView,
   Animated,
   Easing,
+  Image,
 } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { SinanceHeroCard } from './src/components/SinanceHeroCard';
@@ -46,27 +47,42 @@ function AppContent() {
   });
   const initialProfileOpen = getQueryParam('profile') === 'true';
   const [isProfileMounted, setIsProfileMounted] = useState(initialProfileOpen);
+  const [isAvatarFlying, setIsAvatarFlying] = useState(false);
+  const [isProfileSettled, setIsProfileSettled] = useState(initialProfileOpen);
   const profileAnim = useRef(new Animated.Value(initialProfileOpen ? 1 : 0)).current;
 
   const handleOpenProfile = () => {
     setIsProfileMounted(true);
+    setIsAvatarFlying(true);
+    setIsProfileSettled(false);
+
     Animated.timing(profileAnim, {
       toValue: 1,
-      duration: 340,
+      duration: 380,
       easing: Easing.bezier(0.16, 1, 0.3, 1),
-      useNativeDriver: Platform.OS !== 'web',
-    }).start();
+      useNativeDriver: false,
+    }).start(({ finished }) => {
+      if (finished) {
+        setIsAvatarFlying(false);
+        setIsProfileSettled(true);
+      }
+    });
   };
 
   const handleCloseProfile = () => {
+    setIsAvatarFlying(true);
+    setIsProfileSettled(false);
+
     Animated.timing(profileAnim, {
       toValue: 0,
-      duration: 270,
+      duration: 320,
       easing: Easing.bezier(0.25, 0.1, 0.25, 1),
-      useNativeDriver: Platform.OS !== 'web',
+      useNativeDriver: false,
     }).start(({ finished }) => {
       if (finished) {
+        setIsAvatarFlying(false);
         setIsProfileMounted(false);
+        setIsProfileSettled(false);
       }
     });
   };
@@ -274,6 +290,7 @@ function AppContent() {
                   onPressBalance={() => {
                     setIsPocketOpen(true);
                   }}
+                  isAvatarHidden={isAvatarFlying || isProfileMounted}
                 />
 
                 {/* SECTION 2: TWO-COLUMN ACTIVITY & BRAIN CARDS */}
@@ -329,7 +346,7 @@ function AppContent() {
             />
           </Animated.View>
 
-          {/* ================= FULL PROFILE SCREEN (HERO MOTION) ================= */}
+          {/* ================= FULL PROFILE SCREEN (SLIDES UP FROM BOTTOM) ================= */}
           {isProfileMounted && (
             <Animated.View
               style={[
@@ -337,21 +354,11 @@ function AppContent() {
                 {
                   zIndex: 200,
                   backgroundColor: theme.canvas,
-                  opacity: profileAnim.interpolate({
-                    inputRange: [0, 0.25, 1],
-                    outputRange: [0, 0.85, 1],
-                  }),
                   transform: [
                     {
                       translateY: profileAnim.interpolate({
                         inputRange: [0, 1],
-                        outputRange: [65, 0],
-                      }),
-                    },
-                    {
-                      scale: profileAnim.interpolate({
-                        inputRange: [0, 1],
-                        outputRange: [0.96, 1],
+                        outputRange: [800, 0],
                       }),
                     },
                   ],
@@ -369,6 +376,51 @@ function AppContent() {
                   handleCloseProfile();
                   setIsAuthModalOpen(true);
                 }}
+                isAvatarHidden={!isProfileSettled}
+              />
+            </Animated.View>
+          )}
+
+          {/* ================= SHARED FLYING AVATAR (HOMEPAGE -> PROFILE POSITION) ================= */}
+          {(isAvatarFlying || (isProfileMounted && !isProfileSettled)) && (
+            <Animated.View
+              pointerEvents="none"
+              style={[
+                styles.flyingAvatarContainer,
+                {
+                  left: profileAnim.interpolate({
+                    inputRange: [0, 1],
+                    outputRange: [20, 39],
+                  }),
+                  top: profileAnim.interpolate({
+                    inputRange: [0, 1],
+                    outputRange: [Platform.OS === 'android' ? 14 : 10, Platform.OS === 'android' ? 89 : 85],
+                  }),
+                  width: profileAnim.interpolate({
+                    inputRange: [0, 1],
+                    outputRange: [44, 54],
+                  }),
+                  height: profileAnim.interpolate({
+                    inputRange: [0, 1],
+                    outputRange: [44, 54],
+                  }),
+                  borderRadius: profileAnim.interpolate({
+                    inputRange: [0, 1],
+                    outputRange: [22, 27],
+                  }),
+                  borderWidth: profileAnim.interpolate({
+                    inputRange: [0, 1],
+                    outputRange: [2, 1.5],
+                  }),
+                  borderColor: theme.borderSubtle,
+                  backgroundColor: theme.avatarInnerBg,
+                },
+              ]}
+            >
+              <Image
+                source={require('./assets/esther_avatar.png')}
+                style={styles.flyingAvatarImage}
+                resizeMode="cover"
               />
             </Animated.View>
           )}
@@ -440,5 +492,14 @@ const styles = StyleSheet.create({
   },
   contentContainer: {
     paddingBottom: 110,
+  },
+  flyingAvatarContainer: {
+    position: 'absolute',
+    overflow: 'hidden',
+    zIndex: 350,
+  },
+  flyingAvatarImage: {
+    width: '100%',
+    height: '100%',
   },
 });
