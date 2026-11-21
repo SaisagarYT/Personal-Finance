@@ -9,7 +9,7 @@ import { StatsView } from './src/screens/StatsView';
 import { SinancePocketScreen } from './src/screens/SinancePocketScreen';
 import { TaskManagerScreen } from './src/screens/TaskManagerScreen';
 import { AuthScreen } from './src/screens/AuthScreen';
-import { ProfileModal } from './src/components/ProfileModal';
+import { ProfileScreen } from './src/screens/ProfileScreen';
 import { GetSetUpModal } from './src/components/GetSetUpModal';
 import { AuthProvider, useAuth } from './src/context/AuthContext';
 import { FinanceService, Account, Transaction } from './src/services/financeService';
@@ -35,7 +35,7 @@ function AppContent() {
   const [isPocketOpen, setIsPocketOpen] = useState(() => {
     return getQueryParam('pocket') === 'true';
   });
-  const [isProfileModalOpen, setIsProfileModalOpen] = useState(() => {
+  const [isProfileOpen, setIsProfileOpen] = useState(() => {
     return getQueryParam('profile') === 'true';
   });
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(() => {
@@ -150,10 +150,20 @@ function AppContent() {
           }
         />
         <View style={[styles.mainContainer, { backgroundColor: theme.canvas }]}>
-          {activeTab === 'tasks' ? (
+          {isProfileOpen ? (
+            /* ================= FULL PROFILE & PREFERENCES SCREEN ================= */
+            <ProfileScreen
+              onBack={() => setIsProfileOpen(false)}
+              currency={currency}
+              onToggleCurrency={(newCurr) => setCurrency(newCurr)}
+              isSetupDismissed={isSetupDismissed}
+              onToggleSetupDismissed={() => setIsSetupDismissed((prev) => !prev)}
+              onOpenAuth={() => setIsAuthModalOpen(true)}
+            />
+          ) : activeTab === 'tasks' ? (
             /* ================= TAB 2: TASKS & GOALS BOARD ================= */
             <TaskManagerScreen
-              onOpenProfile={() => setIsProfileModalOpen(true)}
+              onOpenProfile={() => setIsProfileOpen(true)}
             />
           ) : isPocketOpen || activeTab === 'cards' ? (
             /* ================= POCKET DETAIL SCREEN ================= */
@@ -213,8 +223,8 @@ function AppContent() {
                     : 'is a crucial phase in the onboarding process'
                 }
                 isSetupDismissed={isSetupDismissed}
-                onPressAvatar={() => setIsProfileModalOpen(true)}
-                onPressNotification={() => setIsProfileModalOpen(true)}
+                onPressAvatar={() => setIsProfileOpen(true)}
+                onPressNotification={() => setIsProfileOpen(true)}
                 onPressDismissSetup={() => setIsSetupDismissed(true)}
                 onPressGetSetUp={() => setIsGetSetUpModalOpen(true)}
                 onPressBalance={() => {
@@ -249,20 +259,7 @@ function AppContent() {
             onSelectTab={(tab) => {
               setActiveTab(tab);
               setIsPocketOpen(false);
-            }}
-          />
-
-          {/* ================= PROFILE & PREFERENCES HUB MODAL ================= */}
-          <ProfileModal
-            visible={isProfileModalOpen}
-            onClose={() => setIsProfileModalOpen(false)}
-            currency={currency}
-            onToggleCurrency={(newCurr) => setCurrency(newCurr)}
-            isSetupDismissed={isSetupDismissed}
-            onToggleSetupDismissed={() => setIsSetupDismissed((prev) => !prev)}
-            onOpenAuth={() => {
-              setIsProfileModalOpen(false);
-              setIsAuthModalOpen(true);
+              setIsProfileOpen(false);
             }}
           />
 

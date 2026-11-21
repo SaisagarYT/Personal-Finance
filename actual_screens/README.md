@@ -16,7 +16,8 @@ actual_screens/
 │   ├── 03_stats/
 │   │   └── stats_screen.png                  # Live Stats view (Capsule charts, Category pills, Trend metrics)
 │   ├── 04_profile/
-│   │   └── profile_screen.png                # Live Profile modal (Identity, Cloud Sync, Currency switch)
+│   │   ├── profile_screen_dark.png           # Live Profile & Settings screen (Dark mode)
+│   │   └── profile_screen_light.png          # Live Profile & Settings screen (Light mode)
 │   ├── 05_auth/
 │   │   └── auth_screen.png                   # Live Auth screen (Supabase sign in & sign up)
 │   └── 06_task_manager/
