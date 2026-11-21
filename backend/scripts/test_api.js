@@ -182,8 +182,13 @@ async function runTestSuite() {
     console.log(`  -> Safety gate triggered: ${crisisHit ? 'YES (CRISIS INTERCEPTED)' : 'NO'}`);
     if (!crisisHit) throw new Error('Safety gate failed to intercept crisis phrase');
 
+    console.log('\n[Test 11] Testing Subscriptions & Recurring Bills...');
+    const { data: subData } = await supabase.from('subscriptions').select('*').eq('user_id', TEST_USER_ID);
+    console.log(`  -> Subscriptions retrieved: ${subData?.length} active bills in Supabase`);
+    if (!subData || subData.length === 0) throw new Error('No subscriptions found');
+
     console.log(`\n======================================================`);
-    console.log(`   ALL 10 BACKEND INTEGRATION TESTS PASSED (100% OK)`);
+    console.log(`   ALL 11 BACKEND INTEGRATION TESTS PASSED (100% OK)`);
     console.log(`======================================================\n`);
   } finally {
     server.close();

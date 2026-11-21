@@ -10,6 +10,7 @@ import transactionsRoutes from './routes/transactions.js';
 import analyticsRoutes from './routes/analytics.js';
 import budgetsRoutes from './routes/budgets.js';
 import savingsRoutes from './routes/savings.js';
+import subscriptionsRoutes from './routes/subscriptions.js';
 import goalsRoutes from './routes/goals.js';
 import habitsRoutes from './routes/habits.js';
 import focusRoutes from './routes/focus.js';
@@ -55,6 +56,7 @@ app.use('/api/transactions', transactionsRoutes);
 app.use('/api/analytics', analyticsRoutes);
 app.use('/api/budgets', budgetsRoutes);
 app.use('/api/savings', savingsRoutes);
+app.use('/api/subscriptions', subscriptionsRoutes);
 
 // 2. Life OS Modules
 app.use('/api/goals', goalsRoutes);
