@@ -5,9 +5,9 @@ import { HeaderBar } from './src/components/HeaderBar';
 import { CardStack } from './src/components/CardStack';
 import { ActionPills } from './src/components/ActionPills';
 import { ExpenseLedger } from './src/components/ExpenseLedger';
-import { EcoFinHeroCard } from './src/components/EcoFinHeroCard';
-import { EcoFinActivitySection } from './src/components/EcoFinActivitySection';
-import { EcoFinSavingsRulesSection } from './src/components/EcoFinSavingsRulesSection';
+import { SinanceHeroCard } from './src/components/SinanceHeroCard';
+import { SinanceActivitySection } from './src/components/SinanceActivitySection';
+import { SinanceSavingsRulesSection } from './src/components/SinanceSavingsRulesSection';
 import { BottomCapsuleDock, NavTabId } from './src/components/BottomCapsuleDock';
 import { StatsView } from './src/screens/StatsView';
 import { useAppTheme } from './src/theme/colors';
@@ -114,9 +114,9 @@ export default function App() {
               showsVerticalScrollIndicator={false}
               bounces={false}
             >
-              {/* ================= SECTION 1: ECOFIN HERO CARD ================= */}
-              <EcoFinHeroCard
-                userName="Esther"
+              {/* ================= SECTION 1: SINANCE HERO CARD ================= */}
+              <SinanceHeroCard
+                userName="Sagar"
                 balance="$142.83"
                 pastWeekDiff="+$23.91 past week"
                 onboardingStep="2 of 5 complete"
@@ -128,7 +128,7 @@ export default function App() {
               />
 
               {/* ================= SECTION 2: TWO-COLUMN ACTIVITY & BRAIN CARDS ================= */}
-              <EcoFinActivitySection
+              <SinanceActivitySection
                 brainAmount="$142.83"
                 sinceAllTimeLabel="Since All Time"
                 dailyCashSubtitle="+$15.43 Daily Cash"
@@ -137,7 +137,7 @@ export default function App() {
               />
 
               {/* ================= SECTION 3: SAVINGS RULES & 1P CHALLENGE ================= */}
-              <EcoFinSavingsRulesSection
+              <SinanceSavingsRulesSection
                 automaticAmount="$150.87"
                 onPressAutomaticRule={() => console.log('Automatic saving rule pressed')}
                 onPressChallenge={() => console.log('1P Challenge pressed')}

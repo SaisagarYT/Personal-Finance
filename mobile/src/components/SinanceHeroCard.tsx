@@ -2,7 +2,7 @@ import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Image, Platform } from 'react-native';
 import { Bell, ChevronRight, ChevronsRight, X } from 'lucide-react-native';
 
-interface EcoFinHeroCardProps {
+interface SinanceHeroCardProps {
   userName?: string;
   balance?: string;
   pastWeekDiff?: string;
@@ -14,8 +14,8 @@ interface EcoFinHeroCardProps {
   onPressBalance?: () => void;
 }
 
-export const EcoFinHeroCard: React.FC<EcoFinHeroCardProps> = ({
-  userName = 'Esther',
+export const SinanceHeroCard: React.FC<SinanceHeroCardProps> = ({
+  userName = 'Sagar',
   balance = '$142.83',
   pastWeekDiff = '$23.91 past week',
   onboardingStep = '2 of 5 complete',
@@ -61,7 +61,7 @@ export const EcoFinHeroCard: React.FC<EcoFinHeroCardProps> = ({
 
       {/* 2. Value & Balance Section */}
       <View style={styles.balanceSection}>
-        <Text style={styles.balanceLabel}>Your EcoFin Value</Text>
+        <Text style={styles.balanceLabel}>Your Sinance Value</Text>
         <TouchableOpacity
           activeOpacity={0.9}
           onPress={onPressBalance}

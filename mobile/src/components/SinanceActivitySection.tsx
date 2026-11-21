@@ -2,7 +2,7 @@ import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { Flame } from 'lucide-react-native';
 
-interface EcoFinActivitySectionProps {
+interface SinanceActivitySectionProps {
   brainAmount?: string;
   sinceAllTimeLabel?: string;
   dailyCashSubtitle?: string;
@@ -10,7 +10,7 @@ interface EcoFinActivitySectionProps {
   onPressActivityCard?: () => void;
 }
 
-export const EcoFinActivitySection: React.FC<EcoFinActivitySectionProps> = ({
+export const SinanceActivitySection: React.FC<SinanceActivitySectionProps> = ({
   brainAmount = '$142.83',
   sinceAllTimeLabel = 'Since All Time',
   dailyCashSubtitle = '+$15.43 Daily Cash',
@@ -18,7 +18,7 @@ export const EcoFinActivitySection: React.FC<EcoFinActivitySectionProps> = ({
   onPressActivityCard,
 }) => {
   // 7 weekly activity data points (Monday through Sunday)
-  // Thursday is the peak active day highlighted with EcoFin Green
+  // Thursday is the peak active day highlighted with Sinance Green (#23F07D)
   const weeklyBars = [
     { day: 'M', height: 10, isHighlight: false },
     { day: 'T', height: 16, isHighlight: false },

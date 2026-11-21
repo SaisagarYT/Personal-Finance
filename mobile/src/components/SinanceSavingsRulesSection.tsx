@@ -2,13 +2,13 @@ import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { Star, Target, ChevronRight } from 'lucide-react-native';
 
-interface EcoFinSavingsRulesSectionProps {
+interface SinanceSavingsRulesSectionProps {
   automaticAmount?: string;
   onPressAutomaticRule?: () => void;
   onPressChallenge?: () => void;
 }
 
-export const EcoFinSavingsRulesSection: React.FC<EcoFinSavingsRulesSectionProps> = ({
+export const SinanceSavingsRulesSection: React.FC<SinanceSavingsRulesSectionProps> = ({
   automaticAmount = '$150.87',
   onPressAutomaticRule,
   onPressChallenge,
