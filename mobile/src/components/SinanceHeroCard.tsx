@@ -9,6 +9,7 @@ interface SinanceHeroCardProps {
   pastWeekDiff?: string;
   onboardingStep?: string;
   onboardingText?: string;
+  isSetupDismissed?: boolean;
   onPressNotification?: () => void;
   onPressAvatar?: () => void;
   onPressDismissSetup?: () => void;
@@ -22,6 +23,7 @@ export const SinanceHeroCard: React.FC<SinanceHeroCardProps> = ({
   pastWeekDiff = '$23.91 past week',
   onboardingStep = '2 of 5 complete',
   onboardingText = 'is a crucial phase in the onboarding process',
+  isSetupDismissed = false,
   onPressNotification,
   onPressAvatar,
   onPressDismissSetup,
@@ -85,49 +87,51 @@ export const SinanceHeroCard: React.FC<SinanceHeroCardProps> = ({
       </View>
 
       {/* 3. Setup / Onboarding Banner */}
-      <View
-        style={[
-          styles.setupBanner,
-          {
-            backgroundColor: theme.heroSetupBannerBg,
-            borderColor: theme.heroSetupBannerBorder,
-          },
-        ]}
-      >
-        {/* Onboarding phase notice + Dismiss button */}
-        <View style={styles.setupTextRow}>
-          <Text style={[styles.setupNoticeText, { color: theme.forestDark }]}>
-            Get Set Up <Text style={[styles.setupNoticeEmphasis, { color: theme.forestDark }]}>({onboardingStep})</Text> {onboardingText}
-          </Text>
+      {!isSetupDismissed && (
+        <View
+          style={[
+            styles.setupBanner,
+            {
+              backgroundColor: theme.heroSetupBannerBg,
+              borderColor: theme.heroSetupBannerBorder,
+            },
+          ]}
+        >
+          {/* Onboarding phase notice + Dismiss button */}
+          <View style={styles.setupTextRow}>
+            <Text style={[styles.setupNoticeText, { color: theme.forestDark }]}>
+              Get Set Up <Text style={[styles.setupNoticeEmphasis, { color: theme.forestDark }]}>({onboardingStep})</Text> {onboardingText}
+            </Text>
+            <TouchableOpacity
+              activeOpacity={0.7}
+              onPress={onPressDismissSetup}
+              style={[styles.dismissButton, { backgroundColor: theme.heroPillDiscBg }]}
+            >
+              <X size={12} color={theme.heroPillDiscIcon} strokeWidth={2.8} />
+            </TouchableOpacity>
+          </View>
+
+          {/* Interactive Action Pill Button */}
           <TouchableOpacity
-            activeOpacity={0.7}
-            onPress={onPressDismissSetup}
-            style={[styles.dismissButton, { backgroundColor: theme.heroPillDiscBg }]}
+            activeOpacity={0.9}
+            onPress={onPressGetSetUp}
+            style={[styles.actionPillButton, { backgroundColor: theme.heroPillBg }]}
           >
-            <X size={12} color={theme.heroPillDiscIcon} strokeWidth={2.8} />
+            {/* Left black disc with chevron */}
+            <View style={[styles.arrowDisc, { backgroundColor: theme.heroPillDiscBg }]}>
+              <ChevronRight size={17} color={theme.heroPillDiscIcon} strokeWidth={2.8} />
+            </View>
+
+            {/* Center text */}
+            <Text style={[styles.actionPillText, { color: theme.heroPillText }]}>Get Set Up</Text>
+
+            {/* Right double chevron */}
+            <View style={styles.rightChevrons}>
+              <ChevronsRight size={18} color={theme.textDim} strokeWidth={2.4} />
+            </View>
           </TouchableOpacity>
         </View>
-
-        {/* Interactive Action Pill Button */}
-        <TouchableOpacity
-          activeOpacity={0.9}
-          onPress={onPressGetSetUp}
-          style={[styles.actionPillButton, { backgroundColor: theme.heroPillBg }]}
-        >
-          {/* Left black disc with chevron */}
-          <View style={[styles.arrowDisc, { backgroundColor: theme.heroPillDiscBg }]}>
-            <ChevronRight size={17} color={theme.heroPillDiscIcon} strokeWidth={2.8} />
-          </View>
-
-          {/* Center text */}
-          <Text style={[styles.actionPillText, { color: theme.heroPillText }]}>Get Set Up</Text>
-
-          {/* Right double chevron */}
-          <View style={styles.rightChevrons}>
-            <ChevronsRight size={18} color={theme.textDim} strokeWidth={2.4} />
-          </View>
-        </TouchableOpacity>
-      </View>
+      )}
     </View>
   );
 };

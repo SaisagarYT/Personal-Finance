@@ -10,6 +10,7 @@ import { SinancePocketScreen } from './src/screens/SinancePocketScreen';
 import { TaskManagerScreen } from './src/screens/TaskManagerScreen';
 import { AuthScreen } from './src/screens/AuthScreen';
 import { ProfileModal } from './src/components/ProfileModal';
+import { GetSetUpModal } from './src/components/GetSetUpModal';
 import { AuthProvider, useAuth } from './src/context/AuthContext';
 import { FinanceService, Account, Transaction } from './src/services/financeService';
 import { SubscriptionService } from './src/services/subscriptionService';
@@ -39,6 +40,12 @@ function AppContent() {
   });
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(() => {
     return getQueryParam('auth') === 'true';
+  });
+  const [isSetupDismissed, setIsSetupDismissed] = useState(() => {
+    return getQueryParam('setup_dismissed') === 'true';
+  });
+  const [isGetSetUpModalOpen, setIsGetSetUpModalOpen] = useState(() => {
+    return getQueryParam('setup_modal') === 'true';
   });
 
   // Cloud Financial Data State
@@ -205,16 +212,11 @@ function AppContent() {
                     ? 'Your data is connected to Supabase and synced across devices.'
                     : 'is a crucial phase in the onboarding process'
                 }
+                isSetupDismissed={isSetupDismissed}
                 onPressAvatar={() => setIsProfileModalOpen(true)}
                 onPressNotification={() => setIsProfileModalOpen(true)}
-                onPressDismissSetup={() => console.log('Dismiss setup')}
-                onPressGetSetUp={() => {
-                  if (!user) {
-                    setIsAuthModalOpen(true);
-                  } else {
-                    setIsPocketOpen(true);
-                  }
-                }}
+                onPressDismissSetup={() => setIsSetupDismissed(true)}
+                onPressGetSetUp={() => setIsGetSetUpModalOpen(true)}
                 onPressBalance={() => {
                   setIsPocketOpen(true);
                 }}
@@ -258,6 +260,18 @@ function AppContent() {
               setIsProfileModalOpen(false);
               setIsAuthModalOpen(true);
             }}
+          />
+
+          {/* ================= GET SET UP MODAL ================= */}
+          <GetSetUpModal
+            visible={isGetSetUpModalOpen}
+            onClose={() => setIsGetSetUpModalOpen(false)}
+            onDismissFromHome={() => setIsSetupDismissed(true)}
+            onNavigateToPocket={() => setIsPocketOpen(true)}
+            onNavigateToBills={() => {
+              // Can open upcoming bills screen
+            }}
+            onNavigateToAuth={() => setIsAuthModalOpen(true)}
           />
 
           {/* ================= AUTH MODAL ================= */}
