@@ -18,10 +18,31 @@ function AppContent() {
   const { user, session } = useAuth();
 
   const [currency, setCurrency] = useState<'INR' | 'USD'>('INR');
-  const [activeTab, setActiveTab] = useState<NavTabId>('home');
-  const [isPocketOpen, setIsPocketOpen] = useState(false);
-  const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
-  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState<NavTabId>(() => {
+    if (Platform.OS === 'web' && typeof window !== 'undefined') {
+      const t = new URLSearchParams(window.location.search).get('tab') as NavTabId | null;
+      if (t) return t;
+    }
+    return 'home';
+  });
+  const [isPocketOpen, setIsPocketOpen] = useState(() => {
+    if (Platform.OS === 'web' && typeof window !== 'undefined') {
+      return new URLSearchParams(window.location.search).get('pocket') === 'true';
+    }
+    return false;
+  });
+  const [isProfileModalOpen, setIsProfileModalOpen] = useState(() => {
+    if (Platform.OS === 'web' && typeof window !== 'undefined') {
+      return new URLSearchParams(window.location.search).get('profile') === 'true';
+    }
+    return false;
+  });
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(() => {
+    if (Platform.OS === 'web' && typeof window !== 'undefined') {
+      return new URLSearchParams(window.location.search).get('auth') === 'true';
+    }
+    return false;
+  });
 
   // Cloud Financial Data State
   const [accounts, setAccounts] = useState<Account[]>([]);
