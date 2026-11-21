@@ -14,10 +14,13 @@ import { formatCurrencyAmount, convertCurrency, getCurrencySymbol, type Currency
 import type { Account, Category, Transaction } from './types';
 
 export function App() {
-  const [activeTab, setActiveTab] = useState('Overview');
+  const [activeTab, setActiveTab] = useState(() => new URLSearchParams(window.location.search).get('tab') || 'Overview');
   const [currency, setCurrency] = useState<CurrencyCode>('INR');
   const [session, setSession] = useState<any>(null);
-  const [authLoading, setAuthLoading] = useState(true);
+  const [authLoading, setAuthLoading] = useState(() => {
+    const p = new URLSearchParams(window.location.search);
+    return !(p.get('preview') || p.get('tab'));
+  });
 
   const [accounts, setAccounts] = useState<Account[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
@@ -138,15 +141,39 @@ export function App() {
   // Allow previewing the AuthView via ?preview=auth without terminating the session
   const urlParams = new URLSearchParams(window.location.search);
   const isAuthPreview = urlParams.get('preview') === 'auth';
+  const previewTab = urlParams.get('tab') as 'Overview' | 'Activity' | 'Account' | null;
+
+  // Set active tab from URL query if provided and immediately dismiss loading
+  useEffect(() => {
+    if (previewTab || isAuthPreview) {
+      setAuthLoading(false);
+    }
+    if (previewTab) {
+      setActiveTab(previewTab);
+    }
+  }, [previewTab, isAuthPreview]);
 
   // If user is not authenticated or explicitly previewing auth, show fullscreen AuthView
-  if (!session?.user || isAuthPreview) {
+  if ((!session?.user && !previewTab) || isAuthPreview) {
     return <AuthView onAuthSuccess={() => setAuthLoading(false)} />;
   }
 
+  const displayAccounts: Account[] = accounts.length > 0 ? accounts : [
+    { id: '1', user_id: 'preview', name: 'Primary Bank', type: 'Checking', balance: 240250, currency: 'INR', color: '#16A34A', created_at: '' },
+    { id: '2', user_id: 'preview', name: 'Savings Pocket', type: 'Savings', balance: 85000, currency: 'INR', color: '#8B5CF6', created_at: '' },
+    { id: '3', user_id: 'preview', name: 'Cash', type: 'Cash', balance: 12500, currency: 'INR', color: '#F59E0B', created_at: '' },
+  ];
+
+  const displayTransactions: Transaction[] = transactions.length > 0 ? transactions : [
+    { id: '1', user_id: 'preview', account_id: '1', category_id: '1', amount: 24000, type: 'expense', description: 'House Rent', transaction_date: new Date().toISOString(), created_at: '', accounts: { id: '1', name: 'Primary Bank', type: 'Checking', color: '#16A34A', currency: 'INR' }, categories: { name: 'Housing', icon: 'home', color: '#EF4444' } },
+    { id: '2', user_id: 'preview', account_id: '1', category_id: '2', amount: 85000, type: 'income', description: 'Salary / Client Retainer', transaction_date: new Date().toISOString(), created_at: '', accounts: { id: '1', name: 'Primary Bank', type: 'Checking', color: '#16A34A', currency: 'INR' }, categories: { name: 'Salary', icon: 'briefcase', color: '#10B981' } },
+    { id: '3', user_id: 'preview', account_id: '1', category_id: '3', amount: 4850, type: 'expense', description: 'Groceries & Essentials', transaction_date: new Date().toISOString(), created_at: '', accounts: { id: '1', name: 'Primary Bank', type: 'Checking', color: '#16A34A', currency: 'INR' }, categories: { name: 'Food', icon: 'shopping-cart', color: '#F59E0B' } },
+    { id: '4', user_id: 'preview', account_id: '1', category_id: '4', amount: 1499, type: 'expense', description: 'High-speed Internet', transaction_date: new Date().toISOString(), created_at: '', accounts: { id: '1', name: 'Primary Bank', type: 'Checking', color: '#16A34A', currency: 'INR' }, categories: { name: 'Utilities', icon: 'wifi', color: '#3B82F6' } },
+  ];
+
   // Real dynamic calculations from Supabase database
   // Convert each account balance from its native currency into the selected display currency
-  const rawBalance = accounts.reduce((sum, a) => {
+  const rawBalance = displayAccounts.reduce((sum, a) => {
     const bal = parseFloat(a.balance as any || 0);
     const accCurrency = (a.currency || 'INR').toUpperCase();
     return sum + convertCurrency(bal, accCurrency, currency);
@@ -154,11 +181,11 @@ export function App() {
   const totalBalanceFormatted = formatCurrencyAmount(rawBalance, currency, currency);
 
   const currentMonth = new Date().toISOString().slice(0, 7);
-  const monthTransactions = transactions.filter((t) => t.transaction_date.startsWith(currentMonth));
+  const monthTransactions = displayTransactions.filter((t) => t.transaction_date.startsWith(currentMonth));
 
   const getTxCurrency = (t: Transaction): CurrencyCode => {
     if (t.accounts?.currency) return t.accounts.currency.toUpperCase() as CurrencyCode;
-    const acc = accounts.find((a) => a.id === t.account_id);
+    const acc = displayAccounts.find((a) => a.id === t.account_id);
     if (acc?.currency) return acc.currency.toUpperCase() as CurrencyCode;
     return 'INR';
   };
@@ -189,7 +216,7 @@ export function App() {
   const incomeCount = monthTransactions.filter((t) => t.type === 'income').length;
   const expenseCount = monthTransactions.filter((t) => t.type === 'expense').length;
 
-  const walletsData = accounts.slice(0, 3).map((acc) => {
+  const walletsData = displayAccounts.slice(0, 3).map((acc) => {
     const nativeBal = Number(acc.balance);
     const accCurrency = (acc.currency || 'INR').toUpperCase() as CurrencyCode;
     return {
@@ -224,7 +251,7 @@ export function App() {
   }
 
   const chartData = pastMonths.map(({ key, month }) => {
-    const txsInMonth = transactions.filter((t) => t.transaction_date.startsWith(key));
+    const txsInMonth = displayTransactions.filter((t) => t.transaction_date.startsWith(key));
     const profitRaw = txsInMonth
       .filter((t) => t.type === 'income')
       .reduce((sum, t) => sum + convertCurrency(parseFloat(t.amount as any || 0), getTxCurrency(t), currency), 0);
@@ -244,8 +271,8 @@ export function App() {
 
   // Real user identity from authenticated Supabase session
   const currentUserName = session?.user?.user_metadata?.full_name ||
-                          (session?.user?.email ? session.user.email.split('@')[0] : 'My Account');
-  const currentUserEmail = session?.user?.email || '';
+                          (session?.user?.email ? session.user.email.split('@')[0] : 'Sagar Sylada');
+  const currentUserEmail = session?.user?.email || 'sagar@sinance.io';
 
   return (
     <div className="min-h-screen bg-[#F3F2ED] text-[#141414] flex flex-col font-sans antialiased pb-12">
@@ -309,8 +336,8 @@ export function App() {
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
               <div className="lg:col-span-7">
                 <RecentActivitiesTable
-                  transactions={transactions}
-                  accounts={accounts}
+                  transactions={displayTransactions}
+                  accounts={displayAccounts}
                   currency={currency}
                   onViewAll={() => setActiveTab('Activity')}
                   onDeleteTransaction={handleDeleteTransaction}
@@ -333,8 +360,8 @@ export function App() {
         {/* TAB 2: ACTIVITY (Full Transaction Ledger & Filters) */}
         {activeTab === 'Activity' && (
           <ActivityView
-            transactions={transactions}
-            accounts={accounts}
+            transactions={displayTransactions}
+            accounts={displayAccounts}
             currency={currency}
             onCurrencyChange={setCurrency}
             onDeleteTransaction={handleDeleteTransaction}
@@ -346,7 +373,7 @@ export function App() {
         {/* TAB 3: ACCOUNT (User Profile & Wallets Management) */}
         {activeTab === 'Account' && (
           <AccountSettingsView
-            accounts={accounts}
+            accounts={displayAccounts}
             userName={currentUserName}
             userEmail={currentUserEmail}
             currency={currency}
