@@ -108,6 +108,28 @@ function AppContent() {
               }}
               balance={formattedBalance}
               availableBalance="₹0 Available"
+              accounts={accounts}
+              transactions={transactions}
+              onAccountCreated={(newAcc) => {
+                setAccounts((prev) => [...prev, newAcc]);
+                setTotalBalance((prev) => prev + Number(newAcc.balance));
+              }}
+              onTransactionAdded={(newTx) => {
+                setTransactions((prev) => [newTx, ...prev]);
+                const delta = newTx.type === 'income' ? Number(newTx.amount) : -Number(newTx.amount);
+                setTotalBalance((prev) => Math.max(0, prev + delta));
+                setAccounts((prev) =>
+                  prev.map((acc) => {
+                    if (acc.id === newTx.account_id) {
+                      return {
+                        ...acc,
+                        balance: Math.max(0, Number(acc.balance) + delta),
+                      };
+                    }
+                    return acc;
+                  })
+                );
+              }}
             />
           ) : activeTab === 'analytics' ? (
             <StatsView
