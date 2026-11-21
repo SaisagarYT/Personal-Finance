@@ -67,7 +67,7 @@ export const HeaderBar: React.FC<HeaderBarProps> = ({
             ]}
           >
             <View style={[styles.avatarInner, { backgroundColor: theme.avatarInnerBg }]}>
-              <Text style={styles.avatarText}>
+              <Text style={[styles.avatarText, { color: theme.textMain }]}>
                 {userName.charAt(0).toUpperCase()}
               </Text>
             </View>
@@ -136,7 +136,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   avatarText: {
-    color: '#FFFFFF',
     fontSize: 15,
     fontWeight: '800',
   },

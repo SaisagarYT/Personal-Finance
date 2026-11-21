@@ -123,7 +123,7 @@ export const StatsView: React.FC<StatsViewProps> = ({
               activeSegment === 'category' && [
                 styles.segmentTabActive,
                 {
-                  backgroundColor: theme.isDark ? theme.surface : '#FFFFFF',
+                  backgroundColor: theme.surface,
                   shadowColor: '#000000',
                 },
               ],
@@ -153,7 +153,7 @@ export const StatsView: React.FC<StatsViewProps> = ({
               activeSegment === 'all' && [
                 styles.segmentTabActive,
                 {
-                  backgroundColor: theme.isDark ? theme.surface : '#FFFFFF',
+                  backgroundColor: theme.surface,
                   shadowColor: '#000000',
                 },
               ],

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { Flame } from 'lucide-react-native';
+import { useAppTheme } from '../theme/colors';
 
 interface SinanceActivitySectionProps {
   brainAmount?: string;
@@ -19,6 +20,7 @@ export const SinanceActivitySection: React.FC<SinanceActivitySectionProps> = ({
   onPressBrainCard,
   onPressActivityCard,
 }) => {
+  const theme = useAppTheme();
   // Local interaction state so it turns white upon touch/press
   const [isPressed, setIsPressed] = useState(false);
 
@@ -26,7 +28,7 @@ export const SinanceActivitySection: React.FC<SinanceActivitySectionProps> = ({
   const isWhite = isBrainActive || isPressed;
 
   // 7 weekly activity data points (Monday through Sunday)
-  // Thursday is the peak active day highlighted with Sinance Green (#23F07D)
+  // Thursday is the peak active day highlighted with EcoFin Green
   const weeklyBars = [
     { day: 'M', height: 10, isHighlight: false },
     { day: 'T', height: 16, isHighlight: false },
@@ -47,21 +49,24 @@ export const SinanceActivitySection: React.FC<SinanceActivitySectionProps> = ({
         onPress={onPressBrainCard}
         style={[
           styles.brainCardBase,
-          isWhite ? styles.brainCardWhite : styles.brainCardDark,
+          {
+            backgroundColor: isWhite ? theme.surface : theme.cardContainer,
+            borderColor: isWhite ? theme.surface : theme.borderSubtle,
+          },
         ]}
       >
         {/* Top Header: Flame Icon & Brain Label */}
         <View style={styles.brainHeaderRow}>
           <Flame
             size={18}
-            color={isWhite ? '#000000' : '#FFFFFF'}
-            fill={isWhite ? '#000000' : 'none'}
+            color={isWhite ? theme.forestDark : theme.textMain}
+            fill={isWhite ? theme.forestDark : 'none'}
             strokeWidth={2.4}
           />
           <Text
             style={[
               styles.brainTitle,
-              { color: isWhite ? '#09090B' : '#FFFFFF' },
+              { color: isWhite ? theme.forestDark : theme.textMain },
             ]}
           >
             Brain
@@ -73,7 +78,7 @@ export const SinanceActivitySection: React.FC<SinanceActivitySectionProps> = ({
           <Text
             style={[
               styles.brainAmount,
-              { color: isWhite ? '#09090B' : '#FFFFFF' },
+              { color: isWhite ? theme.forestDark : theme.textMain },
             ]}
           >
             {brainAmount}
@@ -81,7 +86,7 @@ export const SinanceActivitySection: React.FC<SinanceActivitySectionProps> = ({
           <Text
             style={[
               styles.brainSubtitle,
-              { color: isWhite ? '#71717A' : '#A1A1AA' },
+              { color: isWhite ? theme.textDim : theme.textMuted },
             ]}
           >
             {sinceAllTimeLabel}
@@ -93,12 +98,18 @@ export const SinanceActivitySection: React.FC<SinanceActivitySectionProps> = ({
       <TouchableOpacity
         activeOpacity={0.88}
         onPress={onPressActivityCard}
-        style={styles.activityCard}
+        style={[
+          styles.activityCard,
+          {
+            backgroundColor: theme.cardContainer,
+            borderColor: theme.borderSubtle,
+          },
+        ]}
       >
         {/* Header: Weekly Activity & Daily Cash */}
         <View style={styles.activityHeader}>
-          <Text style={styles.activityTitle}>Weekly Activity</Text>
-          <Text style={styles.activitySubtitle}>{dailyCashSubtitle}</Text>
+          <Text style={[styles.activityTitle, { color: theme.textMain }]}>Weekly Activity</Text>
+          <Text style={[styles.activitySubtitle, { color: theme.textMuted }]}>{dailyCashSubtitle}</Text>
         </View>
 
         {/* 7-Day Mini Bar Chart */}
@@ -110,7 +121,7 @@ export const SinanceActivitySection: React.FC<SinanceActivitySectionProps> = ({
                   styles.bar,
                   {
                     height: bar.height,
-                    backgroundColor: bar.isHighlight ? '#23F07D' : '#FFFFFF',
+                    backgroundColor: bar.isHighlight ? theme.brand : theme.textMain,
                   },
                 ]}
               />
@@ -137,21 +148,12 @@ const styles = StyleSheet.create({
     padding: 16,
     justifyContent: 'space-between',
     minHeight: 126,
+    borderWidth: 1,
     shadowColor: '#000000',
     shadowOffset: { width: 0, height: 3 },
     shadowOpacity: 0.15,
     shadowRadius: 6,
     elevation: 3,
-  },
-  brainCardDark: {
-    backgroundColor: '#161616',
-    borderWidth: 1,
-    borderColor: '#242426',
-  },
-  brainCardWhite: {
-    backgroundColor: '#FFFFFF',
-    borderWidth: 1,
-    borderColor: '#FFFFFF',
   },
   brainHeaderRow: {
     flexDirection: 'row',
@@ -179,13 +181,11 @@ const styles = StyleSheet.create({
   },
   activityCard: {
     flex: 1,
-    backgroundColor: '#161616',
     borderRadius: 24,
     padding: 16,
     justifyContent: 'space-between',
     minHeight: 126,
     borderWidth: 1,
-    borderColor: '#242426',
     shadowColor: '#000000',
     shadowOffset: { width: 0, height: 3 },
     shadowOpacity: 0.2,
@@ -198,13 +198,11 @@ const styles = StyleSheet.create({
   activityTitle: {
     fontSize: 14,
     fontWeight: '700',
-    color: '#FFFFFF',
     letterSpacing: -0.2,
   },
   activitySubtitle: {
     fontSize: 11,
     fontWeight: '500',
-    color: '#A1A1AA',
     marginTop: 3,
     letterSpacing: -0.1,
   },

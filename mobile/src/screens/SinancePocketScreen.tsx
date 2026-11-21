@@ -9,6 +9,7 @@ import {
   Sparkles,
   Calendar,
 } from 'lucide-react-native';
+import { useAppTheme } from '../theme/colors';
 
 interface SinancePocketScreenProps {
   onBack: () => void;
@@ -21,35 +22,36 @@ export const SinancePocketScreen: React.FC<SinancePocketScreenProps> = ({
   balance = '$142.83',
   availableBalance = '$0 Available',
 }) => {
+  const theme = useAppTheme();
   const [activeSubTab, setActiveSubTab] = useState<'activity' | 'moreInfo'>('activity');
 
   return (
-    <View style={styles.outerContainer}>
+    <View style={[styles.outerContainer, { backgroundColor: theme.canvas }]}>
       <ScrollView
-        style={styles.scrollView}
+        style={[styles.scrollView, { backgroundColor: theme.canvas }]}
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
         bounces={false}
       >
         {/* ================= TOP GREEN HERO CARD ================= */}
-        <View style={styles.heroCard}>
+        <View style={[styles.heroCard, { backgroundColor: theme.heroCardBg }]}>
           {/* Top navigation row */}
           <View style={styles.topNavRow}>
             {/* Back Button */}
             <TouchableOpacity
               activeOpacity={0.7}
               onPress={onBack}
-              style={styles.backButton}
+              style={[styles.backButton, { backgroundColor: theme.forestBadgeBg }]}
             >
-              <ArrowLeft size={18} color="#08180E" strokeWidth={2.4} />
+              <ArrowLeft size={18} color={theme.forestDark} strokeWidth={2.4} />
             </TouchableOpacity>
 
             {/* Centered Pocket Brand */}
             <View style={styles.pocketHeaderCenter}>
-              <View style={styles.pocketIconDisc}>
-                <DollarSign size={13} color="#FFFFFF" strokeWidth={2.8} />
+              <View style={[styles.pocketIconDisc, { backgroundColor: theme.forestDark }]}>
+                <DollarSign size={13} color={theme.brand} strokeWidth={2.8} />
               </View>
-              <Text style={styles.pocketTitle}>Pocket</Text>
+              <Text style={[styles.pocketTitle, { color: theme.forestDark }]}>Pocket</Text>
             </View>
 
             {/* Spacer for symmetry */}
@@ -58,10 +60,10 @@ export const SinancePocketScreen: React.FC<SinancePocketScreenProps> = ({
 
           {/* Balance Section */}
           <View style={styles.balanceContainer}>
-            <Text style={styles.balanceAmount}>{balance}</Text>
-            <Text style={styles.availableText}>{availableBalance}</Text>
-            <View style={styles.instantBadge}>
-              <Text style={styles.instantBadgeText}>Instant Withdrawals</Text>
+            <Text style={[styles.balanceAmount, { color: theme.forestDark }]}>{balance}</Text>
+            <Text style={[styles.availableText, { color: theme.forestMedium }]}>{availableBalance}</Text>
+            <View style={[styles.instantBadge, { backgroundColor: theme.forestBadgeBg }]}>
+              <Text style={[styles.instantBadgeText, { color: theme.forestMedium }]}>Instant Withdrawals</Text>
             </View>
           </View>
 
@@ -69,18 +71,18 @@ export const SinancePocketScreen: React.FC<SinancePocketScreenProps> = ({
           <View style={styles.actionButtonsRow}>
             <TouchableOpacity
               activeOpacity={0.85}
-              style={styles.depositButton}
+              style={[styles.depositButton, { backgroundColor: theme.forestDark }]}
               onPress={() => console.log('Deposit pressed')}
             >
-              <Text style={styles.depositText}>Deposit</Text>
+              <Text style={[styles.depositText, { color: theme.textMain }]}>Deposit</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
               activeOpacity={0.85}
-              style={styles.withdrawButton}
+              style={[styles.withdrawButton, { backgroundColor: theme.forestBadgeBg }]}
               onPress={() => console.log('Withdraw pressed')}
             >
-              <Text style={styles.withdrawText}>Withdraw</Text>
+              <Text style={[styles.withdrawText, { color: theme.forestMedium }]}>Withdraw</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -97,6 +99,7 @@ export const SinancePocketScreen: React.FC<SinancePocketScreenProps> = ({
               <Text
                 style={[
                   styles.subTabText,
+                  { color: activeSubTab === 'activity' ? theme.textMain : theme.textDim },
                   activeSubTab === 'activity' && styles.subTabTextActive,
                 ]}
               >
@@ -112,6 +115,7 @@ export const SinancePocketScreen: React.FC<SinancePocketScreenProps> = ({
               <Text
                 style={[
                   styles.subTabText,
+                  { color: activeSubTab === 'moreInfo' ? theme.textMain : theme.textDim },
                   activeSubTab === 'moreInfo' && styles.subTabTextActive,
                 ]}
               >
@@ -123,78 +127,96 @@ export const SinancePocketScreen: React.FC<SinancePocketScreenProps> = ({
           {/* Enable Quick Transfers Banner Card */}
           <TouchableOpacity
             activeOpacity={0.9}
-            style={styles.quickTransfersCard}
+            style={[styles.quickTransfersCard, { backgroundColor: theme.brand }]}
             onPress={() => console.log('Enable quick transfers pressed')}
           >
             <View style={styles.quickCardLeft}>
-              <View style={styles.starDisc}>
-                <Star size={16} color="#23F07D" fill="#23F07D" />
+              <View style={[styles.starDisc, { backgroundColor: theme.forestDark }]}>
+                <Star size={16} color={theme.brand} fill={theme.brand} />
               </View>
               <View style={styles.quickTextWrapper}>
-                <Text style={styles.quickCardTitle}>Enable Quick Transfers</Text>
-                <Text style={styles.quickCardSubtitle}>
+                <Text style={[styles.quickCardTitle, { color: theme.forestDark }]}>Enable Quick Transfers</Text>
+                <Text style={[styles.quickCardSubtitle, { color: theme.forestMedium }]}>
                   Get your money now, Don't Wait 4 days for direct debits
                 </Text>
               </View>
             </View>
-            <ChevronRight size={18} color="#082312" strokeWidth={2.4} />
+            <ChevronRight size={18} color={theme.forestDark} strokeWidth={2.4} />
           </TouchableOpacity>
 
           {/* Ledger Group: April 2024 */}
-          <Text style={styles.ledgerMonthHeader}>April 2024</Text>
+          <Text style={[styles.ledgerMonthHeader, { color: theme.textMain }]}>April 2024</Text>
 
           {/* Transaction 1: Manual Deposit */}
           <TouchableOpacity
             activeOpacity={0.85}
-            style={styles.txRow}
+            style={[
+              styles.txRow,
+              {
+                backgroundColor: theme.cardContainer,
+                borderColor: theme.borderSubtle,
+              },
+            ]}
             onPress={() => console.log('Manual deposit clicked')}
           >
             <View style={styles.txLeft}>
-              <View style={styles.txIconBadge}>
-                <ArrowDown size={16} color="#23F07D" strokeWidth={2.4} />
+              <View style={[styles.txIconBadge, { backgroundColor: theme.forestBadgeBg, borderColor: theme.brandMedium }]}>
+                <ArrowDown size={16} color={theme.brand} strokeWidth={2.4} />
               </View>
               <View style={styles.txTextContainer}>
-                <Text style={styles.txTitle}>Manual Deposit</Text>
-                <Text style={styles.txSubtitle}>Cancelled • 17 April 2024</Text>
+                <Text style={[styles.txTitle, { color: theme.textMain }]}>Manual Deposit</Text>
+                <Text style={[styles.txSubtitle, { color: theme.textMuted }]}>Cancelled • 17 April 2024</Text>
               </View>
             </View>
-            <Text style={styles.txAmount}>+$10</Text>
+            <Text style={[styles.txAmount, { color: theme.brand }]}>+$10</Text>
           </TouchableOpacity>
 
           {/* Transaction 2: Automatic Deposit */}
           <TouchableOpacity
             activeOpacity={0.85}
-            style={styles.txRow}
+            style={[
+              styles.txRow,
+              {
+                backgroundColor: theme.cardContainer,
+                borderColor: theme.borderSubtle,
+              },
+            ]}
             onPress={() => console.log('Automatic deposit clicked')}
           >
             <View style={styles.txLeft}>
-              <View style={styles.txIconBadge}>
-                <Sparkles size={16} color="#23F07D" strokeWidth={2.2} />
+              <View style={[styles.txIconBadge, { backgroundColor: theme.forestBadgeBg, borderColor: theme.brandMedium }]}>
+                <Sparkles size={16} color={theme.brand} strokeWidth={2.2} />
               </View>
               <View style={styles.txTextContainer}>
-                <Text style={styles.txTitle}>Automatic Deposit</Text>
-                <Text style={styles.txSubtitle}>Should Arrive on 25 April 2024</Text>
+                <Text style={[styles.txTitle, { color: theme.textMain }]}>Automatic Deposit</Text>
+                <Text style={[styles.txSubtitle, { color: theme.textMuted }]}>Should Arrive on 25 April 2024</Text>
               </View>
             </View>
-            <Text style={styles.txAmount}>+$20</Text>
+            <Text style={[styles.txAmount, { color: theme.brand }]}>+$20</Text>
           </TouchableOpacity>
 
           {/* Transaction 3: Monthly Lookback */}
           <TouchableOpacity
             activeOpacity={0.85}
-            style={styles.txRow}
+            style={[
+              styles.txRow,
+              {
+                backgroundColor: theme.cardContainer,
+                borderColor: theme.borderSubtle,
+              },
+            ]}
             onPress={() => console.log('Monthly lookback clicked')}
           >
             <View style={styles.txLeft}>
-              <View style={styles.txIconBadge}>
-                <Calendar size={16} color="#23F07D" strokeWidth={2.2} />
+              <View style={[styles.txIconBadge, { backgroundColor: theme.forestBadgeBg, borderColor: theme.brandMedium }]}>
+                <Calendar size={16} color={theme.brand} strokeWidth={2.2} />
               </View>
               <View style={styles.txTextContainer}>
-                <Text style={styles.txTitle}>Monthly Lookback</Text>
-                <Text style={styles.txSubtitle}>A summary of how your savings</Text>
+                <Text style={[styles.txTitle, { color: theme.textMain }]}>Monthly Lookback</Text>
+                <Text style={[styles.txSubtitle, { color: theme.textMuted }]}>A summary of how your savings</Text>
               </View>
             </View>
-            <Text style={styles.txAmount}>+$110</Text>
+            <Text style={[styles.txAmount, { color: theme.brand }]}>+$110</Text>
           </TouchableOpacity>
         </View>
       </ScrollView>
@@ -205,7 +227,6 @@ export const SinancePocketScreen: React.FC<SinancePocketScreenProps> = ({
 const styles = StyleSheet.create({
   outerContainer: {
     flex: 1,
-    backgroundColor: '#000000',
     width: '100%',
   },
   scrollView: {
@@ -216,7 +237,6 @@ const styles = StyleSheet.create({
     paddingBottom: 110,
   },
   heroCard: {
-    backgroundColor: '#23F07D',
     borderBottomLeftRadius: 36,
     borderBottomRightRadius: 36,
     paddingHorizontal: 20,
@@ -233,7 +253,6 @@ const styles = StyleSheet.create({
     width: 38,
     height: 38,
     borderRadius: 19,
-    backgroundColor: 'rgba(10, 35, 20, 0.12)',
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -245,7 +264,6 @@ const styles = StyleSheet.create({
     width: 22,
     height: 22,
     borderRadius: 11,
-    backgroundColor: '#08170E',
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 4,
@@ -253,7 +271,6 @@ const styles = StyleSheet.create({
   pocketTitle: {
     fontSize: 13,
     fontWeight: '700',
-    color: '#08170E',
     letterSpacing: -0.2,
   },
   backButtonPlaceholder: {
@@ -269,17 +286,14 @@ const styles = StyleSheet.create({
   balanceAmount: {
     fontSize: 40,
     fontWeight: '800',
-    color: '#08180E',
     letterSpacing: -1,
   },
   availableText: {
     fontSize: 12.5,
     fontWeight: '600',
-    color: '#133922',
     marginTop: 4,
   },
   instantBadge: {
-    backgroundColor: 'rgba(18, 56, 32, 0.12)',
     paddingHorizontal: 12,
     paddingVertical: 5,
     borderRadius: 20,
@@ -288,7 +302,6 @@ const styles = StyleSheet.create({
   instantBadgeText: {
     fontSize: 11.5,
     fontWeight: '700',
-    color: '#123820',
     letterSpacing: -0.2,
   },
   actionButtonsRow: {
@@ -297,7 +310,6 @@ const styles = StyleSheet.create({
   },
   depositButton: {
     flex: 1,
-    backgroundColor: '#0B0B0D',
     borderRadius: 26,
     height: 48,
     alignItems: 'center',
@@ -311,12 +323,10 @@ const styles = StyleSheet.create({
   depositText: {
     fontSize: 14.5,
     fontWeight: '700',
-    color: '#FFFFFF',
     letterSpacing: -0.2,
   },
   withdrawButton: {
     flex: 1,
-    backgroundColor: 'rgba(18, 56, 32, 0.12)',
     borderRadius: 26,
     height: 48,
     alignItems: 'center',
@@ -325,7 +335,6 @@ const styles = StyleSheet.create({
   withdrawText: {
     fontSize: 14.5,
     fontWeight: '700',
-    color: '#0A2615',
     letterSpacing: -0.2,
   },
   lowerContainer: {
@@ -344,17 +353,14 @@ const styles = StyleSheet.create({
   subTabText: {
     fontSize: 13.5,
     fontWeight: '600',
-    color: '#71717A',
   },
   subTabTextActive: {
-    color: '#FFFFFF',
     fontWeight: '700',
   },
   quickTransfersCard: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    backgroundColor: '#23F07D',
     borderRadius: 22,
     paddingHorizontal: 16,
     paddingVertical: 14,
@@ -375,7 +381,6 @@ const styles = StyleSheet.create({
     width: 38,
     height: 38,
     borderRadius: 19,
-    backgroundColor: '#08170E',
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -386,20 +391,17 @@ const styles = StyleSheet.create({
   quickCardTitle: {
     fontSize: 14,
     fontWeight: '700',
-    color: '#07170D',
     letterSpacing: -0.2,
   },
   quickCardSubtitle: {
     fontSize: 11,
     lineHeight: 14,
     fontWeight: '500',
-    color: '#0E2E19',
     marginTop: 2,
   },
   ledgerMonthHeader: {
     fontSize: 14.5,
     fontWeight: '700',
-    color: '#FFFFFF',
     marginBottom: 14,
     letterSpacing: -0.2,
   },
@@ -407,12 +409,10 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    backgroundColor: '#161616',
     borderRadius: 22,
     paddingHorizontal: 16,
     paddingVertical: 14,
     borderWidth: 1,
-    borderColor: '#242426',
     marginBottom: 12,
   },
   txLeft: {
@@ -424,9 +424,7 @@ const styles = StyleSheet.create({
     width: 38,
     height: 38,
     borderRadius: 19,
-    backgroundColor: 'rgba(35, 240, 125, 0.14)',
     borderWidth: 1,
-    borderColor: 'rgba(35, 240, 125, 0.2)',
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -437,20 +435,17 @@ const styles = StyleSheet.create({
   txTitle: {
     fontSize: 14.5,
     fontWeight: '700',
-    color: '#FFFFFF',
     letterSpacing: -0.2,
   },
   txSubtitle: {
     fontSize: 11.5,
     fontWeight: '500',
-    color: '#A1A1AA',
     marginTop: 2,
     letterSpacing: -0.1,
   },
   txAmount: {
     fontSize: 15,
     fontWeight: '700',
-    color: '#FFFFFF',
     letterSpacing: -0.3,
   },
 });

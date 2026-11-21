@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Image, Platform } from 'react-native';
 import { Bell, ChevronRight, ChevronsRight, X } from 'lucide-react-native';
+import { useAppTheme } from '../theme/colors';
 
 interface SinanceHeroCardProps {
   userName?: string;
@@ -25,13 +26,15 @@ export const SinanceHeroCard: React.FC<SinanceHeroCardProps> = ({
   onPressGetSetUp,
   onPressBalance,
 }) => {
+  const theme = useAppTheme();
+
   return (
-    <View style={styles.cardContainer}>
+    <View style={[styles.cardContainer, { backgroundColor: theme.heroCardBg }]}>
       {/* 1. Header Greeting & Notification Row */}
       <View style={styles.headerRow}>
         <View style={styles.userInfoRow}>
           {/* Avatar with circular ring */}
-          <View style={styles.avatarWrapper}>
+          <View style={[styles.avatarWrapper, { borderColor: theme.surface, backgroundColor: theme.avatarInnerBg }]}>
             <Image
               source={require('../../assets/esther_avatar.png')}
               style={styles.avatarImage}
@@ -42,10 +45,10 @@ export const SinanceHeroCard: React.FC<SinanceHeroCardProps> = ({
           {/* Greeting text */}
           <View style={styles.greetingContainer}>
             <View style={styles.waveRow}>
-              <Text style={styles.helloText}>Hello</Text>
+              <Text style={[styles.helloText, { color: theme.forestMedium }]}>Hello</Text>
               <Text style={styles.waveEmoji}> 👋</Text>
             </View>
-            <Text style={styles.userNameText}>{userName}</Text>
+            <Text style={[styles.userNameText, { color: theme.forestDark }]}>{userName}</Text>
           </View>
         </View>
 
@@ -53,41 +56,49 @@ export const SinanceHeroCard: React.FC<SinanceHeroCardProps> = ({
         <TouchableOpacity
           activeOpacity={0.8}
           onPress={onPressNotification}
-          style={styles.notificationButton}
+          style={[styles.notificationButton, { backgroundColor: theme.heroPillDiscBg }]}
         >
-          <Bell size={16} color="#FFFFFF" strokeWidth={2.2} />
+          <Bell size={16} color={theme.textMain} strokeWidth={2.2} />
         </TouchableOpacity>
       </View>
 
       {/* 2. Value & Balance Section */}
       <View style={styles.balanceSection}>
-        <Text style={styles.balanceLabel}>Your Sinance Value</Text>
+        <Text style={[styles.balanceLabel, { color: theme.forestMedium }]}>Your Sinance Value</Text>
         <TouchableOpacity
           activeOpacity={0.9}
           onPress={onPressBalance}
           style={styles.balanceRow}
         >
-          <Text style={styles.balanceAmount}>{balance}</Text>
-          <View style={styles.pastWeekBadge}>
-            <Text style={styles.triangleIndicator}>▲</Text>
-            <Text style={styles.pastWeekText}>{pastWeekDiff}</Text>
+          <Text style={[styles.balanceAmount, { color: theme.forestDark }]}>{balance}</Text>
+          <View style={[styles.pastWeekBadge, { backgroundColor: theme.forestBadgeBg }]}>
+            <Text style={[styles.triangleIndicator, { color: theme.forestMedium }]}>▲</Text>
+            <Text style={[styles.pastWeekText, { color: theme.forestMedium }]}>{pastWeekDiff}</Text>
           </View>
         </TouchableOpacity>
       </View>
 
       {/* 3. Setup / Onboarding Banner */}
-      <View style={styles.setupBanner}>
+      <View
+        style={[
+          styles.setupBanner,
+          {
+            backgroundColor: theme.heroSetupBannerBg,
+            borderColor: theme.heroSetupBannerBorder,
+          },
+        ]}
+      >
         {/* Onboarding phase notice + Dismiss button */}
         <View style={styles.setupTextRow}>
-          <Text style={styles.setupNoticeText}>
-            Get Set Up <Text style={styles.setupNoticeEmphasis}>({onboardingStep})</Text> {onboardingText}
+          <Text style={[styles.setupNoticeText, { color: theme.forestMedium }]}>
+            Get Set Up <Text style={[styles.setupNoticeEmphasis, { color: theme.forestDark }]}>({onboardingStep})</Text> {onboardingText}
           </Text>
           <TouchableOpacity
             activeOpacity={0.7}
             onPress={onPressDismissSetup}
-            style={styles.dismissButton}
+            style={[styles.dismissButton, { backgroundColor: theme.heroPillDiscBg }]}
           >
-            <X size={12} color="#FFFFFF" strokeWidth={2.8} />
+            <X size={12} color={theme.textMain} strokeWidth={2.8} />
           </TouchableOpacity>
         </View>
 
@@ -95,19 +106,19 @@ export const SinanceHeroCard: React.FC<SinanceHeroCardProps> = ({
         <TouchableOpacity
           activeOpacity={0.9}
           onPress={onPressGetSetUp}
-          style={styles.actionPillButton}
+          style={[styles.actionPillButton, { backgroundColor: theme.heroPillBg }]}
         >
           {/* Left black disc with chevron */}
-          <View style={styles.arrowDisc}>
-            <ChevronRight size={17} color="#FFFFFF" strokeWidth={2.8} />
+          <View style={[styles.arrowDisc, { backgroundColor: theme.heroPillDiscBg }]}>
+            <ChevronRight size={17} color={theme.textMain} strokeWidth={2.8} />
           </View>
 
           {/* Center text */}
-          <Text style={styles.actionPillText}>Get Set Up</Text>
+          <Text style={[styles.actionPillText, { color: theme.heroPillText }]}>Get Set Up</Text>
 
           {/* Right double chevron */}
           <View style={styles.rightChevrons}>
-            <ChevronsRight size={18} color="#71717A" strokeWidth={2.4} />
+            <ChevronsRight size={18} color={theme.textDim} strokeWidth={2.4} />
           </View>
         </TouchableOpacity>
       </View>
@@ -117,7 +128,6 @@ export const SinanceHeroCard: React.FC<SinanceHeroCardProps> = ({
 
 const styles = StyleSheet.create({
   cardContainer: {
-    backgroundColor: '#23F07D',
     borderBottomLeftRadius: 36,
     borderBottomRightRadius: 36,
     paddingHorizontal: 20,
@@ -139,9 +149,7 @@ const styles = StyleSheet.create({
     height: 44,
     borderRadius: 22,
     borderWidth: 2,
-    borderColor: '#FFFFFF',
     overflow: 'hidden',
-    backgroundColor: '#1E293B',
     shadowColor: '#000000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.15,
@@ -163,7 +171,6 @@ const styles = StyleSheet.create({
   helloText: {
     fontSize: 12.5,
     fontWeight: '500',
-    color: '#163824',
     letterSpacing: -0.1,
   },
   waveEmoji: {
@@ -172,7 +179,6 @@ const styles = StyleSheet.create({
   userNameText: {
     fontSize: 18,
     fontWeight: '800',
-    color: '#08170E',
     letterSpacing: -0.3,
     marginTop: -1,
   },
@@ -180,7 +186,6 @@ const styles = StyleSheet.create({
     width: 38,
     height: 38,
     borderRadius: 19,
-    backgroundColor: '#0F1A13',
     alignItems: 'center',
     justifyContent: 'center',
     shadowColor: '#000000',
@@ -195,7 +200,6 @@ const styles = StyleSheet.create({
   balanceLabel: {
     fontSize: 13,
     fontWeight: '500',
-    color: '#163824',
     marginBottom: 4,
     letterSpacing: -0.1,
   },
@@ -208,13 +212,11 @@ const styles = StyleSheet.create({
   balanceAmount: {
     fontSize: 38,
     fontWeight: '800',
-    color: '#07160D',
     letterSpacing: -1,
   },
   pastWeekBadge: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'rgba(18, 56, 32, 0.12)',
     paddingHorizontal: 10,
     paddingVertical: 5,
     borderRadius: 20,
@@ -222,22 +224,18 @@ const styles = StyleSheet.create({
   },
   triangleIndicator: {
     fontSize: 9,
-    color: '#123820',
   },
   pastWeekText: {
     fontSize: 12,
     fontWeight: '700',
-    color: '#123820',
     letterSpacing: -0.2,
   },
   setupBanner: {
-    backgroundColor: '#1FD872',
     borderRadius: 22,
     paddingHorizontal: 16,
     paddingTop: 14,
     paddingBottom: 14,
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.25)',
   },
   setupTextRow: {
     flexDirection: 'row',
@@ -250,19 +248,16 @@ const styles = StyleSheet.create({
     fontSize: 12,
     lineHeight: 16,
     fontWeight: '500',
-    color: '#0E2918',
     paddingRight: 10,
     letterSpacing: -0.1,
   },
   setupNoticeEmphasis: {
     fontWeight: '700',
-    color: '#07170D',
   },
   dismissButton: {
     width: 20,
     height: 20,
     borderRadius: 10,
-    backgroundColor: '#0F1A13',
     alignItems: 'center',
     justifyContent: 'center',
     marginTop: 2,
@@ -271,7 +266,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    backgroundColor: '#FFFFFF',
     borderRadius: 26,
     paddingVertical: 5,
     paddingLeft: 6,
@@ -287,14 +281,12 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: '#0A130D',
     alignItems: 'center',
     justifyContent: 'center',
   },
   actionPillText: {
     fontSize: 14.5,
     fontWeight: '700',
-    color: '#09150E',
     letterSpacing: -0.2,
   },
   rightChevrons: {

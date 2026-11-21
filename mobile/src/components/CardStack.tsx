@@ -194,32 +194,32 @@ export const CardStack: React.FC<CardStackProps> = ({
             {/* Top Row: Brand Monogram + Masked Number */}
             <View style={styles.primaryTopRow}>
               <View style={styles.brandRow}>
-                <View style={styles.brandBadge}>
-                  <Text style={styles.brandBadgeText}>S</Text>
+                <View style={[styles.brandBadge, { backgroundColor: theme.forestDark }]}>
+                  <Text style={[styles.brandBadgeText, { color: theme.brand }]}>S</Text>
                 </View>
-                <Text style={styles.brandTitle}>SINANCE</Text>
+                <Text style={[styles.brandTitle, { color: theme.forestDark }]}>SINANCE</Text>
               </View>
 
-              <Text style={styles.primaryCardNumber}>{primaryCardNumber}</Text>
+              <Text style={[styles.primaryCardNumber, { color: theme.forestMedium }]}>{primaryCardNumber}</Text>
             </View>
 
             {/* Middle Row: Balance & Expiry */}
             <View style={styles.balanceRow}>
               <View>
-                <Text style={styles.labelMuted}>Balance</Text>
-                <Text style={styles.balanceAmount}>{balance}</Text>
+                <Text style={[styles.labelMuted, { color: theme.forestMedium }]}>Balance</Text>
+                <Text style={[styles.balanceAmount, { color: theme.forestDark }]}>{balance}</Text>
               </View>
 
               <View style={styles.expiryCol}>
-                <Text style={styles.labelMuted}>Exp. Date</Text>
-                <Text style={styles.expiryValue}>{expiryDate}</Text>
+                <Text style={[styles.labelMuted, { color: theme.forestMedium }]}>Exp. Date</Text>
+                <Text style={[styles.expiryValue, { color: theme.forestDark }]}>{expiryDate}</Text>
               </View>
             </View>
 
             {/* Bottom Row: Cardholder Name (sitting in the taller left section) */}
             <View style={styles.nameRow}>
-              <Text style={styles.labelMuted}>Name</Text>
-              <Text style={styles.nameValue}>{cardHolderName}</Text>
+              <Text style={[styles.labelMuted, { color: theme.forestMedium }]}>Name</Text>
+              <Text style={[styles.nameValue, { color: theme.forestDark }]}>{cardHolderName}</Text>
             </View>
           </View>
         </TouchableOpacity>
@@ -342,17 +342,14 @@ const styles = StyleSheet.create({
     width: 22,
     height: 22,
     borderRadius: 11,
-    backgroundColor: SINANCE_COLORS.brand,
     alignItems: 'center',
     justifyContent: 'center',
   },
   brandBadgeText: {
-    color: '#FFFFFF',
     fontSize: 12,
     fontWeight: '900',
   },
   brandTitle: {
-    color: '#FFFFFF',
     fontSize: 13,
     fontWeight: '800',
     letterSpacing: 1.2,
@@ -361,7 +358,6 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: '600',
     letterSpacing: 1.2,
-    color: 'rgba(255,255,255,0.65)',
   },
   balanceRow: {
     flexDirection: 'row',
@@ -371,14 +367,12 @@ const styles = StyleSheet.create({
   labelMuted: {
     fontSize: 10,
     fontWeight: '600',
-    color: 'rgba(255,255,255,0.5)',
     letterSpacing: 0.2,
     marginBottom: 3,
   },
   balanceAmount: {
     fontSize: 30,
     fontWeight: '800',
-    color: '#FFFFFF',
     letterSpacing: -0.6,
   },
   expiryCol: {
@@ -388,7 +382,6 @@ const styles = StyleSheet.create({
   expiryValue: {
     fontSize: 13,
     fontWeight: '700',
-    color: '#FFFFFF',
     letterSpacing: 0.5,
   },
   nameRow: {
@@ -397,7 +390,6 @@ const styles = StyleSheet.create({
   nameValue: {
     fontSize: 13,
     fontWeight: '700',
-    color: '#FFFFFF',
     letterSpacing: 0.2,
   },
 
@@ -408,7 +400,6 @@ const styles = StyleSheet.create({
     right: 0,
     height: 44,
     borderRadius: 22,
-    backgroundColor: '#0C0C0D',
     flexDirection: 'row',
     alignItems: 'center',
     paddingLeft: 8,
@@ -420,18 +411,15 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 2,
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.1)',
   },
   addCardIconCircle: {
     width: 28,
     height: 28,
     borderRadius: 14,
-    backgroundColor: '#FFFFFF',
     alignItems: 'center',
     justifyContent: 'center',
   },
   addCardText: {
-    color: '#FFFFFF',
     fontSize: 12.5,
     fontWeight: '700',
     letterSpacing: -0.2,
