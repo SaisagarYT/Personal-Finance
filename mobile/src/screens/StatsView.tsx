@@ -110,7 +110,7 @@ export const StatsView: React.FC<StatsViewProps> = ({
           style={[
             styles.segmentContainer,
             {
-              backgroundColor: theme.isDark ? '#141419' : '#ECEAE2',
+              backgroundColor: theme.surfaceSubtle,
               borderColor: theme.borderSubtle,
             },
           ]}
@@ -123,7 +123,7 @@ export const StatsView: React.FC<StatsViewProps> = ({
               activeSegment === 'category' && [
                 styles.segmentTabActive,
                 {
-                  backgroundColor: theme.isDark ? '#2A263D' : '#FFFFFF',
+                  backgroundColor: theme.isDark ? theme.surface : '#FFFFFF',
                   shadowColor: '#000000',
                 },
               ],
@@ -153,7 +153,7 @@ export const StatsView: React.FC<StatsViewProps> = ({
               activeSegment === 'all' && [
                 styles.segmentTabActive,
                 {
-                  backgroundColor: theme.isDark ? '#2A263D' : '#FFFFFF',
+                  backgroundColor: theme.isDark ? theme.surface : '#FFFFFF',
                   shadowColor: '#000000',
                 },
               ],
@@ -216,7 +216,7 @@ export const StatsView: React.FC<StatsViewProps> = ({
           style={[
             styles.gridIconChip,
             {
-              backgroundColor: theme.isDark ? '#141419' : '#ECEAE2',
+              backgroundColor: theme.surfaceSubtle,
               borderColor: theme.borderSubtle,
             },
           ]}
@@ -235,11 +235,11 @@ export const StatsView: React.FC<StatsViewProps> = ({
                 styles.categoryChip,
                 isSelected
                   ? {
-                      backgroundColor: theme.isDark ? '#A244E3' : '#141414',
+                      backgroundColor: theme.brand,
                       borderColor: 'transparent',
                     }
                   : {
-                      backgroundColor: theme.isDark ? '#141419' : '#ECEAE2',
+                      backgroundColor: theme.surfaceSubtle,
                       borderColor: theme.borderSubtle,
                     },
               ]}
@@ -248,7 +248,7 @@ export const StatsView: React.FC<StatsViewProps> = ({
                 style={[
                   styles.categoryChipText,
                   {
-                    color: isSelected ? '#FFFFFF' : theme.textMain,
+                    color: isSelected ? theme.forestDark : theme.textMain,
                     fontWeight: isSelected ? '700' : '500',
                   },
                 ]}
@@ -257,7 +257,7 @@ export const StatsView: React.FC<StatsViewProps> = ({
               </Text>
               {isSelected && (
                 <View style={styles.chipCloseIcon}>
-                  <X size={12} color="#FFFFFF" strokeWidth={2.6} />
+                  <X size={12} color={theme.forestDark} strokeWidth={2.6} />
                 </View>
               )}
             </TouchableOpacity>
@@ -308,9 +308,9 @@ export const StatsView: React.FC<StatsViewProps> = ({
                     styles.dashedGuideline,
                     {
                       borderColor: isSelected
-                        ? theme.textMuted
+                        ? theme.brand
                         : theme.borderSubtle,
-                      opacity: isSelected ? 0.7 : 0.3,
+                      opacity: isSelected ? 0.8 : 0.3,
                     },
                   ]}
                 />
@@ -322,12 +322,10 @@ export const StatsView: React.FC<StatsViewProps> = ({
                     {
                       height: barHeight,
                       backgroundColor: isSelected
-                        ? theme.isDark
-                          ? '#A244E3'
-                          : '#141414'
+                        ? theme.brand
                         : theme.isDark
-                        ? '#22222B'
-                        : '#DFDCD4',
+                        ? theme.surfaceSubtle
+                        : theme.borderSubtle,
                     },
                   ]}
                 >
@@ -336,7 +334,7 @@ export const StatsView: React.FC<StatsViewProps> = ({
                       style={[
                         styles.capsuleInnerHighlight,
                         {
-                          backgroundColor: theme.isDark ? '#C068FF' : '#333333',
+                          backgroundColor: theme.brandLight,
                         },
                       ]}
                     />
@@ -405,9 +403,9 @@ export const StatsView: React.FC<StatsViewProps> = ({
               { backgroundColor: theme.expenseIconCircleBg },
             ]}
           >
-            <TrendingUp size={16} color="#E74D28" strokeWidth={2.2} />
+            <TrendingUp size={16} color={theme.brand} strokeWidth={2.2} />
           </View>
-          <Text style={[styles.metricValue, { color: '#E74D28' }]}>
+          <Text style={[styles.metricValue, { color: theme.brand }]}>
             Up 18%
           </Text>
           <Text style={[styles.metricLabel, { color: theme.textMuted }]}>
@@ -431,7 +429,7 @@ export const StatsView: React.FC<StatsViewProps> = ({
               { backgroundColor: theme.expenseIconCircleBg },
             ]}
           >
-            <Sparkles size={16} color="#D4A017" strokeWidth={2} />
+            <Sparkles size={16} color={theme.brand} strokeWidth={2} />
           </View>
           <Text style={[styles.metricValue, { color: theme.textMain }]}>
             {potentialSavings}

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { Flame } from 'lucide-react-native';
 
@@ -6,6 +6,7 @@ interface SinanceActivitySectionProps {
   brainAmount?: string;
   sinceAllTimeLabel?: string;
   dailyCashSubtitle?: string;
+  isBrainActive?: boolean;
   onPressBrainCard?: () => void;
   onPressActivityCard?: () => void;
 }
@@ -14,9 +15,16 @@ export const SinanceActivitySection: React.FC<SinanceActivitySectionProps> = ({
   brainAmount = '$142.83',
   sinceAllTimeLabel = 'Since All Time',
   dailyCashSubtitle = '+$15.43 Daily Cash',
+  isBrainActive = false,
   onPressBrainCard,
   onPressActivityCard,
 }) => {
+  // Local interaction state so it turns white upon touch/press
+  const [isPressed, setIsPressed] = useState(false);
+
+  // Active if passed from parent or currently being pressed
+  const isWhite = isBrainActive || isPressed;
+
   // 7 weekly activity data points (Monday through Sunday)
   // Thursday is the peak active day highlighted with Sinance Green (#23F07D)
   const weeklyBars = [
@@ -31,22 +39,53 @@ export const SinanceActivitySection: React.FC<SinanceActivitySectionProps> = ({
 
   return (
     <View style={styles.container}>
-      {/* ================= LEFT CARD: WHITE BRAIN CARD ================= */}
+      {/* ================= LEFT CARD: BRAIN CARD (TURNS WHITE ON INTERACTION/ACTIVE) ================= */}
       <TouchableOpacity
-        activeOpacity={0.88}
+        activeOpacity={0.9}
+        onPressIn={() => setIsPressed(true)}
+        onPressOut={() => setIsPressed(false)}
         onPress={onPressBrainCard}
-        style={styles.brainCard}
+        style={[
+          styles.brainCardBase,
+          isWhite ? styles.brainCardWhite : styles.brainCardDark,
+        ]}
       >
         {/* Top Header: Flame Icon & Brain Label */}
         <View style={styles.brainHeaderRow}>
-          <Flame size={18} color="#000000" fill="#000000" />
-          <Text style={styles.brainTitle}>Brain</Text>
+          <Flame
+            size={18}
+            color={isWhite ? '#000000' : '#FFFFFF'}
+            fill={isWhite ? '#000000' : 'none'}
+            strokeWidth={2.4}
+          />
+          <Text
+            style={[
+              styles.brainTitle,
+              { color: isWhite ? '#09090B' : '#FFFFFF' },
+            ]}
+          >
+            Brain
+          </Text>
         </View>
 
         {/* Amount & Timeframe */}
         <View style={styles.brainValueContainer}>
-          <Text style={styles.brainAmount}>{brainAmount}</Text>
-          <Text style={styles.brainSubtitle}>{sinceAllTimeLabel}</Text>
+          <Text
+            style={[
+              styles.brainAmount,
+              { color: isWhite ? '#09090B' : '#FFFFFF' },
+            ]}
+          >
+            {brainAmount}
+          </Text>
+          <Text
+            style={[
+              styles.brainSubtitle,
+              { color: isWhite ? '#71717A' : '#A1A1AA' },
+            ]}
+          >
+            {sinceAllTimeLabel}
+          </Text>
         </View>
       </TouchableOpacity>
 
@@ -92,18 +131,27 @@ const styles = StyleSheet.create({
     marginBottom: 14,
     width: '100%',
   },
-  brainCard: {
+  brainCardBase: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
     borderRadius: 24,
     padding: 16,
     justifyContent: 'space-between',
     minHeight: 126,
     shadowColor: '#000000',
     shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.1,
+    shadowOpacity: 0.15,
     shadowRadius: 6,
     elevation: 3,
+  },
+  brainCardDark: {
+    backgroundColor: '#161616',
+    borderWidth: 1,
+    borderColor: '#242426',
+  },
+  brainCardWhite: {
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1,
+    borderColor: '#FFFFFF',
   },
   brainHeaderRow: {
     flexDirection: 'row',
@@ -113,7 +161,6 @@ const styles = StyleSheet.create({
   brainTitle: {
     fontSize: 14.5,
     fontWeight: '700',
-    color: '#09090B',
     letterSpacing: -0.2,
   },
   brainValueContainer: {
@@ -122,13 +169,11 @@ const styles = StyleSheet.create({
   brainAmount: {
     fontSize: 22,
     fontWeight: '800',
-    color: '#09090B',
     letterSpacing: -0.6,
   },
   brainSubtitle: {
     fontSize: 11.5,
     fontWeight: '500',
-    color: '#71717A',
     marginTop: 3,
     letterSpacing: -0.1,
   },

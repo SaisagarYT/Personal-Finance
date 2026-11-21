@@ -10,12 +10,14 @@ import { SinanceActivitySection } from './src/components/SinanceActivitySection'
 import { SinanceSavingsRulesSection } from './src/components/SinanceSavingsRulesSection';
 import { BottomCapsuleDock, NavTabId } from './src/components/BottomCapsuleDock';
 import { StatsView } from './src/screens/StatsView';
+import { SinancePocketScreen } from './src/screens/SinancePocketScreen';
 import { useAppTheme } from './src/theme/colors';
 
 export default function App() {
   const theme = useAppTheme();
   const [currency, setCurrency] = useState<'USD' | 'INR'>('USD');
   const [activeTab, setActiveTab] = useState<NavTabId>('home');
+  const [isPocketOpen, setIsPocketOpen] = useState(false);
 
   // Upper section synchronized spring elastic effect when switching tabs
   const upperSpring = useRef(new Animated.Value(0)).current;
@@ -98,18 +100,27 @@ export default function App() {
   ];
 
   return (
-    <View style={[styles.outerWrapper, { backgroundColor: '#000000' }]}>
-      <SafeAreaView style={[styles.safeArea, { backgroundColor: '#23F07D' }]}>
+    <View style={[styles.outerWrapper, { backgroundColor: theme.canvas }]}>
+      <SafeAreaView style={[styles.safeArea, { backgroundColor: theme.heroCardBg }]}>
         <StatusBar style="dark" />
-        <View style={[styles.mainContainer, { backgroundColor: '#000000' }]}>
-          {activeTab === 'analytics' ? (
+        <View style={[styles.mainContainer, { backgroundColor: theme.canvas }]}>
+          {isPocketOpen || activeTab === 'cards' ? (
+            <SinancePocketScreen
+              onBack={() => {
+                setIsPocketOpen(false);
+                setActiveTab('home');
+              }}
+              balance="$142.83"
+              availableBalance="$0 Available"
+            />
+          ) : activeTab === 'analytics' ? (
             <StatsView
               onBack={() => setActiveTab('home')}
               currency={currency}
             />
           ) : (
             <ScrollView
-              style={[styles.container, { backgroundColor: '#000000' }]}
+              style={[styles.container, { backgroundColor: theme.canvas }]}
               contentContainerStyle={styles.contentContainer}
               showsVerticalScrollIndicator={false}
               bounces={false}
@@ -124,7 +135,10 @@ export default function App() {
                 onPressNotification={() => setActiveTab('analytics')}
                 onPressDismissSetup={() => console.log('Dismiss setup')}
                 onPressGetSetUp={() => console.log('Get Set Up clicked')}
-                onPressBalance={() => setCurrency((prev) => (prev === 'USD' ? 'INR' : 'USD'))}
+                onPressBalance={() => {
+                  setIsPocketOpen(true);
+                  setActiveTab('cards');
+                }}
               />
 
               {/* ================= SECTION 2: TWO-COLUMN ACTIVITY & BRAIN CARDS ================= */}
@@ -132,7 +146,11 @@ export default function App() {
                 brainAmount="$142.83"
                 sinceAllTimeLabel="Since All Time"
                 dailyCashSubtitle="+$15.43 Daily Cash"
-                onPressBrainCard={() => console.log('Brain card pressed')}
+                isBrainActive={isPocketOpen}
+                onPressBrainCard={() => {
+                  setIsPocketOpen(true);
+                  setActiveTab('cards');
+                }}
                 onPressActivityCard={() => setActiveTab('analytics')}
               />
 
@@ -151,6 +169,11 @@ export default function App() {
             onSelectTab={(tab) => {
               console.log('Navigated to:', tab);
               setActiveTab(tab);
+              if (tab === 'cards') {
+                setIsPocketOpen(true);
+              } else {
+                setIsPocketOpen(false);
+              }
             }}
           />
         </View>
