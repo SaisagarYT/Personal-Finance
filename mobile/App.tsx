@@ -1,5 +1,14 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { StyleSheet, View, SafeAreaView, Platform, StatusBar as RNStatusBar, ScrollView, Animated } from 'react-native';
+import {
+  StyleSheet,
+  View,
+  SafeAreaView,
+  Platform,
+  StatusBar as RNStatusBar,
+  ScrollView,
+  Animated,
+  Easing,
+} from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { SinanceHeroCard } from './src/components/SinanceHeroCard';
 import { SinanceActivitySection } from './src/components/SinanceActivitySection';
@@ -35,9 +44,33 @@ function AppContent() {
   const [isPocketOpen, setIsPocketOpen] = useState(() => {
     return getQueryParam('pocket') === 'true';
   });
-  const [isProfileOpen, setIsProfileOpen] = useState(() => {
-    return getQueryParam('profile') === 'true';
-  });
+  const initialProfileOpen = getQueryParam('profile') === 'true';
+  const [isProfileMounted, setIsProfileMounted] = useState(initialProfileOpen);
+  const profileAnim = useRef(new Animated.Value(initialProfileOpen ? 1 : 0)).current;
+
+  const handleOpenProfile = () => {
+    setIsProfileMounted(true);
+    Animated.timing(profileAnim, {
+      toValue: 1,
+      duration: 340,
+      easing: Easing.bezier(0.16, 1, 0.3, 1),
+      useNativeDriver: Platform.OS !== 'web',
+    }).start();
+  };
+
+  const handleCloseProfile = () => {
+    Animated.timing(profileAnim, {
+      toValue: 0,
+      duration: 270,
+      easing: Easing.bezier(0.25, 0.1, 0.25, 1),
+      useNativeDriver: Platform.OS !== 'web',
+    }).start(({ finished }) => {
+      if (finished) {
+        setIsProfileMounted(false);
+      }
+    });
+  };
+
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(() => {
     return getQueryParam('auth') === 'true';
   });
@@ -150,118 +183,195 @@ function AppContent() {
           }
         />
         <View style={[styles.mainContainer, { backgroundColor: theme.canvas }]}>
-          {isProfileOpen ? (
-            /* ================= FULL PROFILE & PREFERENCES SCREEN ================= */
-            <ProfileScreen
-              onBack={() => setIsProfileOpen(false)}
-              currency={currency}
-              onToggleCurrency={(newCurr) => setCurrency(newCurr)}
-              isSetupDismissed={isSetupDismissed}
-              onToggleSetupDismissed={() => setIsSetupDismissed((prev) => !prev)}
-              onOpenAuth={() => setIsAuthModalOpen(true)}
-            />
-          ) : activeTab === 'tasks' ? (
-            /* ================= TAB 2: TASKS & GOALS BOARD ================= */
-            <TaskManagerScreen
-              onOpenProfile={() => setIsProfileOpen(true)}
-            />
-          ) : isPocketOpen || activeTab === 'cards' ? (
-            /* ================= POCKET DETAIL SCREEN ================= */
-            <SinancePocketScreen
-              onBack={() => {
-                setIsPocketOpen(false);
-                setActiveTab('sinance');
-              }}
-              balance={formattedBalance}
-              availableBalance="₹0 Available"
-              accounts={accounts}
-              transactions={transactions}
-              onAccountCreated={(newAcc) => {
-                setAccounts((prev) => [...prev, newAcc]);
-                setTotalBalance((prev) => prev + Number(newAcc.balance));
-              }}
-              onTransactionAdded={(newTx) => {
-                setTransactions((prev) => [newTx, ...prev]);
-                const delta = newTx.type === 'income' ? Number(newTx.amount) : -Number(newTx.amount);
-                setTotalBalance((prev) => Math.max(0, prev + delta));
-                setAccounts((prev) =>
-                  prev.map((acc) => {
-                    if (acc.id === newTx.account_id) {
-                      return {
-                        ...acc,
-                        balance: Math.max(0, Number(acc.balance) + delta),
-                      };
-                    }
-                    return acc;
-                  })
-                );
-              }}
-            />
-          ) : activeTab === 'analytics' ? (
-            /* ================= STATS VIEW SCREEN ================= */
-            <StatsView
-              onBack={() => setActiveTab('sinance')}
-              currency={currency}
-            />
-          ) : (
-            /* ================= TAB 1: SINANCE CORE HOME SCREEN ================= */
-            <ScrollView
-              style={[styles.container, { backgroundColor: theme.canvas }]}
-              contentContainerStyle={styles.contentContainer}
-              showsVerticalScrollIndicator={false}
-              bounces={false}
-            >
-              {/* SECTION 1: SINANCE HERO CARD */}
-              <SinanceHeroCard
-                userName={userName}
+          {/* ================= PRIMARY SCREEN CONTENT WRAPPER WITH MOTION DEPTH ================= */}
+          <Animated.View
+            style={[
+              styles.screenContentWrapper,
+              {
+                opacity: profileAnim.interpolate({
+                  inputRange: [0, 1],
+                  outputRange: [1, 0.7],
+                }),
+                transform: [
+                  {
+                    scale: profileAnim.interpolate({
+                      inputRange: [0, 1],
+                      outputRange: [1, 0.98],
+                    }),
+                  },
+                ],
+              },
+            ]}
+            pointerEvents={isProfileMounted ? 'none' : 'auto'}
+          >
+            {activeTab === 'tasks' ? (
+              /* ================= TAB 2: TASKS & GOALS BOARD ================= */
+              <TaskManagerScreen
+                onOpenProfile={handleOpenProfile}
+              />
+            ) : isPocketOpen || activeTab === 'cards' ? (
+              /* ================= POCKET DETAIL SCREEN ================= */
+              <SinancePocketScreen
+                onBack={() => {
+                  setIsPocketOpen(false);
+                  setActiveTab('sinance');
+                }}
                 balance={formattedBalance}
-                pastWeekDiff="+₹1,940 past week"
-                onboardingStep={user ? 'Cloud Synced' : '2 of 5 complete'}
-                onboardingText={
-                  user
-                    ? 'Your data is connected to Supabase and synced across devices.'
-                    : 'is a crucial phase in the onboarding process'
-                }
+                availableBalance="₹0 Available"
+                accounts={accounts}
+                transactions={transactions}
+                onAccountCreated={(newAcc) => {
+                  setAccounts((prev) => [...prev, newAcc]);
+                  setTotalBalance((prev) => prev + Number(newAcc.balance));
+                }}
+                onTransactionAdded={(newTx) => {
+                  setTransactions((prev) => [newTx, ...prev]);
+                  const delta = newTx.type === 'income' ? Number(newTx.amount) : -Number(newTx.amount);
+                  setTotalBalance((prev) => Math.max(0, prev + delta));
+                  setAccounts((prev) =>
+                    prev.map((acc) => {
+                      if (acc.id === newTx.account_id) {
+                        return {
+                          ...acc,
+                          balance: Math.max(0, Number(acc.balance) + delta),
+                        };
+                      }
+                      return acc;
+                    })
+                  );
+                }}
+              />
+            ) : activeTab === 'analytics' ? (
+              /* ================= STATS VIEW SCREEN ================= */
+              <StatsView
+                onBack={() => setActiveTab('sinance')}
+                currency={currency}
+              />
+            ) : (
+              /* ================= TAB 1: SINANCE CORE HOME SCREEN ================= */
+              <ScrollView
+                style={[styles.container, { backgroundColor: theme.canvas }]}
+                contentContainerStyle={styles.contentContainer}
+                showsVerticalScrollIndicator={false}
+                bounces={false}
+              >
+                {/* SECTION 1: SINANCE HERO CARD */}
+                <SinanceHeroCard
+                  userName={userName}
+                  balance={formattedBalance}
+                  pastWeekDiff="+₹1,940 past week"
+                  onboardingStep={user ? 'Cloud Synced' : '2 of 5 complete'}
+                  onboardingText={
+                    user
+                      ? 'Your data is connected to Supabase and synced across devices.'
+                      : 'is a crucial phase in the onboarding process'
+                  }
+                  isSetupDismissed={isSetupDismissed}
+                  onPressAvatar={handleOpenProfile}
+                  onPressNotification={handleOpenProfile}
+                  onPressDismissSetup={() => setIsSetupDismissed(true)}
+                  onPressGetSetUp={() => setIsGetSetUpModalOpen(true)}
+                  onPressBalance={() => {
+                    setIsPocketOpen(true);
+                  }}
+                />
+
+                {/* SECTION 2: TWO-COLUMN ACTIVITY & BRAIN CARDS */}
+                <SinanceActivitySection
+                  brainAmount={formattedBalance}
+                  sinceAllTimeLabel="Since All Time"
+                  dailyCashSubtitle="+₹1,250 Daily Cash"
+                  isBrainActive={isPocketOpen}
+                  onPressBrainCard={() => {
+                    setIsPocketOpen(true);
+                  }}
+                  onPressActivityCard={() => setActiveTab('analytics')}
+                />
+
+                {/* SECTION 3: UPCOMING BILLS & SUBSCRIPTIONS */}
+                <UpcomingBillsSection
+                  bills={bills.length > 0 ? bills : undefined}
+                  onPressBill={(bill) => console.log('Bill pressed:', bill.name)}
+                  onPressSeeAll={() => console.log('See all bills')}
+                />
+              </ScrollView>
+            )}
+          </Animated.View>
+
+          {/* ================= 2-TAB BOTTOM CAPSULE DOCK (GLIDES OUT ON PROFILE OPEN) ================= */}
+          <Animated.View
+            style={[
+              styles.dockAnimatedWrapper,
+              {
+                opacity: profileAnim.interpolate({
+                  inputRange: [0, 0.4, 1],
+                  outputRange: [1, 0, 0],
+                }),
+                transform: [
+                  {
+                    translateY: profileAnim.interpolate({
+                      inputRange: [0, 1],
+                      outputRange: [0, 90],
+                    }),
+                  },
+                ],
+              },
+            ]}
+            pointerEvents={isProfileMounted ? 'none' : 'auto'}
+          >
+            <BottomCapsuleDock
+              activeTab={activeTab}
+              onSelectTab={(tab) => {
+                setActiveTab(tab);
+                setIsPocketOpen(false);
+                handleCloseProfile();
+              }}
+            />
+          </Animated.View>
+
+          {/* ================= FULL PROFILE SCREEN (HERO MOTION) ================= */}
+          {isProfileMounted && (
+            <Animated.View
+              style={[
+                StyleSheet.absoluteFill,
+                {
+                  zIndex: 200,
+                  backgroundColor: theme.canvas,
+                  opacity: profileAnim.interpolate({
+                    inputRange: [0, 0.25, 1],
+                    outputRange: [0, 0.85, 1],
+                  }),
+                  transform: [
+                    {
+                      translateY: profileAnim.interpolate({
+                        inputRange: [0, 1],
+                        outputRange: [65, 0],
+                      }),
+                    },
+                    {
+                      scale: profileAnim.interpolate({
+                        inputRange: [0, 1],
+                        outputRange: [0.96, 1],
+                      }),
+                    },
+                  ],
+                },
+              ]}
+            >
+              <ProfileScreen
+                animProgress={profileAnim}
+                onBack={handleCloseProfile}
+                currency={currency}
+                onToggleCurrency={(newCurr) => setCurrency(newCurr)}
                 isSetupDismissed={isSetupDismissed}
-                onPressAvatar={() => setIsProfileOpen(true)}
-                onPressNotification={() => setIsProfileOpen(true)}
-                onPressDismissSetup={() => setIsSetupDismissed(true)}
-                onPressGetSetUp={() => setIsGetSetUpModalOpen(true)}
-                onPressBalance={() => {
-                  setIsPocketOpen(true);
+                onToggleSetupDismissed={() => setIsSetupDismissed((prev) => !prev)}
+                onOpenAuth={() => {
+                  handleCloseProfile();
+                  setIsAuthModalOpen(true);
                 }}
               />
-
-              {/* SECTION 2: TWO-COLUMN ACTIVITY & BRAIN CARDS */}
-              <SinanceActivitySection
-                brainAmount={formattedBalance}
-                sinceAllTimeLabel="Since All Time"
-                dailyCashSubtitle="+₹1,250 Daily Cash"
-                isBrainActive={isPocketOpen}
-                onPressBrainCard={() => {
-                  setIsPocketOpen(true);
-                }}
-                onPressActivityCard={() => setActiveTab('analytics')}
-              />
-
-              {/* SECTION 3: UPCOMING BILLS & SUBSCRIPTIONS */}
-              <UpcomingBillsSection
-                bills={bills.length > 0 ? bills : undefined}
-                onPressBill={(bill) => console.log('Bill pressed:', bill.name)}
-                onPressSeeAll={() => console.log('See all bills')}
-              />
-            </ScrollView>
+            </Animated.View>
           )}
-
-          {/* ================= 2-TAB BOTTOM CAPSULE DOCK ================= */}
-          <BottomCapsuleDock
-            activeTab={activeTab}
-            onSelectTab={(tab) => {
-              setActiveTab(tab);
-              setIsPocketOpen(false);
-              setIsProfileOpen(false);
-            }}
-          />
 
           {/* ================= GET SET UP MODAL ================= */}
           <GetSetUpModal
@@ -312,6 +422,17 @@ const styles = StyleSheet.create({
     width: '100%',
     position: 'relative',
     overflow: 'hidden',
+  },
+  screenContentWrapper: {
+    flex: 1,
+    width: '100%',
+  },
+  dockAnimatedWrapper: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    zIndex: 100,
   },
   container: {
     flex: 1,

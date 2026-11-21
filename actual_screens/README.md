@@ -16,6 +16,8 @@ actual_screens/
 │   ├── 03_stats/
 │   │   └── stats_screen.png                  # Live Stats view (Capsule charts, Category pills, Trend metrics)
 │   ├── 04_profile/
+│   │   ├── home_before_profile.png           # Live Home screen showing profile avatar trigger
+│   │   ├── profile_screen_flat.png           # Live Profile screen with zero elevations/shadows (Flat & Crisp)
 │   │   ├── profile_screen_dark.png           # Live Profile & Settings screen (Dark mode)
 │   │   └── profile_screen_light.png          # Live Profile & Settings screen (Light mode)
 │   ├── 05_auth/

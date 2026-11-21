@@ -7,6 +7,7 @@ import {
   ScrollView,
   Platform,
   Image,
+  Animated,
 } from 'react-native';
 import {
   ChevronLeft,
@@ -38,6 +39,7 @@ export interface ProfileScreenProps {
   isSetupDismissed?: boolean;
   onToggleSetupDismissed?: () => void;
   onOpenAuth?: () => void;
+  animProgress?: Animated.Value;
 }
 
 export const ProfileScreen: React.FC<ProfileScreenProps> = ({
@@ -47,6 +49,7 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
   isSetupDismissed = false,
   onToggleSetupDismissed,
   onOpenAuth,
+  animProgress,
 }) => {
   const theme = useAppTheme();
   const { user, signOut } = useAuth();
@@ -65,6 +68,49 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
   const displayName = user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'Sagar';
   const displayEmail = user?.email || 'sagar@sinance.app';
   const isCloudSynced = !!user;
+
+  // Premium Hero Transition Interpolations (Option C)
+  const avatarScale = animProgress
+    ? animProgress.interpolate({
+        inputRange: [0, 1],
+        outputRange: [44 / 54, 1],
+      })
+    : 1;
+
+  const avatarTranslateX = animProgress
+    ? animProgress.interpolate({
+        inputRange: [0, 1],
+        outputRange: [-10, 0],
+      })
+    : 0;
+
+  const heroDetailsOpacity = animProgress
+    ? animProgress.interpolate({
+        inputRange: [0, 0.4, 1],
+        outputRange: [0, 0.6, 1],
+      })
+    : 1;
+
+  const heroDetailsTranslateX = animProgress
+    ? animProgress.interpolate({
+        inputRange: [0, 1],
+        outputRange: [12, 0],
+      })
+    : 0;
+
+  const sectionsOpacity = animProgress
+    ? animProgress.interpolate({
+        inputRange: [0, 0.25, 1],
+        outputRange: [0, 0.5, 1],
+      })
+    : 1;
+
+  const sectionsTranslateY = animProgress
+    ? animProgress.interpolate({
+        inputRange: [0, 1],
+        outputRange: [24, 0],
+      })
+    : 0;
 
   return (
     <View style={[styles.container, { backgroundColor: theme.canvas }]}>
@@ -100,11 +146,18 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
             },
           ]}
         >
-          {/* Avatar on the left */}
-          <View
+          {/* Avatar on the left - smoothly scales and translates */}
+          <Animated.View
             style={[
               styles.avatarContainer,
-              { borderColor: theme.borderSubtle, backgroundColor: theme.surfaceSubtle },
+              {
+                borderColor: theme.borderSubtle,
+                backgroundColor: theme.surfaceSubtle,
+                transform: [
+                  { scale: avatarScale },
+                  { translateX: avatarTranslateX },
+                ],
+              },
             ]}
           >
             <Image
@@ -112,10 +165,18 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
               style={styles.avatarImage}
               resizeMode="cover"
             />
-          </View>
+          </Animated.View>
 
-          {/* User Name & Email */}
-          <View style={styles.heroTextContainer}>
+          {/* User Name & Email - smoothly reveals */}
+          <Animated.View
+            style={[
+              styles.heroTextContainer,
+              {
+                opacity: heroDetailsOpacity,
+                transform: [{ translateX: heroDetailsTranslateX }],
+              },
+            ]}
+          >
             <View style={styles.nameRow}>
               <Text style={[styles.userName, { color: theme.textMain }]}>
                 {displayName}
@@ -138,7 +199,7 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
             <Text style={[styles.userEmail, { color: theme.textDim }]}>
               {displayEmail}
             </Text>
-          </View>
+          </Animated.View>
         </View>
 
         {/* Notice Toast Banner */}
@@ -163,6 +224,14 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
             </Text>
           </View>
         )}
+
+        {/* ================= ALL SETTINGS GROUPS (Animated Entrance) ================= */}
+        <Animated.View
+          style={{
+            opacity: sectionsOpacity,
+            transform: [{ translateY: sectionsTranslateY }],
+          }}
+        >
 
         {/* ================= SECTION 1: ACCOUNT ================= */}
         <Text style={[styles.sectionHeaderLabel, { color: theme.textDim }]}>Account</Text>
@@ -446,6 +515,7 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
             </TouchableOpacity>
           )}
         </View>
+        </Animated.View>
 
         {/* Spacing for bottom */}
         <View style={{ height: 60 }} />
@@ -473,11 +543,6 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.04,
-    shadowRadius: 2,
-    elevation: 1,
   },
   scrollView: {
     flex: 1,
@@ -497,11 +562,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 18,
     marginBottom: 24,
     gap: 14,
-    shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.04,
-    shadowRadius: 3,
-    elevation: 1,
   },
   avatarContainer: {
     width: 54,
@@ -573,11 +633,6 @@ const styles = StyleSheet.create({
     paddingVertical: 4,
     paddingHorizontal: 16,
     marginBottom: 22,
-    shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.03,
-    shadowRadius: 2,
-    elevation: 1,
   },
   settingRow: {
     flexDirection: 'row',
