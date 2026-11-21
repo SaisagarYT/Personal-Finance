@@ -7,6 +7,7 @@ import { ActionPills } from './src/components/ActionPills';
 import { ExpenseLedger } from './src/components/ExpenseLedger';
 import { EcoFinHeroCard } from './src/components/EcoFinHeroCard';
 import { EcoFinActivitySection } from './src/components/EcoFinActivitySection';
+import { EcoFinSavingsRulesSection } from './src/components/EcoFinSavingsRulesSection';
 import { BottomCapsuleDock, NavTabId } from './src/components/BottomCapsuleDock';
 import { StatsView } from './src/screens/StatsView';
 import { useAppTheme } from './src/theme/colors';
@@ -135,7 +136,12 @@ export default function App() {
                 onPressActivityCard={() => setActiveTab('analytics')}
               />
 
-              {/* SECTION 3 will be placed here next */}
+              {/* ================= SECTION 3: SAVINGS RULES & 1P CHALLENGE ================= */}
+              <EcoFinSavingsRulesSection
+                automaticAmount="$150.87"
+                onPressAutomaticRule={() => console.log('Automatic saving rule pressed')}
+                onPressChallenge={() => console.log('1P Challenge pressed')}
+              />
             </ScrollView>
           )}
 
