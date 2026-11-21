@@ -84,13 +84,13 @@ export const SinancePocketScreen: React.FC<SinancePocketScreenProps> = ({
   const getAccountIcon = (type: Account['type']) => {
     switch (type) {
       case 'Checking':
-        return <Building size={16} color={theme.brand} strokeWidth={2.4} />;
+        return <Building size={16} color={theme.textMain} strokeWidth={2.2} />;
       case 'Savings':
-        return <Wallet size={16} color={theme.brand} strokeWidth={2.4} />;
+        return <Wallet size={16} color={theme.textMain} strokeWidth={2.2} />;
       case 'Credit Card':
-        return <CreditCard size={16} color={theme.brand} strokeWidth={2.4} />;
+        return <CreditCard size={16} color={theme.textMain} strokeWidth={2.2} />;
       default:
-        return <DollarSign size={16} color={theme.brand} strokeWidth={2.4} />;
+        return <DollarSign size={16} color={theme.textMain} strokeWidth={2.2} />;
     }
   };
 
@@ -173,8 +173,8 @@ export const SinancePocketScreen: React.FC<SinancePocketScreenProps> = ({
               onPress={() => setIsAddAccountOpen(true)}
               style={styles.addAccountLink}
             >
-              <Plus size={14} color={theme.brand} strokeWidth={2.6} />
-              <Text style={[styles.addAccountLinkText, { color: theme.brand }]}>Add Account</Text>
+              <Plus size={14} color={theme.textMain} strokeWidth={2.4} />
+              <Text style={[styles.addAccountLinkText, { color: theme.textMain }]}>Add Account</Text>
             </TouchableOpacity>
           </View>
 
@@ -212,7 +212,7 @@ export const SinancePocketScreen: React.FC<SinancePocketScreenProps> = ({
                   >
                     {acc.name}
                   </Text>
-                  <Text style={[styles.accBalance, { color: theme.brand }]}>
+                  <Text style={[styles.accBalance, { color: theme.textMain }]}>
                     ₹{Number(acc.balance).toLocaleString('en-IN', { minimumFractionDigits: 2 })}
                   </Text>
                 </View>
@@ -231,8 +231,8 @@ export const SinancePocketScreen: React.FC<SinancePocketScreenProps> = ({
                 },
               ]}
             >
-              <View style={[styles.addCardIconCircle, { backgroundColor: theme.forestBadgeBg }]}>
-                <Plus size={20} color={theme.brand} strokeWidth={2.6} />
+              <View style={[styles.addCardIconCircle, { backgroundColor: theme.surface }]}>
+                <Plus size={20} color={theme.textMain} strokeWidth={2.4} />
               </View>
               <Text style={[styles.addCardLabel, { color: theme.textMain }]}>New Account</Text>
               <Text style={[styles.addCardSub, { color: theme.textMuted }]}>Checking / Card</Text>
@@ -325,13 +325,13 @@ export const SinancePocketScreen: React.FC<SinancePocketScreenProps> = ({
                           style={[
                             styles.txIconBadge,
                             {
-                              backgroundColor: theme.forestBadgeBg,
-                              borderColor: theme.brandMedium,
+                              backgroundColor: theme.surfaceSubtle,
+                              borderColor: theme.borderSubtle,
                             },
                           ]}
                         >
                           {isIncome ? (
-                            <ArrowDown size={16} color={theme.brand} strokeWidth={2.4} />
+                            <ArrowDown size={16} color={theme.isDark ? '#23F07D' : '#059669'} strokeWidth={2.4} />
                           ) : (
                             <ArrowUp size={16} color={theme.textMuted} strokeWidth={2.4} />
                           )}
@@ -351,7 +351,7 @@ export const SinancePocketScreen: React.FC<SinancePocketScreenProps> = ({
                       <Text
                         style={[
                           styles.txAmount,
-                          { color: isIncome ? theme.brand : theme.textMain },
+                          { color: isIncome ? (theme.isDark ? '#23F07D' : '#059669') : theme.textMain },
                         ]}
                       >
                         {isIncome ? '+' : '-'}₹{Number(tx.amount).toLocaleString('en-IN')}
@@ -383,7 +383,7 @@ export const SinancePocketScreen: React.FC<SinancePocketScreenProps> = ({
                 ]}
               >
                 <View style={styles.infoRow}>
-                  <Cloud size={20} color={theme.brand} />
+                  <Cloud size={20} color={theme.textMain} />
                   <View style={styles.infoRowText}>
                     <Text style={[styles.infoTitle, { color: theme.textMain }]}>
                       Supabase PostgreSQL
@@ -392,13 +392,13 @@ export const SinancePocketScreen: React.FC<SinancePocketScreenProps> = ({
                       Status: Connected & Live
                     </Text>
                   </View>
-                  <CheckCircle2 size={18} color={theme.brand} />
+                  <CheckCircle2 size={18} color={theme.isDark ? '#23F07D' : '#059669'} />
                 </View>
 
                 <View style={[styles.divider, { backgroundColor: theme.borderSubtle }]} />
 
                 <View style={styles.infoRow}>
-                  <ShieldCheck size={20} color={theme.brand} />
+                  <ShieldCheck size={20} color={theme.textMain} />
                   <View style={styles.infoRowText}>
                     <Text style={[styles.infoTitle, { color: theme.textMain }]}>
                       Row Level Security (RLS)
@@ -412,7 +412,7 @@ export const SinancePocketScreen: React.FC<SinancePocketScreenProps> = ({
                 <View style={[styles.divider, { backgroundColor: theme.borderSubtle }]} />
 
                 <View style={styles.infoRow}>
-                  <Building size={20} color={theme.brand} />
+                  <Building size={20} color={theme.textMain} />
                   <View style={styles.infoRowText}>
                     <Text style={[styles.infoTitle, { color: theme.textMain }]}>
                       Web Dashboard Sync

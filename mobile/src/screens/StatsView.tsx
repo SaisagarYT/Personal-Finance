@@ -348,7 +348,9 @@ export const StatsView: React.FC<StatsViewProps> = ({
                   style={[
                     styles.monthLabel,
                     {
-                      color: isSelected ? theme.brand : theme.textMuted,
+                      color: isSelected
+                        ? (theme.isDark ? '#23F07D' : '#059669')
+                        : theme.textMuted,
                       fontWeight: isSelected ? '800' : '600',
                     },
                   ]}
@@ -405,9 +407,9 @@ export const StatsView: React.FC<StatsViewProps> = ({
               { backgroundColor: theme.expenseIconCircleBg },
             ]}
           >
-            <TrendingUp size={16} color={theme.brand} strokeWidth={2.2} />
+            <TrendingUp size={16} color={theme.isDark ? '#23F07D' : '#059669'} strokeWidth={2.2} />
           </View>
-          <Text style={[styles.metricValue, { color: theme.brand }]}>
+          <Text style={[styles.metricValue, { color: theme.isDark ? '#23F07D' : '#059669' }]}>
             Up 18%
           </Text>
           <Text style={[styles.metricLabel, { color: theme.textMuted }]}>

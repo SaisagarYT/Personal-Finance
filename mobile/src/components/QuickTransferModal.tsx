@@ -159,8 +159,8 @@ export const QuickTransferModal: React.FC<QuickTransferModalProps> = ({
             contentContainerStyle={styles.scrollBody}
           >
             {errorMsg && (
-              <View style={[styles.errorBox, { backgroundColor: theme.forestBadgeBg }]}>
-                <Text style={[styles.errorText, { color: theme.brand }]}>{errorMsg}</Text>
+              <View style={[styles.errorBox, { backgroundColor: 'rgba(239, 68, 68, 0.1)' }]}>
+                <Text style={[styles.errorText, { color: '#EF4444' }]}>{errorMsg}</Text>
               </View>
             )}
 
@@ -178,8 +178,8 @@ export const QuickTransferModal: React.FC<QuickTransferModalProps> = ({
                       style={[
                         styles.accountCardItem,
                         {
-                          backgroundColor: isSelected ? theme.forestBadgeBg : theme.surfaceSubtle,
-                          borderColor: isSelected ? theme.brand : theme.borderSubtle,
+                          backgroundColor: isSelected ? theme.surfaceSubtle : theme.surface,
+                          borderColor: isSelected ? (theme.isDark ? '#23F07D' : '#10B981') : theme.borderSubtle,
                         },
                       ]}
                     >
@@ -187,7 +187,7 @@ export const QuickTransferModal: React.FC<QuickTransferModalProps> = ({
                         <View
                           style={[
                             styles.accColorDot,
-                            { backgroundColor: acc.color || theme.brand },
+                            { backgroundColor: acc.color || (theme.isDark ? '#23F07D' : '#10B981') },
                           ]}
                         />
                         <View>
@@ -199,7 +199,7 @@ export const QuickTransferModal: React.FC<QuickTransferModalProps> = ({
                           </Text>
                         </View>
                       </View>
-                      <Text style={[styles.accItemBalance, { color: theme.brand }]}>
+                      <Text style={[styles.accItemBalance, { color: theme.textMain }]}>
                         ₹{Number(acc.balance).toLocaleString('en-IN')}
                       </Text>
                     </TouchableOpacity>
@@ -269,7 +269,7 @@ export const QuickTransferModal: React.FC<QuickTransferModalProps> = ({
             </TouchableOpacity>
 
             <View style={styles.securityRow}>
-              <ShieldCheck size={13} color={theme.brand} />
+              <ShieldCheck size={13} color={theme.textDim} />
               <Text style={[styles.securityText, { color: theme.textDim }]}>
                 Synchronized with Supabase & Web Dashboard
               </Text>

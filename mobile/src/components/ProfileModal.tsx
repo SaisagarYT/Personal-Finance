@@ -115,13 +115,13 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
                     style={[
                       styles.actionBtn,
                       {
-                        backgroundColor: theme.forestBadgeBg,
+                        backgroundColor: theme.surfaceSubtle,
                         borderColor: theme.borderSubtle,
                       },
                     ]}
                   >
-                    <LogOut size={18} color={theme.brand} />
-                    <Text style={[styles.actionBtnText, { color: theme.brand }]}>
+                    <LogOut size={18} color="#EF4444" />
+                    <Text style={[styles.actionBtnText, { color: '#EF4444' }]}>
                       Sign Out
                     </Text>
                   </TouchableOpacity>
@@ -132,10 +132,10 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
                       onClose();
                       onOpenAuth();
                     }}
-                    style={[styles.primaryActionBtn, { backgroundColor: theme.brand }]}
+                    style={[styles.primaryActionBtn, { backgroundColor: theme.isDark ? '#23F07D' : '#10B981' }]}
                   >
-                    <User size={18} color={theme.forestDark} />
-                    <Text style={[styles.primaryActionBtnText, { color: theme.forestDark }]}>
+                    <User size={18} color={theme.isDark ? '#07170D' : '#FFFFFF'} />
+                    <Text style={[styles.primaryActionBtnText, { color: theme.isDark ? '#07170D' : '#FFFFFF' }]}>
                       Sign In / Create Account
                     </Text>
                   </TouchableOpacity>
@@ -144,7 +144,7 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
 
               {/* Security Footnote */}
               <View style={styles.footnoteRow}>
-                <ShieldCheck size={13} color={theme.brand} />
+                <ShieldCheck size={13} color={theme.textDim} />
                 <Text style={[styles.footnoteText, { color: theme.textDim }]}>
                   Row Level Security active on all tables
                 </Text>

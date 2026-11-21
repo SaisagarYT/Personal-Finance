@@ -31,9 +31,9 @@ export const SinanceSavingsRulesSection: React.FC<SinanceSavingsRulesSectionProp
         ]}
       >
         <View style={styles.leftRow}>
-          {/* Emerald Star Badge */}
-          <View style={[styles.iconBadge, { backgroundColor: theme.forestBadgeBg, borderColor: theme.brandMedium }]}>
-            <Star size={18} color={theme.brand} fill={theme.brand} />
+          {/* Star Badge */}
+          <View style={[styles.iconBadge, { backgroundColor: theme.surfaceSubtle, borderColor: theme.borderSubtle }]}>
+            <Star size={18} color={theme.textMain} fill={theme.textMain} />
           </View>
 
           {/* Titles */}
@@ -63,9 +63,9 @@ export const SinanceSavingsRulesSection: React.FC<SinanceSavingsRulesSectionProp
         ]}
       >
         <View style={styles.leftRow}>
-          {/* Emerald Target/Pin Badge */}
-          <View style={[styles.iconBadge, { backgroundColor: theme.forestBadgeBg, borderColor: theme.brandMedium }]}>
-            <Target size={18} color={theme.brand} strokeWidth={2.4} />
+          {/* Target/Pin Badge */}
+          <View style={[styles.iconBadge, { backgroundColor: theme.surfaceSubtle, borderColor: theme.borderSubtle }]}>
+            <Target size={18} color={theme.textMain} strokeWidth={2.4} />
           </View>
 
           {/* Titles */}

@@ -140,8 +140,8 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({ onDismiss }) => {
 
           {/* Error Banner */}
           {errorMessage && (
-            <View style={[styles.errorBox, { backgroundColor: theme.forestBadgeBg }]}>
-              <Text style={[styles.errorText, { color: theme.brand }]}>
+            <View style={[styles.errorBox, { backgroundColor: 'rgba(239, 68, 68, 0.1)' }]}>
+              <Text style={[styles.errorText, { color: '#EF4444' }]}>
                 {errorMessage}
               </Text>
             </View>

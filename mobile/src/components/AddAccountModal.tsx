@@ -138,8 +138,8 @@ export const AddAccountModal: React.FC<AddAccountModalProps> = ({
             contentContainerStyle={styles.scrollBody}
           >
             {errorMsg && (
-              <View style={[styles.errorBox, { backgroundColor: theme.forestBadgeBg }]}>
-                <Text style={[styles.errorText, { color: theme.brand }]}>{errorMsg}</Text>
+              <View style={[styles.errorBox, { backgroundColor: 'rgba(239, 68, 68, 0.1)' }]}>
+                <Text style={[styles.errorText, { color: '#EF4444' }]}>{errorMsg}</Text>
               </View>
             )}
 
@@ -261,7 +261,7 @@ export const AddAccountModal: React.FC<AddAccountModalProps> = ({
             </TouchableOpacity>
 
             <View style={styles.securityRow}>
-              <ShieldCheck size={13} color={theme.brand} />
+              <ShieldCheck size={13} color={theme.textDim} />
               <Text style={[styles.securityText, { color: theme.textDim }]}>
                 Saved directly to Supabase with PostgreSQL RLS
               </Text>
