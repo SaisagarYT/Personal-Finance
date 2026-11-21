@@ -265,15 +265,14 @@ export const TaskManagerScreen: React.FC<TaskManagerScreenProps> = ({
         contentContainerStyle={styles.contentContainer}
         showsVerticalScrollIndicator={false}
       >
-        {/* Detail Top Bar: Back / Laptop icon + "Website Design" & Edit Icon */}
+        {/* Detail Top Bar: [Laptop] "Website Design" & Edit Icon */}
         <View style={styles.detailHeaderRow}>
           <TouchableOpacity
             activeOpacity={0.7}
             onPress={() => setCurrentView('overview')}
             style={styles.detailHeaderTitleGroup}
           >
-            <ChevronLeft size={20} color={theme.textMain} strokeWidth={2.2} />
-            <Laptop size={20} color={theme.textMain} strokeWidth={1.9} />
+            <Laptop size={21} color={theme.textMain} strokeWidth={1.9} />
             <Text style={[styles.detailHeaderTitleText, { color: theme.textMain }]}>
               Website Design
             </Text>
@@ -283,7 +282,7 @@ export const TaskManagerScreen: React.FC<TaskManagerScreenProps> = ({
             activeOpacity={0.7}
             style={styles.detailEditButton}
           >
-            <SquarePen size={18} color={theme.textMain} strokeWidth={1.9} />
+            <SquarePen size={19} color={theme.textMain} strokeWidth={1.9} />
           </TouchableOpacity>
         </View>
 
@@ -318,26 +317,49 @@ export const TaskManagerScreen: React.FC<TaskManagerScreenProps> = ({
           </Text>
         </View>
 
+        {/* Full-width Divider Line between status summary and table */}
+        <View style={[styles.detailSectionDivider, { backgroundColor: theme.borderSubtle }]} />
+
         {/* Tasks Table Header: Task | Description | Status */}
         <View style={styles.tableHeaderRow}>
-          <Text style={[styles.tableColTaskHeader, { color: theme.textDim }]}>Task</Text>
-          <Text style={[styles.tableColDescHeader, { color: theme.textDim }]}>Description</Text>
-          <Text style={[styles.tableColStatusHeader, { color: theme.textDim }]}>Status</Text>
+          <View style={styles.tableColTaskHeader}>
+            <Text style={[styles.tableColHeaderText, { color: theme.textDim }]}>Task</Text>
+          </View>
+          <View style={styles.tableColDescHeader}>
+            <Text style={[styles.tableColHeaderText, { color: theme.textDim }]}>Description</Text>
+          </View>
+          <View style={styles.tableColStatusHeader}>
+            <Text style={[styles.tableColHeaderText, { color: theme.textDim }]}>Status</Text>
+          </View>
         </View>
 
-        {/* Tasks Checklist Rows */}
+        {/* Tasks Checklist Rows with Continuous Vertical Timeline Spine */}
         <View style={styles.detailTasksContainer}>
-          {DETAIL_PROJECT_TASKS.map((task) => {
+          {DETAIL_PROJECT_TASKS.map((task, index) => {
+            const isFirst = index === 0;
+            const isLast = index === DETAIL_PROJECT_TASKS.length - 1;
+
             return (
               <View
                 key={task.id}
-                style={[
-                  styles.detailTaskRow,
-                  { borderBottomColor: theme.borderSubtle },
-                ]}
+                style={styles.detailTaskRow}
               >
-                {/* Column 1: Number Circle Badge + Optional "Ongoing" */}
+                {/* Column 1: Number Stepper with Continuous Vertical Line */}
                 <View style={styles.taskNumColumn}>
+                  {/* Vertical Timeline Spine Line (continuous through circle center) */}
+                  <View
+                    style={[
+                      styles.timelineSpine,
+                      {
+                        backgroundColor: theme.borderSubtle,
+                        top: isFirst ? 13 : -11,
+                        bottom: isLast ? undefined : -11,
+                        height: isLast ? 24 : undefined,
+                      },
+                    ]}
+                  />
+
+                  {/* Stepper Circle */}
                   <View
                     style={[
                       styles.taskNumCircle,
@@ -347,7 +369,7 @@ export const TaskManagerScreen: React.FC<TaskManagerScreenProps> = ({
                             borderColor: theme.isDark ? '#23F07D' : '#10B981',
                           }
                         : {
-                            backgroundColor: theme.surfaceSubtle,
+                            backgroundColor: theme.surface,
                             borderColor: theme.borderSubtle,
                           },
                     ]}
@@ -365,6 +387,8 @@ export const TaskManagerScreen: React.FC<TaskManagerScreenProps> = ({
                       {task.num}
                     </Text>
                   </View>
+
+                  {/* Optional "Ongoing" badge below the active circle */}
                   {task.isOngoing && (
                     <Text style={[styles.ongoingLabel, { color: theme.textDim }]}>
                       Ongoing
@@ -388,21 +412,19 @@ export const TaskManagerScreen: React.FC<TaskManagerScreenProps> = ({
                   </Text>
                 </View>
 
-                {/* Column 3: Checkbox & Date */}
+                {/* Column 3: Checkbox & Date centered */}
                 <View style={styles.taskStatusColumn}>
                   <View
                     style={[
                       styles.detailCheckbox,
                       {
                         borderColor: theme.borderSubtle,
-                        backgroundColor: task.isDone
-                          ? theme.surfaceSubtle
-                          : 'transparent',
+                        backgroundColor: theme.surface,
                       },
                     ]}
                   >
                     {task.isDone && (
-                      <Check size={12} color={theme.textMain} strokeWidth={2.4} />
+                      <Check size={13} color={theme.textMain} strokeWidth={2.4} />
                     )}
                   </View>
                   {task.date ? (
@@ -972,10 +994,10 @@ const styles = StyleSheet.create({
   detailHeaderTitleGroup: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
+    gap: 10,
   },
   detailHeaderTitleText: {
-    fontSize: 18,
+    fontSize: 18.5,
     fontWeight: '600',
     letterSpacing: -0.2,
   },
@@ -988,14 +1010,14 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    borderRadius: 16,
+    borderRadius: 18,
     borderWidth: 1,
-    paddingVertical: 14,
-    paddingHorizontal: 20,
-    marginBottom: 20,
+    paddingVertical: 15,
+    paddingHorizontal: 22,
+    marginBottom: 18,
     shadowColor: '#000000',
     shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
+    shadowOpacity: 0.04,
     shadowRadius: 2,
     elevation: 1,
   },
@@ -1005,10 +1027,10 @@ const styles = StyleSheet.create({
   dateBannerLabel: {
     fontSize: 12,
     fontWeight: '500',
-    marginBottom: 3,
+    marginBottom: 4,
   },
   dateBannerValue: {
-    fontSize: 14.5,
+    fontSize: 15,
     fontWeight: '600',
     letterSpacing: -0.1,
   },
@@ -1020,14 +1042,18 @@ const styles = StyleSheet.create({
   detailStatusRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 6,
-    marginBottom: 16,
+    gap: 7,
     paddingHorizontal: 2,
   },
   detailStatusText: {
-    fontSize: 13,
+    fontSize: 13.5,
     fontWeight: '600',
     letterSpacing: -0.1,
+  },
+  detailSectionDivider: {
+    width: '100%',
+    height: 1,
+    marginVertical: 14,
   },
   tableHeaderRow: {
     flexDirection: 'row',
@@ -1035,47 +1061,55 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingBottom: 8,
     paddingHorizontal: 2,
-    borderBottomWidth: 1,
-    borderBottomColor: 'transparent',
   },
   tableColTaskHeader: {
-    width: 32,
-    fontSize: 12,
-    fontWeight: '500',
+    width: 36,
+    alignItems: 'center',
   },
   tableColDescHeader: {
     flex: 1,
-    marginLeft: 12,
-    fontSize: 12,
-    fontWeight: '500',
+    marginLeft: 14,
   },
   tableColStatusHeader: {
-    width: 50,
-    textAlign: 'right',
+    width: 52,
+    alignItems: 'center',
+  },
+  tableColHeaderText: {
     fontSize: 12,
     fontWeight: '500',
   },
   detailTasksContainer: {
     width: '100%',
+    marginTop: 2,
   },
   detailTaskRow: {
     flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: 13,
-    borderBottomWidth: 1,
+    alignItems: 'flex-start',
+    paddingVertical: 11,
+    position: 'relative',
   },
   taskNumColumn: {
-    width: 32,
+    width: 36,
     alignItems: 'center',
-    justifyContent: 'center',
+    justifyContent: 'flex-start',
+    position: 'relative',
+    minHeight: 52,
+  },
+  timelineSpine: {
+    position: 'absolute',
+    left: '50%',
+    width: 1.5,
+    transform: [{ translateX: -0.75 }],
+    zIndex: 1,
   },
   taskNumCircle: {
-    width: 24,
-    height: 24,
-    borderRadius: 12,
-    borderWidth: 1,
+    width: 26,
+    height: 26,
+    borderRadius: 13,
+    borderWidth: 1.2,
     alignItems: 'center',
     justifyContent: 'center',
+    zIndex: 2,
   },
   taskNumText: {
     fontSize: 11.5,
@@ -1084,13 +1118,15 @@ const styles = StyleSheet.create({
   ongoingLabel: {
     fontSize: 8.5,
     fontWeight: '500',
-    marginTop: 2,
+    marginTop: 3,
     textAlign: 'center',
+    zIndex: 2,
   },
   taskDescColumn: {
     flex: 1,
-    marginLeft: 12,
+    marginLeft: 14,
     paddingRight: 8,
+    paddingTop: 1,
   },
   detailTaskTitle: {
     fontSize: 14.5,
@@ -1103,21 +1139,27 @@ const styles = StyleSheet.create({
     lineHeight: 16,
   },
   taskStatusColumn: {
-    width: 50,
-    alignItems: 'flex-end',
-    justifyContent: 'center',
-    gap: 3,
+    width: 52,
+    alignItems: 'center',
+    justifyContent: 'flex-start',
   },
   detailCheckbox: {
-    width: 18,
-    height: 18,
-    borderRadius: 4,
-    borderWidth: 1.5,
+    width: 22,
+    height: 22,
+    borderRadius: 6,
+    borderWidth: 1.2,
     alignItems: 'center',
     justifyContent: 'center',
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.04,
+    shadowRadius: 2,
+    elevation: 1,
   },
   detailTaskDate: {
     fontSize: 10.5,
     fontWeight: '500',
+    marginTop: 4,
+    textAlign: 'center',
   },
 });
