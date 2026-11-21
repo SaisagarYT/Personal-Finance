@@ -16,12 +16,14 @@ import {
   Folder,
   Ellipsis,
   Check,
+  SquarePen,
 } from 'lucide-react-native';
 import { useAppTheme } from '../theme/colors';
 
 export interface TaskManagerScreenProps {
   onOpenProfile?: () => void;
   onSelectProject?: (projectId: string) => void;
+  initialView?: 'overview' | 'detail';
 }
 
 /**
@@ -76,7 +78,6 @@ const CircularProgressRing: React.FC<CircularProgressRingProps> = ({
   return (
     <View style={{ width: size, height: size, alignItems: 'center', justifyContent: 'center' }}>
       <Svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
-        {/* Track circle */}
         <Circle
           cx={size / 2}
           cy={size / 2}
@@ -85,7 +86,6 @@ const CircularProgressRing: React.FC<CircularProgressRingProps> = ({
           strokeWidth={strokeWidth}
           fill="none"
         />
-        {/* Progress arc */}
         <Circle
           cx={size / 2}
           cy={size / 2}
@@ -178,8 +178,72 @@ const DAILY_TASKS: DailyTaskItem[] = [
   },
 ];
 
-export const TaskManagerScreen: React.FC<TaskManagerScreenProps> = ({ onSelectProject }) => {
+interface ProjectDetailTaskItem {
+  id: string;
+  num: number;
+  title: string;
+  description: string;
+  date?: string;
+  isDone: boolean;
+  isOngoing?: boolean;
+}
+
+const DETAIL_PROJECT_TASKS: ProjectDetailTaskItem[] = [
+  {
+    id: 'dt-1',
+    num: 1,
+    title: 'Discovery Call',
+    description: 'Understand clients needs & project',
+    date: '3 Jul',
+    isDone: true,
+  },
+  {
+    id: 'dt-2',
+    num: 2,
+    title: 'UX Research',
+    description: 'Do user research to understand pain points',
+    date: '6 Jul',
+    isDone: true,
+  },
+  {
+    id: 'dt-3',
+    num: 3,
+    title: 'Wireframing',
+    description: 'Wireframe based on UX research',
+    date: '9 Jul',
+    isDone: true,
+  },
+  {
+    id: 'dt-4',
+    num: 4,
+    title: 'Prototype',
+    description: 'Prototype to make it interactive',
+    isDone: false,
+    isOngoing: true,
+  },
+  {
+    id: 'dt-5',
+    num: 5,
+    title: 'Wireframing',
+    description: 'Wireframe based on UX research',
+    isDone: false,
+  },
+];
+
+export const TaskManagerScreen: React.FC<TaskManagerScreenProps> = ({
+  onSelectProject,
+  initialView = 'overview',
+}) => {
   const theme = useAppTheme();
+
+  // Check URL query param ?view=detail on web
+  const [currentView, setCurrentView] = useState<'overview' | 'detail'>(() => {
+    if (Platform.OS === 'web' && typeof globalThis !== 'undefined' && (globalThis as any).window) {
+      const v = new URLSearchParams((globalThis as any).window.location.search).get('view');
+      if (v === 'detail') return 'detail';
+    }
+    return initialView;
+  });
 
   // Selected calendar day index (defaults to Fri 11 matching the reference image)
   const [selectedDayIndex, setSelectedDayIndex] = useState<number>(4); // Fri 11
@@ -193,6 +257,172 @@ export const TaskManagerScreen: React.FC<TaskManagerScreenProps> = ({ onSelectPr
     { day: 'Sat', num: 12 },
   ];
 
+  // ================= RENDER SECTION 4: PROJECT DETAIL VIEW =================
+  if (currentView === 'detail') {
+    return (
+      <ScrollView
+        style={[styles.container, { backgroundColor: theme.canvas }]}
+        contentContainerStyle={styles.contentContainer}
+        showsVerticalScrollIndicator={false}
+      >
+        {/* Detail Top Bar: Back / Laptop icon + "Website Design" & Edit Icon */}
+        <View style={styles.detailHeaderRow}>
+          <TouchableOpacity
+            activeOpacity={0.7}
+            onPress={() => setCurrentView('overview')}
+            style={styles.detailHeaderTitleGroup}
+          >
+            <ChevronLeft size={20} color={theme.textMain} strokeWidth={2.2} />
+            <Laptop size={20} color={theme.textMain} strokeWidth={1.9} />
+            <Text style={[styles.detailHeaderTitleText, { color: theme.textMain }]}>
+              Website Design
+            </Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            activeOpacity={0.7}
+            style={styles.detailEditButton}
+          >
+            <SquarePen size={18} color={theme.textMain} strokeWidth={1.9} />
+          </TouchableOpacity>
+        </View>
+
+        {/* 2-Column Date Banner Card: Created On | Due On */}
+        <View
+          style={[
+            styles.dateBannerCard,
+            {
+              backgroundColor: theme.surface,
+              borderColor: theme.borderSubtle,
+            },
+          ]}
+        >
+          <View style={styles.dateBannerCol}>
+            <Text style={[styles.dateBannerLabel, { color: theme.textDim }]}>Created On</Text>
+            <Text style={[styles.dateBannerValue, { color: theme.textMain }]}>1 Jul</Text>
+          </View>
+
+          <View style={[styles.dateBannerDivider, { backgroundColor: theme.borderSubtle }]} />
+
+          <View style={styles.dateBannerCol}>
+            <Text style={[styles.dateBannerLabel, { color: theme.textDim }]}>Due On</Text>
+            <Text style={[styles.dateBannerValue, { color: theme.textMain }]}>12 Jul</Text>
+          </View>
+        </View>
+
+        {/* Status Summary: ✳ 3/5 completed */}
+        <View style={styles.detailStatusRow}>
+          <ProjectStatusSymbol size={14} color={theme.textDim} />
+          <Text style={[styles.detailStatusText, { color: theme.textMain }]}>
+            3/5 completed
+          </Text>
+        </View>
+
+        {/* Tasks Table Header: Task | Description | Status */}
+        <View style={styles.tableHeaderRow}>
+          <Text style={[styles.tableColTaskHeader, { color: theme.textDim }]}>Task</Text>
+          <Text style={[styles.tableColDescHeader, { color: theme.textDim }]}>Description</Text>
+          <Text style={[styles.tableColStatusHeader, { color: theme.textDim }]}>Status</Text>
+        </View>
+
+        {/* Tasks Checklist Rows */}
+        <View style={styles.detailTasksContainer}>
+          {DETAIL_PROJECT_TASKS.map((task) => {
+            return (
+              <View
+                key={task.id}
+                style={[
+                  styles.detailTaskRow,
+                  { borderBottomColor: theme.borderSubtle },
+                ]}
+              >
+                {/* Column 1: Number Circle Badge + Optional "Ongoing" */}
+                <View style={styles.taskNumColumn}>
+                  <View
+                    style={[
+                      styles.taskNumCircle,
+                      task.isOngoing
+                        ? {
+                            backgroundColor: theme.isDark ? '#23F07D' : '#10B981',
+                            borderColor: theme.isDark ? '#23F07D' : '#10B981',
+                          }
+                        : {
+                            backgroundColor: theme.surfaceSubtle,
+                            borderColor: theme.borderSubtle,
+                          },
+                    ]}
+                  >
+                    <Text
+                      style={[
+                        styles.taskNumText,
+                        {
+                          color: task.isOngoing
+                            ? (theme.isDark ? '#07170D' : '#FFFFFF')
+                            : theme.textDim,
+                        },
+                      ]}
+                    >
+                      {task.num}
+                    </Text>
+                  </View>
+                  {task.isOngoing && (
+                    <Text style={[styles.ongoingLabel, { color: theme.textDim }]}>
+                      Ongoing
+                    </Text>
+                  )}
+                </View>
+
+                {/* Column 2: Title & Description */}
+                <View style={styles.taskDescColumn}>
+                  <Text
+                    style={[styles.detailTaskTitle, { color: theme.textMain }]}
+                    numberOfLines={1}
+                  >
+                    {task.title}
+                  </Text>
+                  <Text
+                    style={[styles.detailTaskDesc, { color: theme.textDim }]}
+                    numberOfLines={2}
+                  >
+                    {task.description}
+                  </Text>
+                </View>
+
+                {/* Column 3: Checkbox & Date */}
+                <View style={styles.taskStatusColumn}>
+                  <View
+                    style={[
+                      styles.detailCheckbox,
+                      {
+                        borderColor: theme.borderSubtle,
+                        backgroundColor: task.isDone
+                          ? theme.surfaceSubtle
+                          : 'transparent',
+                      },
+                    ]}
+                  >
+                    {task.isDone && (
+                      <Check size={12} color={theme.textMain} strokeWidth={2.4} />
+                    )}
+                  </View>
+                  {task.date ? (
+                    <Text style={[styles.detailTaskDate, { color: theme.textDim }]}>
+                      {task.date}
+                    </Text>
+                  ) : null}
+                </View>
+              </View>
+            );
+          })}
+        </View>
+
+        {/* Spacing for floating capsule dock */}
+        <View style={{ height: 100 }} />
+      </ScrollView>
+    );
+  }
+
+  // ================= RENDER SECTIONS 1, 2, 3: PROJECTS OVERVIEW =================
   return (
     <ScrollView
       style={[styles.container, { backgroundColor: theme.canvas }]}
@@ -223,9 +453,8 @@ export const TaskManagerScreen: React.FC<TaskManagerScreenProps> = ({ onSelectPr
         </TouchableOpacity>
       </View>
 
-      {/* 2. Calendar Horizontal Week Strip (Floating on canvas with circular arrows) */}
+      {/* 2. Calendar Horizontal Week Strip */}
       <View style={styles.calendarStripRow}>
-        {/* Left Arrow Circular Button */}
         <TouchableOpacity
           style={[
             styles.circularNavButton,
@@ -290,7 +519,6 @@ export const TaskManagerScreen: React.FC<TaskManagerScreenProps> = ({ onSelectPr
           })}
         </View>
 
-        {/* Right Arrow Circular Button */}
         <TouchableOpacity
           style={[
             styles.circularNavButton,
@@ -328,7 +556,10 @@ export const TaskManagerScreen: React.FC<TaskManagerScreenProps> = ({ onSelectPr
             <TouchableOpacity
               key={project.id}
               activeOpacity={0.85}
-              onPress={() => onSelectProject?.(project.id)}
+              onPress={() => {
+                onSelectProject?.(project.id);
+                setCurrentView('detail');
+              }}
               style={[
                 styles.projectCard,
                 {
@@ -476,6 +707,7 @@ const styles = StyleSheet.create({
     paddingTop: Platform.OS === 'ios' ? 12 : 16,
     paddingBottom: 24,
   },
+  // Section 1 Header
   headerRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -729,5 +961,163 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: '500',
     letterSpacing: -0.1,
+  },
+  // Section 4: Detail View Styles
+  detailHeaderRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  detailHeaderTitleGroup: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  detailHeaderTitleText: {
+    fontSize: 18,
+    fontWeight: '600',
+    letterSpacing: -0.2,
+  },
+  detailEditButton: {
+    padding: 6,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  dateBannerCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    borderRadius: 16,
+    borderWidth: 1,
+    paddingVertical: 14,
+    paddingHorizontal: 20,
+    marginBottom: 20,
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 2,
+    elevation: 1,
+  },
+  dateBannerCol: {
+    flex: 1,
+  },
+  dateBannerLabel: {
+    fontSize: 12,
+    fontWeight: '500',
+    marginBottom: 3,
+  },
+  dateBannerValue: {
+    fontSize: 14.5,
+    fontWeight: '600',
+    letterSpacing: -0.1,
+  },
+  dateBannerDivider: {
+    width: 1,
+    height: 32,
+    marginHorizontal: 16,
+  },
+  detailStatusRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    marginBottom: 16,
+    paddingHorizontal: 2,
+  },
+  detailStatusText: {
+    fontSize: 13,
+    fontWeight: '600',
+    letterSpacing: -0.1,
+  },
+  tableHeaderRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingBottom: 8,
+    paddingHorizontal: 2,
+    borderBottomWidth: 1,
+    borderBottomColor: 'transparent',
+  },
+  tableColTaskHeader: {
+    width: 32,
+    fontSize: 12,
+    fontWeight: '500',
+  },
+  tableColDescHeader: {
+    flex: 1,
+    marginLeft: 12,
+    fontSize: 12,
+    fontWeight: '500',
+  },
+  tableColStatusHeader: {
+    width: 50,
+    textAlign: 'right',
+    fontSize: 12,
+    fontWeight: '500',
+  },
+  detailTasksContainer: {
+    width: '100%',
+  },
+  detailTaskRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 13,
+    borderBottomWidth: 1,
+  },
+  taskNumColumn: {
+    width: 32,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  taskNumCircle: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    borderWidth: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  taskNumText: {
+    fontSize: 11.5,
+    fontWeight: '700',
+  },
+  ongoingLabel: {
+    fontSize: 8.5,
+    fontWeight: '500',
+    marginTop: 2,
+    textAlign: 'center',
+  },
+  taskDescColumn: {
+    flex: 1,
+    marginLeft: 12,
+    paddingRight: 8,
+  },
+  detailTaskTitle: {
+    fontSize: 14.5,
+    fontWeight: '600',
+    letterSpacing: -0.2,
+    marginBottom: 3,
+  },
+  detailTaskDesc: {
+    fontSize: 12,
+    lineHeight: 16,
+  },
+  taskStatusColumn: {
+    width: 50,
+    alignItems: 'flex-end',
+    justifyContent: 'center',
+    gap: 3,
+  },
+  detailCheckbox: {
+    width: 18,
+    height: 18,
+    borderRadius: 4,
+    borderWidth: 1.5,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  detailTaskDate: {
+    fontSize: 10.5,
+    fontWeight: '500',
   },
 });

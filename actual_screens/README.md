@@ -25,7 +25,9 @@ actual_screens/
 │       ├── 02_section2_dark.png              # Pinned Projects 2x2 Grid (Dark mode)
 │       ├── 02_section2_light.png             # Pinned Projects 2x2 Grid (Light mode)
 │       ├── 03_section3_dark.png              # Task List & Today Dropdown (Dark mode)
-│       └── 03_section3_light.png             # Task List & Today Dropdown (Light mode)
+│       ├── 03_section3_light.png             # Task List & Today Dropdown (Light mode)
+│       ├── 04_section4_detail_dark.png       # Project Detail Screen & Tasks Checklist (Dark mode)
+│       └── 04_section4_detail_light.png      # Project Detail Screen & Tasks Checklist (Light mode)
 └── web/                                      # Real screenshots of web desktop app (1440x900)
     ├── 01_dashboard/
     │   └── dashboard_screen.png              # Live Executive Overview dashboard
