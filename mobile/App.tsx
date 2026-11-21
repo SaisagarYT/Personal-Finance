@@ -6,6 +6,7 @@ import { CardStack } from './src/components/CardStack';
 import { ActionPills } from './src/components/ActionPills';
 import { ExpenseLedger } from './src/components/ExpenseLedger';
 import { EcoFinHeroCard } from './src/components/EcoFinHeroCard';
+import { EcoFinActivitySection } from './src/components/EcoFinActivitySection';
 import { BottomCapsuleDock, NavTabId } from './src/components/BottomCapsuleDock';
 import { StatsView } from './src/screens/StatsView';
 import { useAppTheme } from './src/theme/colors';
@@ -125,7 +126,16 @@ export default function App() {
                 onPressBalance={() => setCurrency((prev) => (prev === 'USD' ? 'INR' : 'USD'))}
               />
 
-              {/* SECTION 2 & 3 will be placed here next */}
+              {/* ================= SECTION 2: TWO-COLUMN ACTIVITY & BRAIN CARDS ================= */}
+              <EcoFinActivitySection
+                brainAmount="$142.83"
+                sinceAllTimeLabel="Since All Time"
+                dailyCashSubtitle="+$15.43 Daily Cash"
+                onPressBrainCard={() => console.log('Brain card pressed')}
+                onPressActivityCard={() => setActiveTab('analytics')}
+              />
+
+              {/* SECTION 3 will be placed here next */}
             </ScrollView>
           )}
 
