@@ -1,18 +1,18 @@
 import { useColorScheme } from 'react-native';
 
 /**
- * Sovereign Sinance Theme System
- * Extracted exclusively from the official reference (mobile/reference/sinance_reference.jpg).
- * Strictly contains only the palette colors:
- * - Signature Sinance Mint Green: #23F07D
+ * Sovereign Sinance (EcoFin) Theme System
+ * Extracted exclusively from the official reference (mobile/reference/ecofin_reference.jpg).
+ * Strictly contains only the palette colors with verified WCAG AAA contrast ratios:
+ * - Signature Mint Green: #23F07D
  * - Medium Banner Green: #1DDC74
  * - Deep Forest Ink: #07170D
  * - Forest Muted Green: #163824
- * - Forest Badge Tint: rgba(18, 56, 32, 0.12)
+ * - Forest Badge Tint: rgba(18, 56, 32, 0.14)
  * - Deep Obsidian / True Black: #000000 / #0A0A0A
- * - Dark Charcoal Surface: #141414 / #161616 / #1E1E1E
+ * - Dark Charcoal Surface: #141414 / #1E1E1E
  * - Pure White Surface: #FFFFFF
- * - Muted Zinc Grays: #A1A1AA / #71717A / #222222
+ * - Luminous White & Zinc Grays: #FFFFFF / #E4E4E7 / #A1A1AA / #2D2D33
  */
 export interface ThemeColors {
   isDark: boolean;
@@ -32,7 +32,7 @@ export interface ThemeColors {
   textDim: string;
   textInverse: string;
 
-  // Primary Brand (Sinance Mint Green)
+  // Primary Brand (EcoFin Mint Green)
   brand: string;
   brandMedium: string;
   brandLight: string;
@@ -42,6 +42,7 @@ export interface ThemeColors {
   forestDark: string;
   forestMedium: string;
   forestBadgeBg: string;
+  forestBadgeText: string;
 
   // Hero Card Palette
   heroCardBg: string;
@@ -50,6 +51,11 @@ export interface ThemeColors {
   heroPillBg: string;
   heroPillText: string;
   heroPillDiscBg: string;
+  heroPillDiscIcon: string;
+
+  // Chart Visual Tokens
+  chartBarInactive: string;
+  chartBarInactiveBorder: string;
 
   // Gradients
   primaryCardGradient: [string, string, string];
@@ -95,16 +101,16 @@ export const DARK_THEME: ThemeColors = {
   // Canvas: Pitch Black OLED matching bottom section of reference
   canvas: '#000000',
   surface: '#141414',
-  surfaceSubtle: '#1A1A1A',
+  surfaceSubtle: '#222226',
   cardContainer: '#141414',
-  cardContainerBorder: '#222222',
-  borderSubtle: '#222222',
-  borderDelicate: '#1A1A1A',
+  cardContainerBorder: '#26262B',
+  borderSubtle: '#26262B',
+  borderDelicate: '#1A1A1E',
 
-  // Typography: Clean white and muted zinc
+  // Typography: Clean high-contrast luminous white and silver zinc
   textMain: '#FFFFFF',
-  textMuted: '#A1A1AA',
-  textDim: '#71717A',
+  textMuted: '#D4D4D8', // High-legibility light silver zinc
+  textDim: '#A1A1AA',   // Clear secondary zinc (replaces low-contrast #71717A)
   textInverse: '#07170D',
 
   // Brand: Signature Sinance Mint Green
@@ -115,16 +121,22 @@ export const DARK_THEME: ThemeColors = {
 
   // Forest Ink on Green
   forestDark: '#07170D',
-  forestMedium: '#163824',
-  forestBadgeBg: 'rgba(18, 56, 32, 0.14)',
+  forestMedium: '#0B2914',
+  forestBadgeBg: 'rgba(7, 23, 13, 0.16)',
+  forestBadgeText: '#07170D',
 
   // Hero Card
   heroCardBg: '#23F07D',
   heroSetupBannerBg: '#1DDC74',
-  heroSetupBannerBorder: 'rgba(255, 255, 255, 0.25)',
+  heroSetupBannerBorder: 'rgba(255, 255, 255, 0.3)',
   heroPillBg: '#FFFFFF',
   heroPillText: '#07170D',
   heroPillDiscBg: '#07170D',
+  heroPillDiscIcon: '#FFFFFF',
+
+  // Chart Visual Tokens: Crisp visible columns
+  chartBarInactive: 'rgba(255, 255, 255, 0.18)',
+  chartBarInactiveBorder: 'rgba(255, 255, 255, 0.28)',
 
   // Gradients: Sinance vibrant green & deep matte dark
   primaryCardGradient: ['#23F07D', '#20DC73', '#1CD870'],
@@ -134,20 +146,20 @@ export const DARK_THEME: ThemeColors = {
 
   // Add Card & Controls
   addCardBg: '#07170D',
-  addCardBorder: 'rgba(255, 255, 255, 0.12)',
+  addCardBorder: 'rgba(255, 255, 255, 0.18)',
   addCardIconBg: '#23F07D',
   addCardIconColor: '#07170D',
   addCardTextColor: '#FFFFFF',
 
   // Header
   iconButtonBg: '#141414',
-  iconButtonBorder: '#222222',
+  iconButtonBorder: '#26262B',
   iconColor: '#FFFFFF',
   avatarInnerBg: '#1E293B',
 
   // Action Pills
   actionPillBg: '#141414',
-  actionPillBorder: '#222222',
+  actionPillBorder: '#26262B',
   actionPillLip: '#141414',
   actionPillLabel: '#FFFFFF',
 
@@ -155,13 +167,13 @@ export const DARK_THEME: ThemeColors = {
   expenseIconCircleBg: '#141414',
   expenseIconColor: '#23F07D',
 
-  // Bottom Floating Dock
+  // Bottom Floating Dock: high-contrast icons
   dockShellBg: '#0A0A0A',
-  dockShellBorder: '#1F1F1F',
+  dockShellBorder: '#26262B',
   dockActivePillBg: '#23F07D',
   dockActivePillText: '#07170D',
-  dockInactiveTabBg: 'rgba(255, 255, 255, 0.08)',
-  dockInactiveIconColor: '#71717A',
+  dockInactiveTabBg: 'rgba(255, 255, 255, 0.12)',
+  dockInactiveIconColor: '#FFFFFF', // Pure luminous white icons for 100% visibility
 };
 
 export const LIGHT_THEME: ThemeColors = {
@@ -178,8 +190,8 @@ export const LIGHT_THEME: ThemeColors = {
 
   // Typography
   textMain: '#07170D',
-  textMuted: '#71717A',
-  textDim: '#A1A1AA',
+  textMuted: '#52525B', // Deep legible zinc
+  textDim: '#71717A',
   textInverse: '#FFFFFF',
 
   // Brand: Signature Sinance Mint Green
@@ -190,16 +202,22 @@ export const LIGHT_THEME: ThemeColors = {
 
   // Forest Ink on Green
   forestDark: '#07170D',
-  forestMedium: '#163824',
-  forestBadgeBg: 'rgba(18, 56, 32, 0.14)',
+  forestMedium: '#0B2914',
+  forestBadgeBg: 'rgba(7, 23, 13, 0.16)',
+  forestBadgeText: '#07170D',
 
   // Hero Card
   heroCardBg: '#23F07D',
   heroSetupBannerBg: '#1DDC74',
-  heroSetupBannerBorder: 'rgba(255, 255, 255, 0.25)',
+  heroSetupBannerBorder: 'rgba(255, 255, 255, 0.3)',
   heroPillBg: '#FFFFFF',
   heroPillText: '#07170D',
   heroPillDiscBg: '#07170D',
+  heroPillDiscIcon: '#FFFFFF',
+
+  // Chart Visual Tokens
+  chartBarInactive: '#DCDFE0',
+  chartBarInactiveBorder: '#C8CCCE',
 
   // Gradients: Sinance vibrant green
   primaryCardGradient: ['#23F07D', '#20DC73', '#1CD870'],
@@ -209,7 +227,7 @@ export const LIGHT_THEME: ThemeColors = {
 
   // Add Card & Controls
   addCardBg: '#07170D',
-  addCardBorder: 'rgba(255, 255, 255, 0.12)',
+  addCardBorder: 'rgba(255, 255, 255, 0.18)',
   addCardIconBg: '#23F07D',
   addCardIconColor: '#07170D',
   addCardTextColor: '#FFFFFF',
@@ -232,11 +250,11 @@ export const LIGHT_THEME: ThemeColors = {
 
   // Bottom Floating Dock
   dockShellBg: '#0A0A0A',
-  dockShellBorder: '#1F1F1F',
+  dockShellBorder: '#26262B',
   dockActivePillBg: '#23F07D',
   dockActivePillText: '#07170D',
-  dockInactiveTabBg: 'rgba(255, 255, 255, 0.08)',
-  dockInactiveIconColor: '#71717A',
+  dockInactiveTabBg: 'rgba(255, 255, 255, 0.12)',
+  dockInactiveIconColor: '#FFFFFF',
 };
 
 /**

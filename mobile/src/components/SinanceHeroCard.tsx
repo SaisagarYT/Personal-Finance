@@ -45,7 +45,7 @@ export const SinanceHeroCard: React.FC<SinanceHeroCardProps> = ({
           {/* Greeting text */}
           <View style={styles.greetingContainer}>
             <View style={styles.waveRow}>
-              <Text style={[styles.helloText, { color: theme.forestMedium }]}>Hello</Text>
+              <Text style={[styles.helloText, { color: theme.forestDark }]}>Hello</Text>
               <Text style={styles.waveEmoji}> 👋</Text>
             </View>
             <Text style={[styles.userNameText, { color: theme.forestDark }]}>{userName}</Text>
@@ -58,13 +58,13 @@ export const SinanceHeroCard: React.FC<SinanceHeroCardProps> = ({
           onPress={onPressNotification}
           style={[styles.notificationButton, { backgroundColor: theme.heroPillDiscBg }]}
         >
-          <Bell size={16} color={theme.textMain} strokeWidth={2.2} />
+          <Bell size={16} color={theme.heroPillDiscIcon} strokeWidth={2.4} />
         </TouchableOpacity>
       </View>
 
       {/* 2. Value & Balance Section */}
       <View style={styles.balanceSection}>
-        <Text style={[styles.balanceLabel, { color: theme.forestMedium }]}>Your Sinance Value</Text>
+        <Text style={[styles.balanceLabel, { color: theme.forestDark }]}>Your Sinance Value</Text>
         <TouchableOpacity
           activeOpacity={0.9}
           onPress={onPressBalance}
@@ -72,8 +72,8 @@ export const SinanceHeroCard: React.FC<SinanceHeroCardProps> = ({
         >
           <Text style={[styles.balanceAmount, { color: theme.forestDark }]}>{balance}</Text>
           <View style={[styles.pastWeekBadge, { backgroundColor: theme.forestBadgeBg }]}>
-            <Text style={[styles.triangleIndicator, { color: theme.forestMedium }]}>▲</Text>
-            <Text style={[styles.pastWeekText, { color: theme.forestMedium }]}>{pastWeekDiff}</Text>
+            <Text style={[styles.triangleIndicator, { color: theme.forestBadgeText }]}>▲</Text>
+            <Text style={[styles.pastWeekText, { color: theme.forestBadgeText }]}>{pastWeekDiff}</Text>
           </View>
         </TouchableOpacity>
       </View>
@@ -90,7 +90,7 @@ export const SinanceHeroCard: React.FC<SinanceHeroCardProps> = ({
       >
         {/* Onboarding phase notice + Dismiss button */}
         <View style={styles.setupTextRow}>
-          <Text style={[styles.setupNoticeText, { color: theme.forestMedium }]}>
+          <Text style={[styles.setupNoticeText, { color: theme.forestDark }]}>
             Get Set Up <Text style={[styles.setupNoticeEmphasis, { color: theme.forestDark }]}>({onboardingStep})</Text> {onboardingText}
           </Text>
           <TouchableOpacity
@@ -98,7 +98,7 @@ export const SinanceHeroCard: React.FC<SinanceHeroCardProps> = ({
             onPress={onPressDismissSetup}
             style={[styles.dismissButton, { backgroundColor: theme.heroPillDiscBg }]}
           >
-            <X size={12} color={theme.textMain} strokeWidth={2.8} />
+            <X size={12} color={theme.heroPillDiscIcon} strokeWidth={2.8} />
           </TouchableOpacity>
         </View>
 
@@ -110,7 +110,7 @@ export const SinanceHeroCard: React.FC<SinanceHeroCardProps> = ({
         >
           {/* Left black disc with chevron */}
           <View style={[styles.arrowDisc, { backgroundColor: theme.heroPillDiscBg }]}>
-            <ChevronRight size={17} color={theme.textMain} strokeWidth={2.8} />
+            <ChevronRight size={17} color={theme.heroPillDiscIcon} strokeWidth={2.8} />
           </View>
 
           {/* Center text */}
@@ -169,8 +169,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   helloText: {
-    fontSize: 12.5,
-    fontWeight: '500',
+    fontSize: 13,
+    fontWeight: '700',
     letterSpacing: -0.1,
   },
   waveEmoji: {
@@ -199,7 +199,7 @@ const styles = StyleSheet.create({
   },
   balanceLabel: {
     fontSize: 13,
-    fontWeight: '500',
+    fontWeight: '600',
     marginBottom: 4,
     letterSpacing: -0.1,
   },
@@ -224,6 +224,7 @@ const styles = StyleSheet.create({
   },
   triangleIndicator: {
     fontSize: 9,
+    fontWeight: '800',
   },
   pastWeekText: {
     fontSize: 12,
@@ -245,19 +246,19 @@ const styles = StyleSheet.create({
   },
   setupNoticeText: {
     flex: 1,
-    fontSize: 12,
-    lineHeight: 16,
-    fontWeight: '500',
+    fontSize: 12.5,
+    lineHeight: 16.5,
+    fontWeight: '600',
     paddingRight: 10,
     letterSpacing: -0.1,
   },
   setupNoticeEmphasis: {
-    fontWeight: '700',
+    fontWeight: '800',
   },
   dismissButton: {
-    width: 20,
-    height: 20,
-    borderRadius: 10,
+    width: 22,
+    height: 22,
+    borderRadius: 11,
     alignItems: 'center',
     justifyContent: 'center',
     marginTop: 2,

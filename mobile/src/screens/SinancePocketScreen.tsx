@@ -49,7 +49,7 @@ export const SinancePocketScreen: React.FC<SinancePocketScreenProps> = ({
             {/* Centered Pocket Brand */}
             <View style={styles.pocketHeaderCenter}>
               <View style={[styles.pocketIconDisc, { backgroundColor: theme.forestDark }]}>
-                <DollarSign size={13} color={theme.brand} strokeWidth={2.8} />
+                <DollarSign size={13} color="#FFFFFF" strokeWidth={2.8} />
               </View>
               <Text style={[styles.pocketTitle, { color: theme.forestDark }]}>Pocket</Text>
             </View>
@@ -74,7 +74,7 @@ export const SinancePocketScreen: React.FC<SinancePocketScreenProps> = ({
               style={[styles.depositButton, { backgroundColor: theme.forestDark }]}
               onPress={() => console.log('Deposit pressed')}
             >
-              <Text style={[styles.depositText, { color: theme.textMain }]}>Deposit</Text>
+              <Text style={[styles.depositText, { color: '#FFFFFF' }]}>Deposit</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
@@ -82,7 +82,7 @@ export const SinancePocketScreen: React.FC<SinancePocketScreenProps> = ({
               style={[styles.withdrawButton, { backgroundColor: theme.forestBadgeBg }]}
               onPress={() => console.log('Withdraw pressed')}
             >
-              <Text style={[styles.withdrawText, { color: theme.forestMedium }]}>Withdraw</Text>
+              <Text style={[styles.withdrawText, { color: theme.forestDark }]}>Withdraw</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -136,7 +136,7 @@ export const SinancePocketScreen: React.FC<SinancePocketScreenProps> = ({
               </View>
               <View style={styles.quickTextWrapper}>
                 <Text style={[styles.quickCardTitle, { color: theme.forestDark }]}>Enable Quick Transfers</Text>
-                <Text style={[styles.quickCardSubtitle, { color: theme.forestMedium }]}>
+                <Text style={[styles.quickCardSubtitle, { color: theme.forestDark }]}>
                   Get your money now, Don't Wait 4 days for direct debits
                 </Text>
               </View>

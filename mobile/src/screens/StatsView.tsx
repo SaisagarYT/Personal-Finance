@@ -292,9 +292,9 @@ export const StatsView: React.FC<StatsViewProps> = ({
                   style={[
                     styles.barAmountText,
                     {
-                      color: isSelected ? theme.textMain : theme.textDim,
-                      fontWeight: isSelected ? '700' : '500',
-                      opacity: isSelected ? 1 : 0.65,
+                      color: isSelected ? theme.textMain : theme.textMuted,
+                      fontWeight: isSelected ? '800' : '600',
+                      opacity: isSelected ? 1 : 0.9,
                     },
                   ]}
                   numberOfLines={1}
@@ -309,8 +309,8 @@ export const StatsView: React.FC<StatsViewProps> = ({
                     {
                       borderColor: isSelected
                         ? theme.brand
-                        : theme.borderSubtle,
-                      opacity: isSelected ? 0.8 : 0.3,
+                        : theme.chartBarInactiveBorder,
+                      opacity: isSelected ? 1 : 0.6,
                     },
                   ]}
                 />
@@ -323,22 +323,24 @@ export const StatsView: React.FC<StatsViewProps> = ({
                       height: barHeight,
                       backgroundColor: isSelected
                         ? theme.brand
-                        : theme.isDark
-                        ? theme.surfaceSubtle
-                        : theme.borderSubtle,
+                        : theme.chartBarInactive,
+                      borderWidth: 1,
+                      borderColor: isSelected
+                        ? theme.brand
+                        : theme.chartBarInactiveBorder,
                     },
                   ]}
                 >
-                  {isSelected && (
-                    <View
-                      style={[
-                        styles.capsuleInnerHighlight,
-                        {
-                          backgroundColor: theme.brandLight,
-                        },
-                      ]}
-                    />
-                  )}
+                  <View
+                    style={[
+                      styles.capsuleInnerHighlight,
+                      {
+                        backgroundColor: isSelected
+                          ? theme.brandLight
+                          : 'rgba(255, 255, 255, 0.25)',
+                      },
+                    ]}
+                  />
                 </View>
 
                 {/* Month Label */}
@@ -346,8 +348,8 @@ export const StatsView: React.FC<StatsViewProps> = ({
                   style={[
                     styles.monthLabel,
                     {
-                      color: isSelected ? theme.textMain : theme.textDim,
-                      fontWeight: isSelected ? '700' : '500',
+                      color: isSelected ? theme.brand : theme.textMuted,
+                      fontWeight: isSelected ? '800' : '600',
                     },
                   ]}
                 >
@@ -463,7 +465,7 @@ export const StatsView: React.FC<StatsViewProps> = ({
               +14.2% higher than October
             </Text>
           </View>
-          <ChevronRight size={18} color={theme.textDim} strokeWidth={2.2} />
+          <ChevronRight size={18} color={theme.textMuted} strokeWidth={2.4} />
         </TouchableOpacity>
 
         <TouchableOpacity
@@ -484,7 +486,7 @@ export const StatsView: React.FC<StatsViewProps> = ({
               4 primary expense streams
             </Text>
           </View>
-          <ChevronRight size={18} color={theme.textDim} strokeWidth={2.2} />
+          <ChevronRight size={18} color={theme.textMuted} strokeWidth={2.4} />
         </TouchableOpacity>
       </View>
     </ScrollView>

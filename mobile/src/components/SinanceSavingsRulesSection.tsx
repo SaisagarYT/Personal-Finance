@@ -77,7 +77,7 @@ export const SinanceSavingsRulesSection: React.FC<SinanceSavingsRulesSectionProp
 
         {/* Right Chevron */}
         <View style={styles.chevronWrapper}>
-          <ChevronRight size={19} color={theme.textDim} strokeWidth={2.2} />
+          <ChevronRight size={19} color={theme.textMuted} strokeWidth={2.4} />
         </View>
       </TouchableOpacity>
     </View>
