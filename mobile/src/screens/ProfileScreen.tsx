@@ -41,6 +41,7 @@ import {
   Bot,
 } from 'lucide-react-native';
 import { useAuth } from '../context/AuthContext';
+import { useToast } from '../context/ToastContext';
 import { useAppTheme } from '../theme/colors';
 import { UserProfile } from '../services/profileService';
 import { EditProfileScreen } from './EditProfileScreen';
@@ -72,7 +73,7 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
 }) => {
   const theme = useAppTheme();
   const { user, signOut } = useAuth();
-  const [exportNotice, setExportNotice] = useState<string | null>(null);
+  const { showToast } = useToast();
   const [isEditProfileOpen, setIsEditProfileOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -82,8 +83,12 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
   };
 
   const handleExportCSV = () => {
-    setExportNotice('Ledger records exported to download storage (CSV)');
-    setTimeout(() => setExportNotice(null), 3000);
+    showToast({
+      title: 'Ledger exported successfully!',
+      description: 'Records saved to your device download storage (CSV)',
+      type: 'success',
+      actionLabel: 'Got It!',
+    });
   };
 
   const handleInviteFriend = async () => {
@@ -177,29 +182,6 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
         contentContainerStyle={styles.contentContainer}
         showsVerticalScrollIndicator={false}
       >
-        {/* Notice Toast Banner */}
-        {exportNotice && (
-          <View
-            style={[
-              styles.toastBanner,
-              {
-                backgroundColor: theme.isDark ? 'rgba(35, 240, 125, 0.12)' : 'rgba(16, 185, 129, 0.12)',
-                borderColor: theme.isDark ? theme.brand : '#10B981',
-              },
-            ]}
-          >
-            <Check size={14} color={theme.isDark ? theme.brand : '#10B981'} strokeWidth={2.5} />
-            <Text
-              style={[
-                styles.toastText,
-                { color: theme.isDark ? theme.brand : '#059669' },
-              ]}
-            >
-              {exportNotice}
-            </Text>
-          </View>
-        )}
-
         {/* ================= 2. WHATSAPP SEARCH BAR ================= */}
         <View
           style={[
@@ -324,8 +306,12 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
               activeOpacity={0.7}
               style={styles.settingRow}
               onPress={() => {
-                setExportNotice('Sinance Brain Copilot is active and syncing insights');
-                setTimeout(() => setExportNotice(null), 3000);
+                showToast({
+                  title: 'Sinance Brain Copilot is active',
+                  description: 'AI model is constantly analyzing anomalies and budget tips',
+                  type: 'success',
+                  actionLabel: 'Got It!',
+                });
               }}
             >
               <View style={styles.settingRowLeft}>

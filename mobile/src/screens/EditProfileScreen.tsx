@@ -29,6 +29,7 @@ import {
   Sparkles,
 } from 'lucide-react-native';
 import { useAppTheme } from '../theme/colors';
+import { useToast } from '../context/ToastContext';
 import { UserProfile, ProfileService } from '../services/profileService';
 
 interface EditProfileScreenProps {
@@ -47,6 +48,7 @@ export const EditProfileScreen: React.FC<EditProfileScreenProps> = ({
   userId,
 }) => {
   const theme = useAppTheme();
+  const { showToast } = useToast();
   const [profile, setProfile] = useState<UserProfile>(
     initialProfile || {
       name: 'Sagar',
@@ -62,7 +64,6 @@ export const EditProfileScreen: React.FC<EditProfileScreenProps> = ({
   const [fieldValue, setFieldValue] = useState('');
   const [savingField, setSavingField] = useState(false);
   const [showResetConfirm, setShowResetConfirm] = useState(false);
-  const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   useEffect(() => {
     if (initialProfile) {
@@ -72,18 +73,17 @@ export const EditProfileScreen: React.FC<EditProfileScreenProps> = ({
     }
   }, [initialProfile, userId]);
 
-  const showToast = (msg: string) => {
-    setToastMessage(msg);
-    setTimeout(() => setToastMessage(null), 3000);
-  };
-
   // 1. Pick from Gallery with 1:1 Aspect Ratio Cropping
   const handlePickFromGallery = async () => {
     try {
       setIsPhotoSheetOpen(false);
       const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
       if (!permission.granted) {
-        Alert.alert('Permission Needed', 'Please allow gallery access to set your profile picture.');
+        showToast({
+          title: 'Permission needed',
+          description: 'Please allow gallery access in device settings to set your photo.',
+          type: 'info',
+        });
         return;
       }
 
@@ -103,7 +103,11 @@ export const EditProfileScreen: React.FC<EditProfileScreenProps> = ({
       }
     } catch (err) {
       console.warn('Failed to pick image:', err);
-      Alert.alert('Error', 'Could not open photo gallery');
+      showToast({
+        title: 'Could not open gallery',
+        description: 'An unexpected error occurred while reading your photo library.',
+        type: 'error',
+      });
     }
   };
 
@@ -113,7 +117,11 @@ export const EditProfileScreen: React.FC<EditProfileScreenProps> = ({
       setIsPhotoSheetOpen(false);
       const permission = await ImagePicker.requestCameraPermissionsAsync();
       if (!permission.granted) {
-        Alert.alert('Permission Needed', 'Please allow camera access to take a profile photo.');
+        showToast({
+          title: 'Permission needed',
+          description: 'Please allow camera access in device settings to take a photo.',
+          type: 'info',
+        });
         return;
       }
 
@@ -132,7 +140,11 @@ export const EditProfileScreen: React.FC<EditProfileScreenProps> = ({
       }
     } catch (err) {
       console.warn('Failed to capture photo:', err);
-      Alert.alert('Error', 'Could not open camera');
+      showToast({
+        title: 'Could not open camera',
+        description: 'Camera device could not be initialized.',
+        type: 'error',
+      });
     }
   };
 
@@ -160,7 +172,11 @@ export const EditProfileScreen: React.FC<EditProfileScreenProps> = ({
     if (!activeEditField) return;
 
     if (activeEditField === 'name' && !fieldValue.trim()) {
-      Alert.alert('Required', 'Name cannot be empty.');
+      showToast({
+        title: 'Name required',
+        description: 'Your display name cannot be blank.',
+        type: 'error',
+      });
       return;
     }
 
@@ -178,7 +194,11 @@ export const EditProfileScreen: React.FC<EditProfileScreenProps> = ({
       showToast(`${activeEditField === 'name' ? 'Name' : 'About'} updated`);
     } catch (err) {
       console.warn('Failed to update field:', err);
-      Alert.alert('Save Failed', 'Could not update your profile.');
+      showToast({
+        title: 'Save failed',
+        description: 'Could not sync your profile updates right now.',
+        type: 'error',
+      });
     } finally {
       setSavingField(false);
     }
@@ -218,14 +238,6 @@ export const EditProfileScreen: React.FC<EditProfileScreenProps> = ({
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
-        {/* Toast Notification */}
-        {toastMessage && (
-          <View style={[styles.toastBar, { backgroundColor: theme.surfaceSubtle, borderColor: theme.brand }]}>
-            <Check size={14} color={theme.isDark ? theme.brand : '#059669'} strokeWidth={2.5} />
-            <Text style={[styles.toastText, { color: theme.textMain }]}>{toastMessage}</Text>
-          </View>
-        )}
-
         {/* ================= 2. HERO CENTERED AVATAR WITH CAMERA BADGE ================= */}
         <View style={styles.heroAvatarContainer}>
           <TouchableOpacity

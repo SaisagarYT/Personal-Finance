@@ -23,6 +23,7 @@ import { AuthScreen } from './src/screens/AuthScreen';
 import { ProfileScreen } from './src/screens/ProfileScreen';
 import { GetSetUpModal } from './src/components/GetSetUpModal';
 import { AuthProvider, useAuth } from './src/context/AuthContext';
+import { ToastProvider, ToastHost } from './src/context/ToastContext';
 import { FinanceService, Account, Transaction } from './src/services/financeService';
 import { SubscriptionService } from './src/services/subscriptionService';
 import { ProfileService, UserProfile } from './src/services/profileService';
@@ -482,6 +483,8 @@ function AppContent() {
               <AuthScreen onDismiss={() => setIsAuthModalOpen(false)} />
             </View>
           )}
+          {/* ================= GLOBAL TOAST NOTIFICATION HOST ================= */}
+          <ToastHost />
         </View>
       </SafeAreaView>
     </View>
@@ -491,7 +494,9 @@ function AppContent() {
 export default function App() {
   return (
     <AuthProvider>
-      <AppContent />
+      <ToastProvider>
+        <AppContent />
+      </ToastProvider>
     </AuthProvider>
   );
 }

@@ -9,6 +9,7 @@ import {
   Platform,
 } from 'react-native';
 import { useAuth } from '../context/AuthContext';
+import { useToast } from '../context/ToastContext';
 import { useAppTheme } from '../theme/colors';
 import {
   User,
@@ -48,9 +49,9 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
 }) => {
   const theme = useAppTheme();
   const { user, signOut } = useAuth();
+  const { showToast } = useToast();
 
   const [biometricsEnabled, setBiometricsEnabled] = useState(true);
-  const [exportNotice, setExportNotice] = useState<string | null>(null);
 
   const handleSignOut = async () => {
     await signOut();
@@ -58,8 +59,12 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
   };
 
   const handleExportCSV = () => {
-    setExportNotice('Ledger records exported to device storage');
-    setTimeout(() => setExportNotice(null), 3000);
+    showToast({
+      title: 'Ledger exported successfully!',
+      description: 'Records saved to your device download storage (CSV)',
+      type: 'success',
+      actionLabel: 'Got It!',
+    });
   };
 
   const displayName = user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'Sagar';
@@ -408,28 +413,6 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
 
               <ChevronRight size={16} color={theme.textDim} strokeWidth={2} />
             </TouchableOpacity>
-
-            {exportNotice && (
-              <View
-                style={[
-                  styles.noticeBanner,
-                  {
-                    backgroundColor: theme.isDark ? 'rgba(35, 240, 125, 0.12)' : 'rgba(16, 185, 129, 0.12)',
-                    borderColor: theme.isDark ? '#23F07D' : '#10B981',
-                  },
-                ]}
-              >
-                <Check size={14} color={theme.isDark ? '#23F07D' : '#10B981'} strokeWidth={2.5} />
-                <Text
-                  style={[
-                    styles.noticeBannerText,
-                    { color: theme.isDark ? '#23F07D' : '#059669' },
-                  ]}
-                >
-                  {exportNotice}
-                </Text>
-              </View>
-            )}
 
             {/* SECTION 3: SECURITY */}
             <Text style={[styles.sectionHeading, { color: theme.textDim, marginTop: 18 }]}>
