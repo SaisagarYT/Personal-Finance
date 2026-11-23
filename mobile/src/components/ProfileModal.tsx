@@ -115,20 +115,6 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
                   <Text style={[styles.userName, { color: theme.textMain }]}>
                     {displayName}
                   </Text>
-                  <View
-                    style={[
-                      styles.tierBadge,
-                      {
-                        backgroundColor: theme.surfaceSubtle,
-                        borderColor: theme.borderSubtle,
-                      },
-                    ]}
-                  >
-                    <Sparkles size={11} color={theme.isDark ? '#23F07D' : '#10B981'} />
-                    <Text style={[styles.tierText, { color: theme.textDim }]}>
-                      {isCloudSynced ? 'Pro Cloud' : 'Free Tier'}
-                    </Text>
-                  </View>
                 </View>
                 <Text style={[styles.userEmail, { color: theme.textDim }]}>
                   {displayEmail}

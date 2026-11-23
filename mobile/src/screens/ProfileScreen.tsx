@@ -271,20 +271,6 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
                 <Text style={[styles.userName, { color: theme.textMain }]} numberOfLines={1}>
                   {displayName}
                 </Text>
-                <View
-                  style={[
-                    styles.tierBadge,
-                    {
-                      backgroundColor: theme.surfaceSubtle,
-                      borderColor: theme.borderSubtle,
-                    },
-                  ]}
-                >
-                  <Sparkles size={10} color={theme.isDark ? theme.brand : '#10B981'} />
-                  <Text style={[styles.tierBadgeText, { color: theme.textDim }]}>
-                    {isCloudSynced ? 'Pro' : 'Free'}
-                  </Text>
-                </View>
               </View>
               <Text style={[styles.userAboutText, { color: theme.textDim }]} numberOfLines={1}>
                 {displayAbout}
@@ -347,14 +333,14 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
                   style={[
                     styles.iconDisc,
                     {
-                      backgroundColor: theme.isDark ? 'rgba(35, 240, 125, 0.15)' : 'rgba(16, 185, 129, 0.15)',
+                      backgroundColor: theme.surfaceSubtle,
                     },
                   ]}
                 >
                   <Bot
                     size={19}
-                    color={theme.isDark ? theme.brand : '#059669'}
-                    strokeWidth={2.2}
+                    color={theme.textMain}
+                    strokeWidth={2}
                   />
                 </View>
                 <View style={styles.textStack}>
