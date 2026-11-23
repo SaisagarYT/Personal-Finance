@@ -33,7 +33,7 @@ import {
 import { useAuth } from '../context/AuthContext';
 import { useAppTheme } from '../theme/colors';
 import { UserProfile } from '../services/profileService';
-import { EditProfileModal } from '../components/EditProfileModal';
+import { EditProfileScreen } from './EditProfileScreen';
 
 export interface ProfileScreenProps {
   onBack: () => void;
@@ -122,6 +122,17 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
         outputRange: [24, 0],
       })
     : 0;
+
+  if (isEditProfileModalOpen) {
+    return (
+      <EditProfileScreen
+        onBack={() => setIsEditProfileModalOpen(false)}
+        userProfile={userProfile}
+        onProfileUpdated={(updated) => onProfileUpdated?.(updated)}
+        userId={user?.id}
+      />
+    );
+  }
 
   return (
     <View style={[styles.container, { backgroundColor: theme.canvas }]}>
@@ -532,14 +543,6 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
         {/* Spacing for bottom */}
         <View style={{ height: 60 }} />
       </ScrollView>
-
-      {/* Edit Profile & Avatar Cropping Modal */}
-      <EditProfileModal
-        visible={isEditProfileModalOpen}
-        onClose={() => setIsEditProfileModalOpen(false)}
-        onProfileUpdated={(updated) => onProfileUpdated?.(updated)}
-        userId={user?.id}
-      />
     </View>
   );
 };
