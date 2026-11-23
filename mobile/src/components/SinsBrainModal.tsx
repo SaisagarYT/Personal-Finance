@@ -6,9 +6,7 @@ import {
   TouchableOpacity,
   TextInput,
   StyleSheet,
-  ScrollView,
   Animated,
-  Easing,
   Platform,
   KeyboardAvoidingView,
 } from 'react-native';
@@ -18,13 +16,8 @@ import {
   Camera,
   Keyboard,
   Send,
-  Sparkles,
-  ChevronRight,
+  ExternalLink,
   CheckCircle2,
-  Receipt,
-  ArrowUpRight,
-  TrendingDown,
-  Volume2,
 } from 'lucide-react-native';
 import { useAppTheme } from '../theme/colors';
 import { StatusSymbol } from './StatusSymbol';
@@ -47,162 +40,70 @@ export const SinsBrainModal: React.FC<SinsBrainModalProps> = ({
 }) => {
   const theme = useAppTheme();
   const [inputText, setInputText] = useState('');
-  const [activeModality, setActiveModality] = useState<'text' | 'voice' | 'camera'>('voice');
+  const [activeModality, setActiveModality] = useState<'overview' | 'text' | 'voice'>('overview');
   const [isListening, setIsListening] = useState(false);
-  const [messages, setMessages] = useState<SinsMessage[]>([
-    {
-      id: 'welcome',
-      sender: 'sins',
-      text: "Hey! I'm Sins. I monitor your entire financial stack in real-time. What would you like to do today?",
-      timestamp: 'Just now',
-    },
-  ]);
+  const [activeResponse, setActiveResponse] = useState<SinsMessage | null>(null);
 
-  const scrollViewRef = useRef<any>(null);
-
-  // Animated halo / aura values for Apple Intelligence glowing horizon effect
-  const auraPulseAnim = useRef(new Animated.Value(0)).current;
-  const slideAnim = useRef(new Animated.Value(100)).current;
-  const micWaveAnim = useRef(new Animated.Value(1)).current;
+  const slideAnim = useRef(new Animated.Value(280)).current;
 
   useEffect(() => {
     if (visible) {
-      // Slide up bottom Gemini card
       Animated.spring(slideAnim, {
         toValue: 0,
-        friction: 8,
-        tension: 40,
+        friction: 9,
+        tension: 50,
         useNativeDriver: true,
       }).start();
-
-      // Continuous breathing aura loop
-      Animated.loop(
-        Animated.sequence([
-          Animated.timing(auraPulseAnim, {
-            toValue: 1,
-            duration: 2600,
-            easing: Easing.inOut(Easing.ease),
-            useNativeDriver: true,
-          }),
-          Animated.timing(auraPulseAnim, {
-            toValue: 0,
-            duration: 2600,
-            easing: Easing.inOut(Easing.ease),
-            useNativeDriver: true,
-          }),
-        ])
-      ).start();
     } else {
-      slideAnim.setValue(100);
-      auraPulseAnim.setValue(0);
+      slideAnim.setValue(280);
       setIsListening(false);
+      setActiveModality('overview');
+      setActiveResponse(null);
     }
   }, [visible]);
-
-  // Voice listening simulation wave
-  useEffect(() => {
-    let loop: Animated.CompositeAnimation | null = null;
-    if (isListening) {
-      loop = Animated.loop(
-        Animated.sequence([
-          Animated.timing(micWaveAnim, {
-            toValue: 1.28,
-            duration: 450,
-            easing: Easing.inOut(Easing.ease),
-            useNativeDriver: true,
-          }),
-          Animated.timing(micWaveAnim, {
-            toValue: 0.95,
-            duration: 450,
-            easing: Easing.inOut(Easing.ease),
-            useNativeDriver: true,
-          }),
-        ])
-      );
-      loop.start();
-    } else {
-      micWaveAnim.setValue(1);
-    }
-    return () => {
-      loop?.stop();
-    };
-  }, [isListening]);
 
   const handleSendMessage = (textToSend?: string) => {
     const query = textToSend || inputText;
     if (!query.trim()) return;
 
-    const userMsg: SinsMessage = {
-      id: Date.now().toString(),
-      sender: 'user',
-      text: query.trim(),
-      timestamp: 'Just now',
-    };
-
-    const newMessages = [...messages, userMsg];
-    setMessages(newMessages);
     setInputText('');
     setIsListening(false);
 
-    // Scroll to bottom
-    setTimeout(() => {
-      scrollViewRef.current?.scrollToEnd({ animated: true });
-    }, 100);
+    const result = BrainService.processQuery(query, contextData);
+    const sinsMsg: SinsMessage = {
+      id: Date.now().toString(),
+      sender: 'sins',
+      text: result.response,
+      timestamp: 'Just now',
+      actionCard: result.actionCard,
+    };
+    setActiveResponse(sinsMsg);
 
-    // Process intelligence query through BrainService
-    setTimeout(() => {
-      const result = BrainService.processQuery(query, contextData);
-
-      const sinsMsg: SinsMessage = {
-        id: (Date.now() + 1).toString(),
-        sender: 'sins',
-        text: result.response,
-        timestamp: 'Just now',
-        actionCard: result.actionCard,
-      };
-
-      setMessages((prev) => [...prev, sinsMsg]);
-
-      // Execute side-effects if any
-      if (result.createTransaction && onExecuteTransaction) {
-        onExecuteTransaction(result.createTransaction);
-      }
-      if (result.payBillId && onPayBill) {
-        onPayBill(result.payBillId);
-      }
-
-      setTimeout(() => {
-        scrollViewRef.current?.scrollToEnd({ animated: true });
-      }, 150);
-    }, 400);
+    if (result.createTransaction && onExecuteTransaction) {
+      onExecuteTransaction(result.createTransaction);
+    }
+    if (result.payBillId && onPayBill) {
+      onPayBill(result.payBillId);
+    }
   };
 
   const handleVoiceToggle = () => {
     if (isListening) {
       setIsListening(false);
+      setActiveModality('overview');
     } else {
       setIsListening(true);
       setActiveModality('voice');
-      // Simulate speech recognition response after 2.8s
       setTimeout(() => {
         setIsListening(false);
         handleSendMessage('How much did I spend this week?');
-      }, 2800);
+      }, 2400);
     }
   };
 
   const handleCameraScan = () => {
-    setActiveModality('camera');
     handleSendMessage('Scan receipt for Whole Foods Grocery');
   };
-
-  // Quick suggestion chips
-  const quickPrompts = [
-    'How much did I spend this week?',
-    'Pay Netflix bill',
-    'Show total portfolio balance',
-    'Spent ₹350 on lunch',
-  ];
 
   return (
     <Modal
@@ -215,290 +116,195 @@ export const SinsBrainModal: React.FC<SinsBrainModalProps> = ({
         style={styles.modalBackdrop}
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       >
-        {/* Backdrop touch to dismiss */}
+        {/* Dismiss Backdrop */}
         <TouchableOpacity
           activeOpacity={1}
           style={StyleSheet.absoluteFill}
           onPress={onClose}
         />
 
-        {/* ================= APPLE INTELLIGENCE AMBIENT AURA (PULSATING GLOW) ================= */}
-        <Animated.View
-          pointerEvents="none"
-          style={[
-            styles.ambientAuraWrapper,
-            {
-              opacity: auraPulseAnim.interpolate({
-                inputRange: [0, 1],
-                outputRange: [0.38, 0.78],
-              }),
-              transform: [
-                {
-                  scale: auraPulseAnim.interpolate({
-                    inputRange: [0, 1],
-                    outputRange: [0.97, 1.05],
-                  }),
-                },
-              ],
-            },
-          ]}
-        >
-          {/* Outer diffuse emerald halo */}
-          <View
-            style={[
-              styles.auraHaloOuter,
-              {
-                backgroundColor: theme.isDark ? 'rgba(35, 240, 125, 0.18)' : 'rgba(5, 150, 105, 0.14)',
-                shadowColor: theme.brand,
-              },
-            ]}
-          />
-          {/* Inner intense neon glow ring */}
-          <View
-            style={[
-              styles.auraHaloInner,
-              {
-                borderColor: theme.isDark ? 'rgba(35, 240, 125, 0.35)' : 'rgba(5, 150, 105, 0.3)',
-              },
-            ]}
-          />
-        </Animated.View>
-
-        {/* ================= FLOATING GEMINI BOTTOM CARD ================= */}
+        {/* ================= FULL-WIDTH GEMINI CARD ================= */}
         <Animated.View
           style={[
-            styles.cardContainer,
+            styles.geminiCard,
             {
-              backgroundColor: theme.isDark ? 'rgba(16, 24, 20, 0.94)' : 'rgba(255, 255, 255, 0.96)',
+              backgroundColor: theme.isDark ? '#181C19' : '#FFFFFF',
               borderColor: theme.borderSubtle,
               transform: [{ translateY: slideAnim }],
             },
           ]}
         >
-          {/* Card Top Drag Handle & Controls */}
-          <View style={styles.cardHeader}>
-            <View style={styles.headerTitleRow}>
-              <View style={[styles.agentBadge, { backgroundColor: theme.surfaceSubtle }]}>
-                <StatusSymbol size={14} color={theme.brand} strokeWidth={2.4} />
-                <Text style={[styles.agentName, { color: theme.textMain }]}>Sins</Text>
-              </View>
-              <Text style={[styles.headerSubtitle, { color: theme.textMuted }]}>
+          {/* Top Bar: Icon + "What would you like to do today?" + Actions */}
+          <View style={styles.topBar}>
+            <View style={styles.topBarLeft}>
+              <StatusSymbol size={16} color={theme.isDark ? '#23F07D' : '#059669'} strokeWidth={2.4} />
+              <Text style={[styles.topPromptText, { color: theme.textMuted }]}>
                 What would you like to do today?
               </Text>
             </View>
 
-            <TouchableOpacity
-              activeOpacity={0.75}
-              onPress={onClose}
-              style={[styles.closeBtn, { backgroundColor: theme.surfaceSubtle }]}
-            >
-              <X size={16} color={theme.textMain} strokeWidth={2.2} />
-            </TouchableOpacity>
-          </View>
-
-          {/* Quick suggestions horizontal scroll */}
-          <View style={styles.quickPromptsWrapper}>
-            <ScrollView
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              contentContainerStyle={styles.quickPromptsScroll}
-            >
-              {quickPrompts.map((prompt, idx) => (
-                <TouchableOpacity
-                  key={idx}
-                  activeOpacity={0.7}
-                  onPress={() => handleSendMessage(prompt)}
-                  style={[
-                    styles.promptChip,
-                    {
-                      backgroundColor: theme.surfaceSubtle,
-                      borderColor: theme.borderSubtle,
-                    },
-                  ]}
-                >
-                  <Text style={[styles.promptChipText, { color: theme.textMain }]}>
-                    {prompt}
-                  </Text>
-                </TouchableOpacity>
-              ))}
-            </ScrollView>
-          </View>
-
-          {/* Chat Messages Stream */}
-          <ScrollView
-            ref={scrollViewRef}
-            style={styles.chatScroll}
-            contentContainerStyle={styles.chatContent}
-            showsVerticalScrollIndicator={false}
-          >
-            {messages.map((msg) => {
-              const isSins = msg.sender === 'sins';
-              return (
-                <View
-                  key={msg.id}
-                  style={[
-                    styles.messageRow,
-                    isSins ? styles.messageRowLeft : styles.messageRowRight,
-                  ]}
-                >
-                  <View
-                    style={[
-                      styles.messageBubble,
-                      isSins
-                        ? [styles.sinsBubble, { backgroundColor: theme.surfaceSubtle, borderColor: theme.borderSubtle }]
-                        : [styles.userBubble, { backgroundColor: theme.brand }],
-                    ]}
-                  >
-                    <Text
-                      style={[
-                        styles.messageText,
-                        { color: isSins ? theme.textMain : theme.forestDark },
-                      ]}
-                    >
-                      {msg.text}
-                    </Text>
-
-                    {/* Action Execution Receipt Card (App-wide impact) */}
-                    {msg.actionCard && (
-                      <View
-                        style={[
-                          styles.actionCardWrap,
-                          {
-                            backgroundColor: theme.cardContainer,
-                            borderColor: theme.borderSubtle,
-                          },
-                        ]}
-                      >
-                        <View style={styles.actionCardTop}>
-                          <View style={styles.actionCardTitleRow}>
-                            <CheckCircle2
-                              size={15}
-                              color={theme.isDark ? '#23F07D' : '#059669'}
-                              strokeWidth={2.4}
-                            />
-                            <Text
-                              style={[styles.actionCardTitle, { color: theme.textMain }]}
-                              numberOfLines={1}
-                            >
-                              {msg.actionCard.title}
-                            </Text>
-                          </View>
-                          {msg.actionCard.amount && (
-                            <Text
-                              style={[
-                                styles.actionCardAmount,
-                                { color: theme.isDark ? '#23F07D' : '#059669' },
-                              ]}
-                            >
-                              {msg.actionCard.amount}
-                            </Text>
-                          )}
-                        </View>
-                        <Text style={[styles.actionCardDetail, { color: theme.textMuted }]}>
-                          {msg.actionCard.detail}
-                        </Text>
-                      </View>
-                    )}
-                  </View>
-                </View>
-              );
-            })}
-
-            {isListening && (
-              <View style={[styles.listeningIndicator, { backgroundColor: theme.surfaceSubtle }]}>
-                <Volume2 size={16} color={theme.brand} strokeWidth={2.4} />
-                <Text style={[styles.listeningText, { color: theme.textMain }]}>
-                  Sins is listening...
-                </Text>
-              </View>
-            )}
-          </ScrollView>
-
-          {/* Active text input bar (when typing mode active) */}
-          {activeModality === 'text' && (
-            <View style={[styles.textInputBar, { backgroundColor: theme.surface, borderColor: theme.borderSubtle }]}>
-              <TextInput
-                value={inputText}
-                onChangeText={setInputText}
-                placeholder="Ask Sins anything..."
-                placeholderTextColor={theme.textDim}
-                style={[styles.textInputField, { color: theme.textMain }]}
-                onSubmitEditing={() => handleSendMessage()}
-                returnKeyType="send"
-                autoFocus
-              />
+            <View style={styles.topBarRight}>
               <TouchableOpacity
-                activeOpacity={0.8}
-                onPress={() => handleSendMessage()}
-                style={[styles.sendBtn, { backgroundColor: theme.brand }]}
+                activeOpacity={0.7}
+                onPress={onClose}
+                style={styles.iconHit}
               >
-                <Send size={15} color={theme.forestDark} strokeWidth={2.4} />
+                <X size={18} color={theme.textDim} strokeWidth={2.2} />
               </TouchableOpacity>
             </View>
-          )}
+          </View>
 
-          {/* ================= FLOATING MODALITY PILL (TYPE, TALK, SHARE A PHOTO) ================= */}
-          <View style={styles.bottomPillContainer}>
+          {/* Center Main Stage */}
+          <View style={styles.centerStage}>
+            {activeResponse ? (
+              <View style={styles.responseContainer}>
+                <Text
+                  style={[styles.responseText, { color: theme.textMain }]}
+                  numberOfLines={2}
+                >
+                  {activeResponse.text}
+                </Text>
+
+                {activeResponse.actionCard && (
+                  <View
+                    style={[
+                      styles.actionCard,
+                      {
+                        backgroundColor: theme.surfaceSubtle,
+                        borderColor: theme.borderSubtle,
+                      },
+                    ]}
+                  >
+                    <View style={styles.actionCardTop}>
+                      <View style={styles.actionCardRow}>
+                        <CheckCircle2
+                          size={15}
+                          color={theme.isDark ? '#23F07D' : '#059669'}
+                          strokeWidth={2.4}
+                        />
+                        <Text
+                          style={[styles.actionCardTitle, { color: theme.textMain }]}
+                          numberOfLines={1}
+                        >
+                          {activeResponse.actionCard.title}
+                        </Text>
+                      </View>
+                      {activeResponse.actionCard.amount && (
+                        <Text
+                          style={[
+                            styles.actionCardAmount,
+                            { color: theme.isDark ? '#23F07D' : '#059669' },
+                          ]}
+                        >
+                          {activeResponse.actionCard.amount}
+                        </Text>
+                      )}
+                    </View>
+                    <Text
+                      style={[styles.actionCardDetail, { color: theme.textMuted }]}
+                      numberOfLines={1}
+                    >
+                      {activeResponse.actionCard.detail}
+                    </Text>
+                  </View>
+                )}
+              </View>
+            ) : isListening ? (
+              <View style={styles.listeningContainer}>
+                <Text style={[styles.listeningTitle, { color: theme.textMain }]}>
+                  Listening...
+                </Text>
+                <Text style={[styles.listeningSubtitle, { color: theme.textMuted }]}>
+                  Speak to log expenses, check bills, or manage accounts
+                </Text>
+              </View>
+            ) : activeModality === 'text' ? (
+              <View style={styles.textInputContainer}>
+                <TextInput
+                  value={inputText}
+                  onChangeText={setInputText}
+                  placeholder="Ask Sins anything..."
+                  placeholderTextColor={theme.textDim}
+                  style={[styles.mainInput, { color: theme.textMain }]}
+                  onSubmitEditing={() => handleSendMessage()}
+                  returnKeyType="send"
+                  autoFocus
+                />
+                <TouchableOpacity
+                  activeOpacity={0.8}
+                  onPress={() => handleSendMessage()}
+                  style={[styles.sendButton, { backgroundColor: theme.brand }]}
+                >
+                  <Send size={15} color={theme.forestDark} strokeWidth={2.4} />
+                </TouchableOpacity>
+              </View>
+            ) : (
+              /* Hero Callout matching reference: "Type, talk, or share a photo" */
+              <TouchableOpacity
+                activeOpacity={0.8}
+                onPress={() => setActiveModality('text')}
+                style={styles.heroPromptWrapper}
+              >
+                <Text style={[styles.heroPromptText, { color: theme.textMain }]}>
+                  Type, talk, or share a photo
+                </Text>
+              </TouchableOpacity>
+            )}
+          </View>
+
+          {/* Bottom Dock Control Pill (Matching Reference) */}
+          <View style={styles.bottomDockWrapper}>
             <View
               style={[
-                styles.modalityPill,
+                styles.bottomModalityPill,
                 {
-                  backgroundColor: theme.surface,
-                  borderColor: theme.borderSubtle,
+                  backgroundColor: theme.isDark ? '#E5E7EB' : '#141414',
                 },
               ]}
             >
-              {/* Type / Keyboard Button */}
+              {/* Keyboard (Type) */}
               <TouchableOpacity
                 activeOpacity={0.7}
-                onPress={() => setActiveModality(activeModality === 'text' ? 'voice' : 'text')}
-                style={[
-                  styles.pillButton,
-                  activeModality === 'text' && { backgroundColor: theme.surfaceSubtle },
-                ]}
+                onPress={() => setActiveModality(activeModality === 'text' ? 'overview' : 'text')}
+                style={styles.pillActionBtn}
               >
                 <Keyboard
-                  size={19}
-                  color={activeModality === 'text' ? theme.brand : theme.textMain}
+                  size={20}
+                  color={theme.isDark ? '#111827' : '#FFFFFF'}
                   strokeWidth={2.2}
                 />
               </TouchableOpacity>
 
-              {/* Scalloped Center Waveform / Mic Disc */}
+              {/* Scalloped Mic Organic Cloud (Talk) */}
               <TouchableOpacity
                 activeOpacity={0.85}
                 onPress={handleVoiceToggle}
-                style={styles.micDiscWrapper}
+                style={[
+                  styles.pillMicScallop,
+                  {
+                    backgroundColor: theme.isDark ? '#D1D5DB' : '#27272A',
+                  },
+                  isListening && {
+                    backgroundColor: theme.brand,
+                  },
+                ]}
               >
-                <Animated.View
-                  style={[
-                    styles.scallopedMicDisc,
-                    {
-                      backgroundColor: theme.isDark ? theme.brand : theme.forestDark,
-                      transform: [{ scale: micWaveAnim }],
-                    },
-                  ]}
-                >
-                  <Mic
-                    size={20}
-                    color={theme.isDark ? theme.forestDark : '#FFFFFF'}
-                    strokeWidth={2.4}
-                  />
-                </Animated.View>
+                <Mic
+                  size={22}
+                  color={theme.isDark ? '#111827' : '#FFFFFF'}
+                  strokeWidth={2.4}
+                />
               </TouchableOpacity>
 
-              {/* Share a Photo / Receipt Scanner */}
+              {/* Camera (Share a Photo) */}
               <TouchableOpacity
                 activeOpacity={0.7}
                 onPress={handleCameraScan}
-                style={[
-                  styles.pillButton,
-                  activeModality === 'camera' && { backgroundColor: theme.surfaceSubtle },
-                ]}
+                style={styles.pillActionBtn}
               >
                 <Camera
-                  size={19}
-                  color={activeModality === 'camera' ? theme.brand : theme.textMain}
+                  size={20}
+                  color={theme.isDark ? '#111827' : '#FFFFFF'}
                   strokeWidth={2.2}
                 />
               </TouchableOpacity>
@@ -513,163 +319,116 @@ export const SinsBrainModal: React.FC<SinsBrainModalProps> = ({
 const styles = StyleSheet.create({
   modalBackdrop: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.45)',
+    backgroundColor: 'rgba(0, 0, 0, 0.55)',
     justifyContent: 'flex-end',
     alignItems: 'center',
   },
-  ambientAuraWrapper: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    height: 380,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  auraHaloOuter: {
-    position: 'absolute',
-    bottom: -60,
-    width: '110%',
-    height: 320,
-    borderRadius: 160,
-    shadowOffset: { width: 0, height: -12 },
-    shadowOpacity: 0.85,
-    shadowRadius: 42,
-    elevation: 16,
-  },
-  auraHaloInner: {
-    position: 'absolute',
-    bottom: -30,
-    width: '95%',
-    height: 240,
-    borderRadius: 120,
-    borderWidth: 2,
-    opacity: 0.65,
-  },
-  cardContainer: {
-    width: '94%',
-    maxWidth: 520,
-    height: 480,
-    marginBottom: Platform.OS === 'ios' ? 26 : 18,
-    borderRadius: 28,
+  geminiCard: {
+    width: '100%',
+    maxWidth: 440,
+    borderTopLeftRadius: 28,
+    borderTopRightRadius: 28,
+    borderBottomLeftRadius: 0,
+    borderBottomRightRadius: 0,
     borderWidth: 1,
+    borderBottomWidth: 0,
     paddingTop: 16,
-    paddingHorizontal: 16,
-    paddingBottom: 12,
-    overflow: 'hidden',
+    paddingHorizontal: 20,
+    paddingBottom: Platform.OS === 'ios' ? 24 : 16,
     shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 8 },
+    shadowOffset: { width: 0, height: -6 },
     shadowOpacity: 0.35,
-    shadowRadius: 18,
-    elevation: 10,
+    shadowRadius: 16,
+    elevation: 12,
   },
-  cardHeader: {
+  topBar: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    marginBottom: 10,
+    paddingBottom: 8,
   },
-  headerTitleRow: {
+  topBarLeft: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
+    flex: 1,
   },
-  agentBadge: {
+  topPromptText: {
+    fontSize: 13.5,
+    fontWeight: '500',
+    letterSpacing: -0.1,
+  },
+  topBarRight: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 5,
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-    borderRadius: 9999,
+    gap: 12,
   },
-  agentName: {
-    fontSize: 13.5,
-    fontWeight: '800',
-    letterSpacing: -0.2,
-  },
-  headerSubtitle: {
-    fontSize: 12,
-    fontWeight: '500',
-  },
-  closeBtn: {
-    width: 28,
-    height: 28,
-    borderRadius: 14,
+  iconHit: {
+    padding: 4,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  quickPromptsWrapper: {
-    marginBottom: 10,
+  centerStage: {
+    minHeight: 88,
+    justifyContent: 'center',
+    paddingVertical: 10,
   },
-  quickPromptsScroll: {
-    gap: 8,
-    paddingRight: 10,
+  heroPromptWrapper: {
+    paddingVertical: 4,
   },
-  promptChip: {
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 12,
-    borderWidth: 1,
+  heroPromptText: {
+    fontSize: 27,
+    fontWeight: '400',
+    letterSpacing: -0.8,
+    lineHeight: 34,
   },
-  promptChipText: {
-    fontSize: 11.5,
-    fontWeight: '600',
-  },
-  chatScroll: {
-    flex: 1,
-  },
-  chatContent: {
-    paddingVertical: 6,
-    gap: 10,
-  },
-  messageRow: {
+  textInputContainer: {
     flexDirection: 'row',
+    alignItems: 'center',
     width: '100%',
   },
-  messageRowLeft: {
-    justifyContent: 'flex-start',
+  mainInput: {
+    flex: 1,
+    fontSize: 20,
+    fontWeight: '500',
+    letterSpacing: -0.4,
+    paddingVertical: 8,
   },
-  messageRowRight: {
-    justifyContent: 'flex-end',
-  },
-  messageBubble: {
-    maxWidth: '85%',
-    paddingHorizontal: 14,
-    paddingVertical: 10,
+  sendButton: {
+    width: 36,
+    height: 36,
     borderRadius: 18,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginLeft: 8,
   },
-  sinsBubble: {
-    borderBottomLeftRadius: 4,
-    borderWidth: 1,
+  responseContainer: {
+    gap: 8,
   },
-  userBubble: {
-    borderBottomRightRadius: 4,
-  },
-  messageText: {
-    fontSize: 13.5,
-    lineHeight: 19,
+  responseText: {
+    fontSize: 15,
+    lineHeight: 21,
     fontWeight: '500',
   },
-  actionCardWrap: {
-    marginTop: 8,
+  actionCard: {
     padding: 10,
     borderRadius: 12,
     borderWidth: 1,
-    gap: 4,
+    gap: 3,
   },
   actionCardTop: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
   },
-  actionCardTitleRow: {
+  actionCardRow: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
     flex: 1,
   },
   actionCardTitle: {
-    fontSize: 12.5,
+    fontSize: 13,
     fontWeight: '700',
   },
   actionCardAmount: {
@@ -681,82 +440,45 @@ const styles = StyleSheet.create({
     fontSize: 11,
     fontWeight: '500',
   },
-  listeningIndicator: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    alignSelf: 'center',
-    paddingHorizontal: 14,
-    paddingVertical: 8,
-    borderRadius: 20,
-    marginTop: 6,
+  listeningContainer: {
+    gap: 4,
   },
-  listeningText: {
-    fontSize: 12,
+  listeningTitle: {
+    fontSize: 22,
     fontWeight: '600',
+    letterSpacing: -0.4,
   },
-  textInputBar: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    borderRadius: 20,
-    borderWidth: 1,
-    paddingHorizontal: 12,
-    paddingVertical: 4,
-    marginBottom: 8,
+  listeningSubtitle: {
+    fontSize: 13,
+    fontWeight: '400',
   },
-  textInputField: {
-    flex: 1,
-    fontSize: 13.5,
-    paddingVertical: 6,
-  },
-  sendBtn: {
-    width: 28,
-    height: 28,
-    borderRadius: 14,
+  bottomDockWrapper: {
     alignItems: 'center',
     justifyContent: 'center',
+    paddingTop: 10,
+    paddingBottom: 4,
   },
-  bottomPillContainer: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingTop: 6,
-  },
-  modalityPill: {
+  bottomModalityPill: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    width: 196,
+    width: 172,
     height: 48,
     borderRadius: 24,
-    borderWidth: 1,
     paddingHorizontal: 8,
-    shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.18,
-    shadowRadius: 8,
-    elevation: 4,
   },
-  pillButton: {
+  pillActionBtn: {
     width: 40,
     height: 40,
     borderRadius: 20,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  micDiscWrapper: {
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  scallopedMicDisc: {
+  pillMicScallop: {
     width: 44,
     height: 44,
     borderRadius: 22,
     alignItems: 'center',
     justifyContent: 'center',
-    shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.25,
-    shadowRadius: 5,
-    elevation: 5,
   },
 });
