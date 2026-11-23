@@ -58,6 +58,7 @@ export interface ProfileScreenProps {
   isAvatarHidden?: boolean;
   userProfile?: UserProfile;
   onProfileUpdated?: (updated: UserProfile) => void;
+  onOpenSinanceBrain?: () => void;
 }
 
 export const ProfileScreen: React.FC<ProfileScreenProps> = ({
@@ -71,6 +72,7 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
   isAvatarHidden = false,
   userProfile,
   onProfileUpdated,
+  onOpenSinanceBrain,
 }) => {
   const theme = useAppTheme();
   const { user, signOut } = useAuth();
@@ -307,12 +309,16 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
               activeOpacity={0.7}
               style={styles.settingRow}
               onPress={() => {
-                showToast({
-                  title: 'Sinance Brain Copilot is active',
-                  description: 'AI model is constantly analyzing anomalies and budget tips',
-                  type: 'success',
-                  actionLabel: 'Got It!',
-                });
+                if (onOpenSinanceBrain) {
+                  onOpenSinanceBrain();
+                } else {
+                  showToast({
+                    title: 'Sinance Brain Copilot is active',
+                    description: 'AI model is constantly analyzing anomalies and budget tips',
+                    type: 'success',
+                    actionLabel: 'Got It!',
+                  });
+                }
               }}
             >
               <View style={styles.settingRowLeft}>

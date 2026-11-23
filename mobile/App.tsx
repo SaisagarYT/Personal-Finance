@@ -16,6 +16,7 @@ import { SinanceHeroCard } from './src/components/SinanceHeroCard';
 import { SinanceActivitySection } from './src/components/SinanceActivitySection';
 import { UpcomingBillsSection, BillItem } from './src/components/UpcomingBillsSection';
 import { AllBillsModal } from './src/components/AllBillsModal';
+import { SinsBrainModal } from './src/components/SinsBrainModal';
 import { BottomCapsuleDock, NavTabId } from './src/components/BottomCapsuleDock';
 import { StatsView } from './src/screens/StatsView';
 import { SinancePocketScreen } from './src/screens/SinancePocketScreen';
@@ -128,6 +129,7 @@ function AppContent() {
     return getQueryParam('auth') === 'true';
   });
   const [isAllBillsOpen, setIsAllBillsOpen] = useState(false);
+  const [isSinsBrainOpen, setIsSinsBrainOpen] = useState(false);
   const [isSetupDismissed, setIsSetupDismissed] = useState(() => {
     return getQueryParam('setup_dismissed') === 'true';
   });
@@ -360,9 +362,9 @@ function AppContent() {
                   brainAmount={formattedBalance}
                   sinceAllTimeLabel="Since All Time"
                   transactions={transactions}
-                  isBrainActive={isPocketOpen}
+                  isBrainActive={isSinsBrainOpen}
                   onPressBrainCard={() => {
-                    setIsPocketOpen(true);
+                    setIsSinsBrainOpen(true);
                   }}
                   onPressActivityCard={() => setActiveTab('analytics')}
                 />
@@ -442,6 +444,7 @@ function AppContent() {
                 isAvatarHidden={!isProfileSettled}
                 userProfile={userProfile || undefined}
                 onProfileUpdated={(updated) => setUserProfile(updated)}
+                onOpenSinanceBrain={() => setIsSinsBrainOpen(true)}
               />
             </Animated.View>
           )}
@@ -512,6 +515,39 @@ function AppContent() {
               });
             }}
             userId={user?.id}
+          />
+
+          {/* ================= SINS BRAIN APP-WIDE AI COPILOT ================= */}
+          <SinsBrainModal
+            visible={isSinsBrainOpen}
+            onClose={() => setIsSinsBrainOpen(false)}
+            contextData={{
+              accounts,
+              transactions,
+              bills,
+              userProfile: userProfile || undefined,
+            }}
+            onExecuteTransaction={(newTx) => {
+              FinanceService.recordTransaction(newTx).then((res) => {
+                if (res.data) {
+                  setTransactions((prev) => [res.data!, ...prev]);
+                  // Refresh accounts
+                  FinanceService.getAccounts(user?.id).then((accRes) => {
+                    if (accRes.data) setAccounts(accRes.data);
+                  });
+                }
+              });
+            }}
+            onPayBill={(billId) => {
+              const matchedBill = bills.find((b) => b.id === billId);
+              if (matchedBill) {
+                SubscriptionService.markAsPaid(matchedBill).then(() => {
+                  SubscriptionService.getSubscriptions(user?.id).then((subRes) => {
+                    if (subRes.billItems) setBills(subRes.billItems);
+                  });
+                });
+              }
+            }}
           />
 
           {/* ================= AUTH MODAL ================= */}

@@ -2,6 +2,8 @@ import { supabase } from '../lib/supabase';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { BillCategory, BillItem } from '../components/UpcomingBillsSection';
 
+export { BillItem, BillCategory };
+
 export interface Subscription {
   id: string;
   user_id: string;
