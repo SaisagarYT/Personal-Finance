@@ -228,14 +228,6 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
           </View>
         )}
 
-        {/* ================= ALL SETTINGS GROUPS (Animated Entrance) ================= */}
-        <Animated.View
-          style={{
-            opacity: sectionsOpacity,
-            transform: [{ translateY: sectionsTranslateY }],
-          }}
-        >
-
         {/* ================= SECTION 1: ACCOUNT ================= */}
         <Text style={[styles.sectionHeaderLabel, { color: theme.textDim }]}>Account</Text>
         <View
@@ -518,7 +510,6 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
             </TouchableOpacity>
           )}
         </View>
-        </Animated.View>
 
         {/* Spacing for bottom */}
         <View style={{ height: 60 }} />
@@ -531,6 +522,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     width: '100%',
+    overflow: 'hidden',
   },
   topBar: {
     flexDirection: 'row',
@@ -555,8 +547,10 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingTop: 8,
     paddingBottom: 40,
+    alignItems: 'stretch',
   },
   heroCard: {
+    alignSelf: 'stretch',
     flexDirection: 'row',
     alignItems: 'center',
     borderRadius: 22,
@@ -611,6 +605,7 @@ const styles = StyleSheet.create({
     letterSpacing: -0.1,
   },
   toastBanner: {
+    alignSelf: 'stretch',
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
@@ -624,6 +619,7 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   sectionHeaderLabel: {
+    alignSelf: 'stretch',
     fontSize: 13,
     fontWeight: '600',
     letterSpacing: -0.1,
@@ -631,6 +627,7 @@ const styles = StyleSheet.create({
     paddingLeft: 4,
   },
   groupedCard: {
+    alignSelf: 'stretch',
     borderRadius: 20,
     borderWidth: 1,
     paddingVertical: 4,

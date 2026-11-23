@@ -30,6 +30,41 @@ function AppContent() {
   const theme = useAppTheme();
   const { user } = useAuth();
 
+  // Prevent white edges and eliminate browser scrollbar gutter lines on web
+  useEffect(() => {
+    if (Platform.OS === 'web' && typeof globalThis !== 'undefined') {
+      const doc = (globalThis as any).document;
+      if (doc) {
+        doc.documentElement.style.backgroundColor = theme.canvas;
+        doc.body.style.backgroundColor = theme.canvas;
+        doc.body.style.overflowX = 'hidden';
+
+        const styleId = 'sinance-hide-scrollbars';
+        let styleTag = doc.getElementById(styleId);
+        if (!styleTag) {
+          styleTag = doc.createElement('style');
+          styleTag.id = styleId;
+          doc.head.appendChild(styleTag);
+        }
+        styleTag.textContent = `
+          html, body, #root {
+            background-color: ${theme.canvas} !important;
+            overflow-x: hidden !important;
+          }
+          * {
+            -ms-overflow-style: none !important;
+            scrollbar-width: none !important;
+          }
+          *::-webkit-scrollbar {
+            display: none !important;
+            width: 0px !important;
+            height: 0px !important;
+          }
+        `;
+      }
+    }
+  }, [theme.canvas]);
+
   const getQueryParam = (key: string): string | null => {
     if (Platform.OS === 'web' && typeof globalThis !== 'undefined' && (globalThis as any).window) {
       return new URLSearchParams((globalThis as any).window.location.search).get(key);
@@ -460,9 +495,10 @@ export default function App() {
 const styles = StyleSheet.create({
   outerWrapper: {
     flex: 1,
-    width: 390,
-    maxWidth: 390,
-    backgroundColor: '#000000',
+    width: '100%',
+    maxWidth: Platform.OS === 'web' ? 440 : undefined,
+    alignSelf: 'center',
+    overflow: 'hidden',
   },
   safeArea: {
     flex: 1,
