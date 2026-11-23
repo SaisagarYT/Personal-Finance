@@ -20,6 +20,7 @@ import {
   CheckCircle2,
 } from 'lucide-react-native';
 import { useAppTheme } from '../theme/colors';
+import { PixelMorphMatrix } from './PixelMorphMatrix';
 import { StatusSymbol } from './StatusSymbol';
 import { BrainService, SinsMessage, AppContextData } from '../services/brainService';
 
@@ -137,7 +138,12 @@ export const SinsBrainModal: React.FC<SinsBrainModalProps> = ({
           {/* Top Bar: Icon + "What would you like to do today?" + Actions */}
           <View style={styles.topBar}>
             <View style={styles.topBarLeft}>
-              <StatusSymbol size={16} color={theme.isDark ? '#23F07D' : '#059669'} strokeWidth={2.4} />
+              <PixelMorphMatrix
+                size={16}
+                color={theme.isDark ? '#23F07D' : '#059669'}
+                glowColor={theme.isDark ? 'rgba(35, 240, 125, 0.45)' : 'rgba(5, 150, 105, 0.35)'}
+                isThinking={true}
+              />
               <Text style={[styles.topPromptText, { color: theme.textMuted }]}>
                 What would you like to do today?
               </Text>
