@@ -16,12 +16,10 @@ import {
   Camera,
   Keyboard,
   Send,
-  ExternalLink,
   CheckCircle2,
 } from 'lucide-react-native';
 import { useAppTheme } from '../theme/colors';
 import { PixelMorphMatrix } from './PixelMorphMatrix';
-import { StatusSymbol } from './StatusSymbol';
 import { BrainService, SinsMessage, AppContextData } from '../services/brainService';
 
 interface SinsBrainModalProps {
@@ -45,23 +43,70 @@ export const SinsBrainModal: React.FC<SinsBrainModalProps> = ({
   const [isListening, setIsListening] = useState(false);
   const [activeResponse, setActiveResponse] = useState<SinsMessage | null>(null);
 
-  const slideAnim = useRef(new Animated.Value(280)).current;
+  // Modal mount control for clean reverse exit animation
+  const [isMounted, setIsMounted] = useState(visible);
+
+  const slideAnim = useRef(new Animated.Value(320)).current;
+  const fadeAnim = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
     if (visible) {
-      Animated.spring(slideAnim, {
-        toValue: 0,
-        friction: 9,
-        tension: 50,
+      setIsMounted(true);
+      Animated.parallel([
+        Animated.spring(slideAnim, {
+          toValue: 0,
+          friction: 9,
+          tension: 45,
+          useNativeDriver: true,
+        }),
+        Animated.timing(fadeAnim, {
+          toValue: 1,
+          duration: 220,
+          useNativeDriver: true,
+        }),
+      ]).start();
+    } else if (isMounted) {
+      // Smooth reverse exit transition
+      Animated.parallel([
+        Animated.timing(slideAnim, {
+          toValue: 320,
+          duration: 240,
+          useNativeDriver: true,
+        }),
+        Animated.timing(fadeAnim, {
+          toValue: 0,
+          duration: 200,
+          useNativeDriver: true,
+        }),
+      ]).start(() => {
+        setIsMounted(false);
+        setIsListening(false);
+        setActiveModality('overview');
+        setActiveResponse(null);
+      });
+    }
+  }, [visible]);
+
+  const handleSmoothClose = () => {
+    Animated.parallel([
+      Animated.timing(slideAnim, {
+        toValue: 320,
+        duration: 240,
         useNativeDriver: true,
-      }).start();
-    } else {
-      slideAnim.setValue(280);
+      }),
+      Animated.timing(fadeAnim, {
+        toValue: 0,
+        duration: 200,
+        useNativeDriver: true,
+      }),
+    ]).start(() => {
+      onClose();
+      setIsMounted(false);
       setIsListening(false);
       setActiveModality('overview');
       setActiveResponse(null);
-    }
-  }, [visible]);
+    });
+  };
 
   const handleSendMessage = (textToSend?: string) => {
     const query = textToSend || inputText;
@@ -106,36 +151,48 @@ export const SinsBrainModal: React.FC<SinsBrainModalProps> = ({
     handleSendMessage('Scan receipt for Whole Foods Grocery');
   };
 
+  if (!isMounted) return null;
+
   return (
     <Modal
-      visible={visible}
+      visible={isMounted}
       transparent
-      animationType="fade"
-      onRequestClose={onClose}
+      animationType="none"
+      onRequestClose={handleSmoothClose}
     >
       <KeyboardAvoidingView
         style={styles.modalBackdrop}
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       >
-        {/* Dismiss Backdrop */}
-        <TouchableOpacity
-          activeOpacity={1}
-          style={StyleSheet.absoluteFill}
-          onPress={onClose}
-        />
+        {/* Animated Dim Backdrop */}
+        <Animated.View
+          style={[
+            StyleSheet.absoluteFill,
+            {
+              backgroundColor: 'rgba(0, 0, 0, 0.6)',
+              opacity: fadeAnim,
+            },
+          ]}
+        >
+          <TouchableOpacity
+            activeOpacity={1}
+            style={StyleSheet.absoluteFill}
+            onPress={handleSmoothClose}
+          />
+        </Animated.View>
 
-        {/* ================= FULL-WIDTH GEMINI CARD ================= */}
+        {/* ================= FULL-WIDTH SINANCE PREMIUM CARD ================= */}
         <Animated.View
           style={[
             styles.geminiCard,
             {
-              backgroundColor: theme.isDark ? '#181C19' : '#FFFFFF',
+              backgroundColor: theme.cardContainer,
               borderColor: theme.borderSubtle,
               transform: [{ translateY: slideAnim }],
             },
           ]}
         >
-          {/* Top Bar: Icon + "What would you like to do today?" + Actions */}
+          {/* Top Bar: 4-Block Animated Matrix + "What would you like to do today?" + Dismiss */}
           <View style={styles.topBar}>
             <View style={styles.topBarLeft}>
               <PixelMorphMatrix size={16} durationMs={1600} />
@@ -144,15 +201,13 @@ export const SinsBrainModal: React.FC<SinsBrainModalProps> = ({
               </Text>
             </View>
 
-            <View style={styles.topBarRight}>
-              <TouchableOpacity
-                activeOpacity={0.7}
-                onPress={onClose}
-                style={styles.iconHit}
-              >
-                <X size={18} color={theme.textDim} strokeWidth={2.2} />
-              </TouchableOpacity>
-            </View>
+            <TouchableOpacity
+              activeOpacity={0.7}
+              onPress={handleSmoothClose}
+              style={[styles.closeHit, { backgroundColor: theme.surfaceSubtle }]}
+            >
+              <X size={15} color={theme.textMain} strokeWidth={2.4} />
+            </TouchableOpacity>
           </View>
 
           {/* Center Main Stage */}
@@ -220,7 +275,7 @@ export const SinsBrainModal: React.FC<SinsBrainModalProps> = ({
                 </Text>
               </View>
             ) : activeModality === 'text' ? (
-              <View style={styles.textInputContainer}>
+              <View style={[styles.textInputContainer, { backgroundColor: theme.surface, borderColor: theme.borderSubtle }]}>
                 <TextInput
                   value={inputText}
                   onChangeText={setInputText}
@@ -253,13 +308,14 @@ export const SinsBrainModal: React.FC<SinsBrainModalProps> = ({
             )}
           </View>
 
-          {/* Bottom Dock Control Pill (Matching Reference) */}
+          {/* Bottom Dock Control Pill (Bound to Sinance Theme) */}
           <View style={styles.bottomDockWrapper}>
             <View
               style={[
                 styles.bottomModalityPill,
                 {
-                  backgroundColor: theme.isDark ? '#E5E7EB' : '#141414',
+                  backgroundColor: theme.surface,
+                  borderColor: theme.borderSubtle,
                 },
               ]}
             >
@@ -267,32 +323,37 @@ export const SinsBrainModal: React.FC<SinsBrainModalProps> = ({
               <TouchableOpacity
                 activeOpacity={0.7}
                 onPress={() => setActiveModality(activeModality === 'text' ? 'overview' : 'text')}
-                style={styles.pillActionBtn}
+                style={[
+                  styles.pillActionBtn,
+                  activeModality === 'text' && { backgroundColor: theme.surfaceSubtle },
+                ]}
               >
                 <Keyboard
-                  size={20}
-                  color={theme.isDark ? '#111827' : '#FFFFFF'}
+                  size={19}
+                  color={activeModality === 'text' ? (theme.isDark ? '#23F07D' : '#059669') : theme.textMain}
                   strokeWidth={2.2}
                 />
               </TouchableOpacity>
 
-              {/* Scalloped Mic Organic Cloud (Talk) */}
+              {/* Scalloped Mic Organic Button (Talk) */}
               <TouchableOpacity
                 activeOpacity={0.85}
                 onPress={handleVoiceToggle}
                 style={[
                   styles.pillMicScallop,
                   {
-                    backgroundColor: theme.isDark ? '#D1D5DB' : '#27272A',
+                    backgroundColor: theme.surfaceSubtle,
+                    borderColor: theme.borderSubtle,
                   },
                   isListening && {
                     backgroundColor: theme.brand,
+                    borderColor: theme.brand,
                   },
                 ]}
               >
                 <Mic
-                  size={22}
-                  color={theme.isDark ? '#111827' : '#FFFFFF'}
+                  size={20}
+                  color={isListening ? theme.forestDark : theme.textMain}
                   strokeWidth={2.4}
                 />
               </TouchableOpacity>
@@ -304,8 +365,8 @@ export const SinsBrainModal: React.FC<SinsBrainModalProps> = ({
                 style={styles.pillActionBtn}
               >
                 <Camera
-                  size={20}
-                  color={theme.isDark ? '#111827' : '#FFFFFF'}
+                  size={19}
+                  color={theme.textMain}
                   strokeWidth={2.2}
                 />
               </TouchableOpacity>
@@ -320,7 +381,6 @@ export const SinsBrainModal: React.FC<SinsBrainModalProps> = ({
 const styles = StyleSheet.create({
   modalBackdrop: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.55)',
     justifyContent: 'flex-end',
     alignItems: 'center',
   },
@@ -335,7 +395,7 @@ const styles = StyleSheet.create({
     borderBottomWidth: 0,
     paddingTop: 16,
     paddingHorizontal: 20,
-    paddingBottom: Platform.OS === 'ios' ? 24 : 16,
+    paddingBottom: Platform.OS === 'ios' ? 26 : 18,
     shadowColor: '#000000',
     shadowOffset: { width: 0, height: -6 },
     shadowOpacity: 0.35,
@@ -351,7 +411,7 @@ const styles = StyleSheet.create({
   topBarLeft: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
+    gap: 10,
     flex: 1,
   },
   topPromptText: {
@@ -359,56 +419,57 @@ const styles = StyleSheet.create({
     fontWeight: '500',
     letterSpacing: -0.1,
   },
-  topBarRight: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-  },
-  iconHit: {
-    padding: 4,
+  closeHit: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
     alignItems: 'center',
     justifyContent: 'center',
   },
   centerStage: {
-    minHeight: 88,
+    minHeight: 84,
     justifyContent: 'center',
-    paddingVertical: 10,
+    paddingVertical: 8,
   },
   heroPromptWrapper: {
     paddingVertical: 4,
   },
   heroPromptText: {
-    fontSize: 27,
-    fontWeight: '400',
+    fontSize: 26,
+    fontWeight: '500',
     letterSpacing: -0.8,
-    lineHeight: 34,
+    lineHeight: 33,
   },
   textInputContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     width: '100%',
+    borderRadius: 16,
+    borderWidth: 1,
+    paddingHorizontal: 12,
+    paddingVertical: 2,
   },
   mainInput: {
     flex: 1,
-    fontSize: 20,
+    fontSize: 16,
     fontWeight: '500',
-    letterSpacing: -0.4,
+    letterSpacing: -0.2,
     paddingVertical: 8,
   },
   sendButton: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
+    width: 32,
+    height: 32,
+    borderRadius: 16,
     alignItems: 'center',
     justifyContent: 'center',
-    marginLeft: 8,
+    marginLeft: 6,
   },
   responseContainer: {
     gap: 8,
   },
   responseText: {
-    fontSize: 15,
-    lineHeight: 21,
+    fontSize: 14.5,
+    lineHeight: 20,
     fontWeight: '500',
   },
   actionCard: {
@@ -457,7 +518,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     paddingTop: 10,
-    paddingBottom: 4,
+    paddingBottom: 2,
   },
   bottomModalityPill: {
     flexDirection: 'row',
@@ -466,19 +527,26 @@ const styles = StyleSheet.create({
     width: 172,
     height: 48,
     borderRadius: 24,
-    paddingHorizontal: 8,
+    borderWidth: 1,
+    paddingHorizontal: 6,
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.16,
+    shadowRadius: 6,
+    elevation: 3,
   },
   pillActionBtn: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
+    width: 38,
+    height: 38,
+    borderRadius: 19,
     alignItems: 'center',
     justifyContent: 'center',
   },
   pillMicScallop: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
+    width: 42,
+    height: 42,
+    borderRadius: 21,
+    borderWidth: 1,
     alignItems: 'center',
     justifyContent: 'center',
   },
