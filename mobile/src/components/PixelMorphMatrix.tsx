@@ -1,72 +1,93 @@
-import React, { useEffect, useState } from 'react';
-import { View, StyleSheet } from 'react-native';
+import React, { useEffect, useRef } from 'react';
+import { View, StyleSheet, Animated, Easing } from 'react-native';
 import { useAppTheme } from '../theme/colors';
 
 export interface PixelMorphMatrixProps {
   size?: number;
-  speedMs?: number;
+  durationMs?: number;
 }
 
 /**
- * Clean 2x2 4-block square matrix.
- * Exactly 4 blocks with sequential rotating color illumination:
- * Block 1 (top-left) -> Block 2 (top-right) -> Block 4 (bottom-right) -> Block 3 (bottom-left)
- * Pure minimalist square grid with zero circular or blurred glow backgrounds.
+ * 2x2 Clean 4-Block Matrix with continuous, ultra-smooth color circulation.
+ * Instead of discrete jump cuts, a single 0 -> 4 continuous loop smoothly
+ * fades and cross-dissolves the theme color across the 4 blocks clockwise:
+ * Top-Left -> Top-Right -> Bottom-Right -> Bottom-Left -> Top-Left.
  */
 export const PixelMorphMatrix: React.FC<PixelMorphMatrixProps> = ({
   size = 18,
-  speedMs = 220,
+  durationMs = 1800,
 }) => {
   const theme = useAppTheme();
-  const [activeStep, setActiveStep] = useState(0);
+  const animValue = useRef(new Animated.Value(0)).current;
 
-  // Cycle through 0 -> 1 -> 2 -> 3 in a clockwise rotation
   useEffect(() => {
-    const timer = setInterval(() => {
-      setActiveStep((prev) => (prev + 1) % 4);
-    }, speedMs);
+    const loop = Animated.loop(
+      Animated.timing(animValue, {
+        toValue: 4,
+        duration: durationMs,
+        easing: Easing.linear,
+        useNativeDriver: false,
+      })
+    );
+    loop.start();
 
-    return () => clearInterval(timer);
-  }, [speedMs]);
+    return () => loop.stop();
+  }, [animValue, durationMs]);
 
-  const primaryColor = theme.isDark ? '#23F07D' : '#059669';
-  const dimColor = theme.isDark ? 'rgba(35, 240, 125, 0.22)' : 'rgba(5, 150, 105, 0.22)';
+  const activeColor = theme.isDark ? '#23F07D' : '#059669';
+  const dimColor = theme.isDark ? 'rgba(35, 240, 125, 0.18)' : 'rgba(5, 150, 105, 0.18)';
 
   const gap = 2;
   const blockSize = Math.floor((size - gap) / 2);
+  const blockRadius = Math.max(1, Math.round(blockSize * 0.22));
 
-  // Rotation order:
-  // Index 0: Top-Left
-  // Index 1: Top-Right
-  // Index 2: Bottom-Right
-  // Index 3: Bottom-Left
-  const getBlockColor = (blockIndex: number) => {
-    return activeStep === blockIndex ? primaryColor : dimColor;
-  };
+  // Block 0: Top-Left (Peaks at 0 and 4)
+  const bgTL = animValue.interpolate({
+    inputRange: [0, 1, 2, 3, 4],
+    outputRange: [activeColor, dimColor, dimColor, dimColor, activeColor],
+  });
+
+  // Block 1: Top-Right (Peaks at 1)
+  const bgTR = animValue.interpolate({
+    inputRange: [0, 1, 2, 3, 4],
+    outputRange: [dimColor, activeColor, dimColor, dimColor, dimColor],
+  });
+
+  // Block 2: Bottom-Right (Peaks at 2)
+  const bgBR = animValue.interpolate({
+    inputRange: [0, 1, 2, 3, 4],
+    outputRange: [dimColor, dimColor, activeColor, dimColor, dimColor],
+  });
+
+  // Block 3: Bottom-Left (Peaks at 3)
+  const bgBL = animValue.interpolate({
+    inputRange: [0, 1, 2, 3, 4],
+    outputRange: [dimColor, dimColor, dimColor, activeColor, dimColor],
+  });
 
   return (
     <View style={[styles.container, { width: size, height: size }]}>
       {/* Top Row: Block 0 (TL), Block 1 (TR) */}
       <View style={[styles.row, { gap }]}>
-        <View
+        <Animated.View
           style={[
             styles.block,
             {
               width: blockSize,
               height: blockSize,
-              backgroundColor: getBlockColor(0),
-              borderRadius: Math.max(1, blockSize * 0.2),
+              backgroundColor: bgTL,
+              borderRadius: blockRadius,
             },
           ]}
         />
-        <View
+        <Animated.View
           style={[
             styles.block,
             {
               width: blockSize,
               height: blockSize,
-              backgroundColor: getBlockColor(1),
-              borderRadius: Math.max(1, blockSize * 0.2),
+              backgroundColor: bgTR,
+              borderRadius: blockRadius,
             },
           ]}
         />
@@ -74,25 +95,25 @@ export const PixelMorphMatrix: React.FC<PixelMorphMatrixProps> = ({
 
       {/* Bottom Row: Block 3 (BL), Block 2 (BR) */}
       <View style={[styles.row, { gap, marginTop: gap }]}>
-        <View
+        <Animated.View
           style={[
             styles.block,
             {
               width: blockSize,
               height: blockSize,
-              backgroundColor: getBlockColor(3),
-              borderRadius: Math.max(1, blockSize * 0.2),
+              backgroundColor: bgBL,
+              borderRadius: blockRadius,
             },
           ]}
         />
-        <View
+        <Animated.View
           style={[
             styles.block,
             {
               width: blockSize,
               height: blockSize,
-              backgroundColor: getBlockColor(2),
-              borderRadius: Math.max(1, blockSize * 0.2),
+              backgroundColor: bgBR,
+              borderRadius: blockRadius,
             },
           ]}
         />
@@ -110,6 +131,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
   },
   block: {
-    // Crisp, clean square tile
+    // Clean, crisp square tile with soft rounded corners
   },
 });
