@@ -16,6 +16,7 @@ interface SinanceHeroCardProps {
   onPressGetSetUp?: () => void;
   onPressBalance?: () => void;
   isAvatarHidden?: boolean;
+  avatarUri?: string | null;
 }
 
 export const SinanceHeroCard: React.FC<SinanceHeroCardProps> = ({
@@ -31,6 +32,7 @@ export const SinanceHeroCard: React.FC<SinanceHeroCardProps> = ({
   onPressGetSetUp,
   onPressBalance,
   isAvatarHidden = false,
+  avatarUri,
 }) => {
   const theme = useAppTheme();
 
@@ -57,7 +59,7 @@ export const SinanceHeroCard: React.FC<SinanceHeroCardProps> = ({
             ]}
           >
             <Image
-              source={require('../../assets/esther_avatar.png')}
+              source={avatarUri ? { uri: avatarUri } : require('../../assets/esther_avatar.png')}
               style={styles.avatarImage}
               resizeMode="cover"
             />

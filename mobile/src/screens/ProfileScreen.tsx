@@ -28,9 +28,12 @@ import {
   User,
   Sparkles,
   Check,
+  Edit2,
 } from 'lucide-react-native';
 import { useAuth } from '../context/AuthContext';
 import { useAppTheme } from '../theme/colors';
+import { UserProfile } from '../services/profileService';
+import { EditProfileModal } from '../components/EditProfileModal';
 
 export interface ProfileScreenProps {
   onBack: () => void;
@@ -41,6 +44,8 @@ export interface ProfileScreenProps {
   onOpenAuth?: () => void;
   animProgress?: Animated.Value;
   isAvatarHidden?: boolean;
+  userProfile?: UserProfile;
+  onProfileUpdated?: (updated: UserProfile) => void;
 }
 
 export const ProfileScreen: React.FC<ProfileScreenProps> = ({
@@ -52,10 +57,13 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
   onOpenAuth,
   animProgress,
   isAvatarHidden = false,
+  userProfile,
+  onProfileUpdated,
 }) => {
   const theme = useAppTheme();
   const { user, signOut } = useAuth();
   const [exportNotice, setExportNotice] = useState<string | null>(null);
+  const [isEditProfileModalOpen, setIsEditProfileModalOpen] = useState(false);
 
   const handleSignOut = async () => {
     await signOut();
@@ -67,8 +75,9 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
     setTimeout(() => setExportNotice(null), 3000);
   };
 
-  const displayName = user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'Sagar';
-  const displayEmail = user?.email || 'sagar@sinance.app';
+  const displayName = userProfile?.name || user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'Sagar';
+  const displayEmail = userProfile?.email || user?.email || 'sagar@sinance.app';
+  const avatarUri = userProfile?.avatarUri;
   const isCloudSynced = !!user;
 
   // Premium Hero Transition Interpolations (Option C)
@@ -140,7 +149,9 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
         showsVerticalScrollIndicator={false}
       >
         {/* ================= HERO PROFILE CARD ================= */}
-        <View
+        <TouchableOpacity
+          activeOpacity={0.85}
+          onPress={() => setIsEditProfileModalOpen(true)}
           style={[
             styles.heroCard,
             {
@@ -165,7 +176,7 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
             ]}
           >
             <Image
-              source={require('../../assets/esther_avatar.png')}
+              source={avatarUri ? { uri: avatarUri } : require('../../assets/esther_avatar.png')}
               style={styles.avatarImage}
               resizeMode="cover"
             />
@@ -204,7 +215,12 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
               {displayEmail}
             </Text>
           </Animated.View>
-        </View>
+
+          {/* Edit icon indicator */}
+          <View style={[styles.editPill, { backgroundColor: theme.surfaceSubtle, borderColor: theme.borderSubtle }]}>
+            <Edit2 size={13} color={theme.textDim} />
+          </View>
+        </TouchableOpacity>
 
         {/* Notice Toast Banner */}
         {exportNotice && (
@@ -243,6 +259,7 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
           {/* Row 1: Manage Profile */}
           <TouchableOpacity
             activeOpacity={0.7}
+            onPress={() => setIsEditProfileModalOpen(true)}
             style={styles.settingRow}
           >
             <View style={styles.settingRowLeft}>
@@ -515,11 +532,28 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
         {/* Spacing for bottom */}
         <View style={{ height: 60 }} />
       </ScrollView>
+
+      {/* Edit Profile & Avatar Cropping Modal */}
+      <EditProfileModal
+        visible={isEditProfileModalOpen}
+        onClose={() => setIsEditProfileModalOpen(false)}
+        onProfileUpdated={(updated) => onProfileUpdated?.(updated)}
+        userId={user?.id}
+      />
     </View>
   );
 };
 
 const styles = StyleSheet.create({
+  editPill: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    borderWidth: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginLeft: 6,
+  },
   container: {
     flex: 1,
     width: '100%',

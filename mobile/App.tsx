@@ -25,6 +25,7 @@ import { GetSetUpModal } from './src/components/GetSetUpModal';
 import { AuthProvider, useAuth } from './src/context/AuthContext';
 import { FinanceService, Account, Transaction } from './src/services/financeService';
 import { SubscriptionService } from './src/services/subscriptionService';
+import { ProfileService, UserProfile } from './src/services/profileService';
 import { useAppTheme } from './src/theme/colors';
 
 function AppContent() {
@@ -137,6 +138,7 @@ function AppContent() {
   const [bills, setBills] = useState<BillItem[]>([]);
   const [totalBalance, setTotalBalance] = useState<number>(240250);
   const [loadingData, setLoadingData] = useState<boolean>(true);
+  const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
 
   // Upper section synchronized spring elastic effect when switching tabs
   const upperSpring = useRef(new Animated.Value(0)).current;
@@ -190,6 +192,9 @@ function AppContent() {
     }
 
     fetchCloudData();
+    ProfileService.getProfile(user?.id).then((prof) => {
+      if (isMounted) setUserProfile(prof);
+    });
 
     return () => {
       isMounted = false;
@@ -307,7 +312,8 @@ function AppContent() {
               >
                 {/* SECTION 1: SINANCE HERO CARD */}
                 <SinanceHeroCard
-                  userName={userName}
+                  userName={userProfile?.name || userName}
+                  avatarUri={userProfile?.avatarUri}
                   balance={formattedBalance}
                   pastWeekDiff="+₹1,940 past week"
                   onboardingStep={user ? 'Cloud Synced' : '2 of 5 complete'}
@@ -412,6 +418,8 @@ function AppContent() {
                   setIsAuthModalOpen(true);
                 }}
                 isAvatarHidden={!isProfileSettled}
+                userProfile={userProfile || undefined}
+                onProfileUpdated={(updated) => setUserProfile(updated)}
               />
             </Animated.View>
           )}
@@ -449,7 +457,7 @@ function AppContent() {
               ]}
             >
               <Image
-                source={require('./assets/esther_avatar.png')}
+                source={userProfile?.avatarUri ? { uri: userProfile.avatarUri } : require('./assets/esther_avatar.png')}
                 style={styles.flyingAvatarImage}
                 resizeMode="cover"
               />
