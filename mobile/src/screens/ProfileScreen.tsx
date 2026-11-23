@@ -128,6 +128,7 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
               borderColor: theme.borderSubtle,
             },
           ]}
+          hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
         >
           <ChevronLeft size={22} color={theme.textMain} strokeWidth={2.2} />
         </TouchableOpacity>

@@ -42,9 +42,11 @@ export const SinanceHeroCard: React.FC<SinanceHeroCardProps> = ({
           activeOpacity={0.8}
           onPress={onPressAvatar}
           style={styles.userInfoRow}
+          hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
         >
           {/* Avatar with circular ring */}
           <View
+            pointerEvents="none"
             style={[
               styles.avatarWrapper,
               {

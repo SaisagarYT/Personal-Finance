@@ -9,6 +9,7 @@ import {
   Animated,
   Easing,
   Image,
+  useWindowDimensions,
 } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { SinanceHeroCard } from './src/components/SinanceHeroCard';
@@ -29,6 +30,8 @@ import { useAppTheme } from './src/theme/colors';
 function AppContent() {
   const theme = useAppTheme();
   const { user } = useAuth();
+  const { height: windowHeight } = useWindowDimensions();
+  const screenHeight = windowHeight || 900;
 
   // Prevent white edges and eliminate browser scrollbar gutter lines on web
   useEffect(() => {
@@ -95,12 +98,10 @@ function AppContent() {
       toValue: 1,
       duration: 380,
       easing: Easing.bezier(0.16, 1, 0.3, 1),
-      useNativeDriver: false,
-    }).start(({ finished }) => {
-      if (finished) {
-        setIsAvatarFlying(false);
-        setIsProfileSettled(true);
-      }
+      useNativeDriver: Platform.OS !== 'web',
+    }).start(() => {
+      setIsAvatarFlying(false);
+      setIsProfileSettled(true);
     });
   };
 
@@ -112,13 +113,11 @@ function AppContent() {
       toValue: 0,
       duration: 320,
       easing: Easing.bezier(0.25, 0.1, 0.25, 1),
-      useNativeDriver: false,
-    }).start(({ finished }) => {
-      if (finished) {
-        setIsAvatarFlying(false);
-        setIsProfileMounted(false);
-        setIsProfileSettled(false);
-      }
+      useNativeDriver: Platform.OS !== 'web',
+    }).start(() => {
+      setIsAvatarFlying(false);
+      setIsProfileMounted(false);
+      setIsProfileSettled(false);
     });
   };
 
@@ -388,12 +387,13 @@ function AppContent() {
                 StyleSheet.absoluteFill,
                 {
                   zIndex: 200,
+                  elevation: 20,
                   backgroundColor: theme.canvas,
                   transform: [
                     {
                       translateY: profileAnim.interpolate({
                         inputRange: [0, 1],
-                        outputRange: [800, 0],
+                        outputRange: [screenHeight, 0],
                       }),
                     },
                   ],
@@ -423,32 +423,28 @@ function AppContent() {
               style={[
                 styles.flyingAvatarContainer,
                 {
-                  left: profileAnim.interpolate({
-                    inputRange: [0, 1],
-                    outputRange: [20, 39],
-                  }),
-                  top: profileAnim.interpolate({
-                    inputRange: [0, 1],
-                    outputRange: [Platform.OS === 'android' ? 14 : 10, Platform.OS === 'android' ? 89 : 85],
-                  }),
-                  width: profileAnim.interpolate({
-                    inputRange: [0, 1],
-                    outputRange: [44, 54],
-                  }),
-                  height: profileAnim.interpolate({
-                    inputRange: [0, 1],
-                    outputRange: [44, 54],
-                  }),
-                  borderRadius: profileAnim.interpolate({
-                    inputRange: [0, 1],
-                    outputRange: [22, 27],
-                  }),
-                  borderWidth: profileAnim.interpolate({
-                    inputRange: [0, 1],
-                    outputRange: [2, 1.5],
-                  }),
                   borderColor: theme.borderSubtle,
                   backgroundColor: theme.avatarInnerBg,
+                  transform: [
+                    {
+                      translateX: profileAnim.interpolate({
+                        inputRange: [0, 1],
+                        outputRange: [0, 24],
+                      }),
+                    },
+                    {
+                      translateY: profileAnim.interpolate({
+                        inputRange: [0, 1],
+                        outputRange: [0, 78],
+                      }),
+                    },
+                    {
+                      scale: profileAnim.interpolate({
+                        inputRange: [0, 1],
+                        outputRange: [1, 54 / 44],
+                      }),
+                    },
+                  ],
                 },
               ]}
             >
@@ -531,8 +527,15 @@ const styles = StyleSheet.create({
   },
   flyingAvatarContainer: {
     position: 'absolute',
+    left: 20,
+    top: Platform.OS === 'android' ? 14 : 10,
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    borderWidth: 2,
     overflow: 'hidden',
-    zIndex: 350,
+    zIndex: 9999,
+    elevation: 9999,
   },
   flyingAvatarImage: {
     width: '100%',
