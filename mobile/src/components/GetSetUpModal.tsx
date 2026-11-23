@@ -23,6 +23,10 @@ import { useAppTheme } from '../theme/colors';
 import { StatusSymbol } from './StatusSymbol';
 import { useAuth } from '../context/AuthContext';
 
+import { Account, Transaction } from '../services/financeService';
+import { BillItem } from '../services/subscriptionService';
+import { UserProfile } from '../services/profileService';
+
 export interface SetupStep {
   id: string;
   num: number;
@@ -30,77 +34,102 @@ export interface SetupStep {
   description: string;
   isCompleted: boolean;
   actionLabel?: string;
-  icon: 'wallet' | 'bill' | 'target' | 'cloud' | 'sparkles';
+  icon: 'wallet' | 'bill' | 'target' | 'cloud' | 'sparkles' | 'user';
 }
 
 interface GetSetUpModalProps {
   visible: boolean;
   onClose: () => void;
   onDismissFromHome: () => void;
+  accounts?: Account[];
+  transactions?: Transaction[];
+  bills?: BillItem[];
+  userProfile?: UserProfile | null;
   onNavigateToPocket?: () => void;
   onNavigateToBills?: () => void;
   onNavigateToAuth?: () => void;
+  onNavigateToProfile?: () => void;
+  onNavigateToRecord?: () => void;
 }
 
 export const GetSetUpModal: React.FC<GetSetUpModalProps> = ({
   visible,
   onClose,
   onDismissFromHome,
+  accounts = [],
+  transactions = [],
+  bills = [],
+  userProfile,
   onNavigateToPocket,
   onNavigateToBills,
   onNavigateToAuth,
+  onNavigateToProfile,
+  onNavigateToRecord,
 }) => {
   const theme = useAppTheme();
   const { user } = useAuth();
+
+  const isAuthCompleted = !!user;
+  const isAccountsCompleted = accounts.length > 0;
+  const isBillsCompleted = bills.length > 0;
+  const isTransactionsCompleted = transactions.length > 0;
+  const isProfileCompleted = Boolean(userProfile?.name && userProfile.name.trim().length > 0);
 
   const steps: SetupStep[] = [
     {
       id: 'step-1',
       num: 1,
-      title: 'Account Initialized',
-      description: user
-        ? `Logged in as ${user.email}`
-        : 'Local guest profile active',
-      isCompleted: true,
-      icon: 'sparkles',
+      title: 'Cloud Identity & Security',
+      description: isAuthCompleted
+        ? `Synced with ${user?.email}`
+        : 'Sign in to sync your ledger across devices',
+      isCompleted: isAuthCompleted,
+      actionLabel: isAuthCompleted ? 'Connected' : 'Sign In',
+      icon: 'cloud',
     },
     {
       id: 'step-2',
       num: 2,
-      title: 'Wallets & Cash Configured',
-      description: 'HDFC Checking, SBI Savings, and Cash ledger set up',
-      isCompleted: true,
-      actionLabel: 'View Wallets',
+      title: 'Wallets & Accounts',
+      description: isAccountsCompleted
+        ? `${accounts.length} connected account${accounts.length > 1 ? 's' : ''}`
+        : 'Connect checking, savings or cash accounts',
+      isCompleted: isAccountsCompleted,
+      actionLabel: isAccountsCompleted ? 'View' : 'Add Account',
       icon: 'wallet',
     },
     {
       id: 'step-3',
       num: 3,
-      title: 'Add Recurring Bills & Subscriptions',
-      description: 'Track utilities, streaming, rent, and monthly commitments',
-      isCompleted: false,
-      actionLabel: 'Add Bill',
+      title: 'Recurring Bills & Subscriptions',
+      description: isBillsCompleted
+        ? `${bills.length} active subscription${bills.length > 1 ? 's' : ''} monitored`
+        : 'Track monthly commitments and auto-pay bills',
+      isCompleted: isBillsCompleted,
+      actionLabel: isBillsCompleted ? 'View Bills' : 'Add Bill',
       icon: 'bill',
     },
     {
       id: 'step-4',
       num: 4,
-      title: 'Set Monthly Savings Target',
-      description: 'Set an automated target to build financial resilience',
-      isCompleted: false,
-      actionLabel: 'Set Goal',
+      title: 'Record First Transaction',
+      description: isTransactionsCompleted
+        ? `${transactions.length} transaction${transactions.length > 1 ? 's' : ''} logged in ledger`
+        : 'Record an expense or deposit to activate analytics',
+      isCompleted: isTransactionsCompleted,
+      actionLabel: isTransactionsCompleted ? 'Activity' : 'Record',
       icon: 'target',
     },
     {
       id: 'step-5',
       num: 5,
-      title: 'Cloud Backup & Sync',
-      description: user
-        ? 'Connected to PostgreSQL Cloud'
-        : 'Sign in with Supabase to sync data across devices',
-      isCompleted: !!user,
-      actionLabel: user ? 'Synced' : 'Connect',
-      icon: 'cloud',
+      title: 'Personalize Ledger Profile',
+      description: isProfileCompleted
+        ? `Configured as ${userProfile?.name}`
+        : 'Set your name, bio, and financial preferences',
+      isCompleted: isProfileCompleted,
+      actionLabel: isProfileCompleted ? 'Edit' : 'Personalize',
+      icon: 'sparkles',
     },
   ];
 
@@ -109,12 +138,17 @@ export const GetSetUpModal: React.FC<GetSetUpModalProps> = ({
 
   const handleStepAction = (step: SetupStep) => {
     onClose();
-    if (step.id === 'step-2' || step.id === 'step-4') {
+    if (step.id === 'step-1') {
+      if (!isAuthCompleted) onNavigateToAuth?.();
+      else onNavigateToProfile?.();
+    } else if (step.id === 'step-2') {
       onNavigateToPocket?.();
     } else if (step.id === 'step-3') {
       onNavigateToBills?.();
-    } else if (step.id === 'step-5' && !user) {
-      onNavigateToAuth?.();
+    } else if (step.id === 'step-4') {
+      onNavigateToRecord?.();
+    } else if (step.id === 'step-5') {
+      onNavigateToProfile?.();
     }
   };
 

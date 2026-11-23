@@ -164,6 +164,40 @@ function AppContent() {
   const [loadingData, setLoadingData] = useState<boolean>(true);
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
 
+  // Dynamic Onboarding Milestone Evaluation
+  const completedStepsCount = useMemo(() => {
+    let count = 0;
+    if (user) count++;
+    if (accounts.length > 0) count++;
+    if (bills.length > 0) count++;
+    if (transactions.length > 0) count++;
+    if (userProfile?.name && userProfile.name.trim().length > 0) count++;
+    return count;
+  }, [user, accounts.length, bills.length, transactions.length, userProfile?.name]);
+
+  const onboardingHeadline = completedStepsCount === 5
+    ? 'All 5 steps complete'
+    : `${completedStepsCount} of 5 complete`;
+
+  const onboardingDetailText = useMemo(() => {
+    if (completedStepsCount === 5) {
+      return 'Your financial workspace is fully configured and tracking.';
+    }
+    if (!user) {
+      return 'Connect your account to Supabase to enable cloud backup & sync.';
+    }
+    if (accounts.length === 0) {
+      return 'Connect checking, savings, or UPI cash ledger to calculate net worth.';
+    }
+    if (bills.length === 0) {
+      return 'Track recurring subscriptions and upcoming utilities.';
+    }
+    if (transactions.length === 0) {
+      return 'Record your first expense or income to activate analytics.';
+    }
+    return 'Complete your ledger setup to unlock maximum financial clarity.';
+  }, [completedStepsCount, user, accounts.length, bills.length, transactions.length]);
+
   // Upper section synchronized spring elastic effect when switching tabs
   const upperSpring = useRef(new Animated.Value(0)).current;
 
@@ -340,12 +374,8 @@ function AppContent() {
                   avatarUri={userProfile?.avatarUri}
                   balance={formattedBalance}
                   pastWeekDiff="+₹1,940 past week"
-                  onboardingStep={user ? 'Cloud Synced' : '2 of 5 complete'}
-                  onboardingText={
-                    user
-                      ? 'Your data is connected to Supabase and synced across devices.'
-                      : 'is a crucial phase in the onboarding process'
-                  }
+                  onboardingStep={onboardingHeadline}
+                  onboardingText={onboardingDetailText}
                   isSetupDismissed={isSetupDismissed}
                   onPressAvatar={handleOpenProfile}
                   onPressNotification={handleOpenProfile}
@@ -494,12 +524,24 @@ function AppContent() {
             visible={isGetSetUpModalOpen}
             onClose={() => setIsGetSetUpModalOpen(false)}
             onDismissFromHome={() => setIsSetupDismissed(true)}
+            accounts={accounts}
+            transactions={transactions}
+            bills={bills}
+            userProfile={userProfile}
             onNavigateToPocket={() => setIsPocketOpen(true)}
             onNavigateToBills={() => {
               setIsGetSetUpModalOpen(false);
               setIsAllBillsOpen(true);
             }}
             onNavigateToAuth={() => setIsAuthModalOpen(true)}
+            onNavigateToProfile={() => {
+              setIsGetSetUpModalOpen(false);
+              handleOpenProfile();
+            }}
+            onNavigateToRecord={() => {
+              setIsGetSetUpModalOpen(false);
+              setIsSinsBrainOpen(true);
+            }}
           />
 
           {/* ================= ALL BILLS & SUBSCRIPTIONS MODAL ================= */}
