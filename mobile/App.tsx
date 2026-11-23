@@ -15,6 +15,7 @@ import { StatusBar } from 'expo-status-bar';
 import { SinanceHeroCard } from './src/components/SinanceHeroCard';
 import { SinanceActivitySection } from './src/components/SinanceActivitySection';
 import { UpcomingBillsSection, BillItem } from './src/components/UpcomingBillsSection';
+import { AllBillsModal } from './src/components/AllBillsModal';
 import { BottomCapsuleDock, NavTabId } from './src/components/BottomCapsuleDock';
 import { StatsView } from './src/screens/StatsView';
 import { SinancePocketScreen } from './src/screens/SinancePocketScreen';
@@ -126,6 +127,7 @@ function AppContent() {
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(() => {
     return getQueryParam('auth') === 'true';
   });
+  const [isAllBillsOpen, setIsAllBillsOpen] = useState(false);
   const [isSetupDismissed, setIsSetupDismissed] = useState(() => {
     return getQueryParam('setup_dismissed') === 'true';
   });
@@ -136,7 +138,26 @@ function AppContent() {
   // Cloud Financial Data State
   const [accounts, setAccounts] = useState<Account[]>([]);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
-  const [bills, setBills] = useState<BillItem[]>([]);
+  const [bills, setBills] = useState<BillItem[]>([
+    {
+      id: 'netflix',
+      name: 'Netflix Premium',
+      category: 'streaming',
+      amount: '₹649.00',
+      dueDate: '24 Nov',
+      dueCountdown: 'Due in 3 days',
+      isAutoPay: true,
+    },
+    {
+      id: 'airtel',
+      name: 'Airtel Xstream Fibre',
+      category: 'internet',
+      amount: '₹999.00',
+      dueDate: '28 Nov',
+      dueCountdown: 'Due in 7 days',
+      isAutoPay: false,
+    },
+  ]);
   const [totalBalance, setTotalBalance] = useState<number>(240250);
   const [loadingData, setLoadingData] = useState<boolean>(true);
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
@@ -349,8 +370,8 @@ function AppContent() {
                 {/* SECTION 3: UPCOMING BILLS & SUBSCRIPTIONS */}
                 <UpcomingBillsSection
                   bills={bills.length > 0 ? bills : undefined}
-                  onPressBill={(bill) => console.log('Bill pressed:', bill.name)}
-                  onPressSeeAll={() => console.log('See all bills')}
+                  onPressBill={() => setIsAllBillsOpen(true)}
+                  onPressSeeAll={() => setIsAllBillsOpen(true)}
                 />
               </ScrollView>
             )}
@@ -472,9 +493,25 @@ function AppContent() {
             onDismissFromHome={() => setIsSetupDismissed(true)}
             onNavigateToPocket={() => setIsPocketOpen(true)}
             onNavigateToBills={() => {
-              // Can open upcoming bills screen
+              setIsGetSetUpModalOpen(false);
+              setIsAllBillsOpen(true);
             }}
             onNavigateToAuth={() => setIsAuthModalOpen(true)}
+          />
+
+          {/* ================= ALL BILLS & SUBSCRIPTIONS MODAL ================= */}
+          <AllBillsModal
+            visible={isAllBillsOpen}
+            onClose={() => setIsAllBillsOpen(false)}
+            bills={bills}
+            onBillsUpdated={() => {
+              SubscriptionService.getSubscriptions(user?.id).then((subRes) => {
+                if (subRes.billItems) {
+                  setBills(subRes.billItems);
+                }
+              });
+            }}
+            userId={user?.id}
           />
 
           {/* ================= AUTH MODAL ================= */}

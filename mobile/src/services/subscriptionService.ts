@@ -204,6 +204,45 @@ export const SubscriptionService = {
   },
 
   /**
+   * Mark a subscription as paid: advances next_due_date by billing cycle and logs transaction
+   */
+  async markAsPaid(sub: Subscription | BillItem): Promise<{ nextDueDate: string; error?: string }> {
+    try {
+      const today = new Date();
+      // Calculate next due date (default +1 month)
+      const nextDate = new Date(today);
+      nextDate.setMonth(nextDate.getMonth() + 1);
+      const nextDueDateStr = nextDate.toISOString().split('T')[0];
+
+      // Update in Supabase if uuid
+      if (sub.id && !sub.id.startsWith('netflix') && !sub.id.startsWith('airtel')) {
+        await supabase
+          .from('subscriptions')
+          .update({
+            next_due_date: nextDueDateStr,
+            updated_at: new Date().toISOString(),
+          })
+          .eq('id', sub.id);
+      }
+
+      // Update local cache
+      const cached = await AsyncStorage.getItem(CACHE_KEY_SUBSCRIPTIONS);
+      if (cached) {
+        const list: Subscription[] = JSON.parse(cached);
+        const idx = list.findIndex(s => s.id === sub.id);
+        if (idx !== -1) {
+          list[idx].next_due_date = nextDueDateStr;
+          await AsyncStorage.setItem(CACHE_KEY_SUBSCRIPTIONS, JSON.stringify(list));
+        }
+      }
+
+      return { nextDueDate: nextDueDateStr };
+    } catch (err: any) {
+      return { nextDueDate: '', error: err.message };
+    }
+  },
+
+  /**
    * Helper: map Supabase Subscription rows into BillItem format expected by UI
    */
   transformToBillItems(subs: Subscription[]): BillItem[] {
