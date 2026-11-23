@@ -8,12 +8,15 @@ import {
   Platform,
   Image,
   Animated,
+  Share,
 } from 'react-native';
 import {
   ChevronLeft,
   ChevronRight,
-  CircleUser,
+  QrCode,
+  KeyRound,
   Lock,
+  CreditCard,
   Bell,
   Languages,
   IndianRupee,
@@ -24,11 +27,11 @@ import {
   FileSpreadsheet,
   HelpCircle,
   ShieldCheck,
+  Share2,
   LogOut,
   User,
   Sparkles,
   Check,
-  Edit2,
 } from 'lucide-react-native';
 import { useAuth } from '../context/AuthContext';
 import { useAppTheme } from '../theme/colors';
@@ -63,7 +66,7 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
   const theme = useAppTheme();
   const { user, signOut } = useAuth();
   const [exportNotice, setExportNotice] = useState<string | null>(null);
-  const [isEditProfileModalOpen, setIsEditProfileModalOpen] = useState(false);
+  const [isEditProfileOpen, setIsEditProfileOpen] = useState(false);
 
   const handleSignOut = async () => {
     await signOut();
@@ -75,12 +78,23 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
     setTimeout(() => setExportNotice(null), 3000);
   };
 
+  const handleInviteFriend = async () => {
+    try {
+      await Share.share({
+        message: 'Join me on Sinance — the premium personal finance ledger app: https://sinance.app',
+      });
+    } catch {
+      // User cancelled
+    }
+  };
+
   const displayName = userProfile?.name || user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'Sagar';
   const displayEmail = userProfile?.email || user?.email || 'sagar@sinance.app';
+  const displayAbout = userProfile?.bio || 'Personal finance enthusiast & investor';
   const avatarUri = userProfile?.avatarUri;
   const isCloudSynced = !!user;
 
-  // Premium Hero Transition Interpolations (Option C)
+  // Premium Hero Transition Interpolations (Shared Element)
   const avatarScale = animProgress
     ? animProgress.interpolate({
         inputRange: [0, 1],
@@ -109,24 +123,11 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
       })
     : 0;
 
-  const sectionsOpacity = animProgress
-    ? animProgress.interpolate({
-        inputRange: [0, 0.25, 1],
-        outputRange: [0, 0.5, 1],
-      })
-    : 1;
-
-  const sectionsTranslateY = animProgress
-    ? animProgress.interpolate({
-        inputRange: [0, 1],
-        outputRange: [24, 0],
-      })
-    : 0;
-
-  if (isEditProfileModalOpen) {
+  // WhatsApp Sub-Screen: Full Edit Profile Screen
+  if (isEditProfileOpen) {
     return (
       <EditProfileScreen
-        onBack={() => setIsEditProfileModalOpen(false)}
+        onBack={() => setIsEditProfileOpen(false)}
         userProfile={userProfile}
         onProfileUpdated={(updated) => onProfileUpdated?.(updated)}
         userId={user?.id}
@@ -136,8 +137,8 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
 
   return (
     <View style={[styles.container, { backgroundColor: theme.canvas }]}>
-      {/* Top Header Row with Back Button */}
-      <View style={styles.topBar}>
+      {/* ================= 1. WHATSAPP SETTINGS TOP APP BAR ================= */}
+      <View style={[styles.topBar, { borderBottomColor: theme.borderSubtle }]}>
         <TouchableOpacity
           activeOpacity={0.7}
           onPress={onBack}
@@ -150,8 +151,10 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
           ]}
           hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
         >
-          <ChevronLeft size={22} color={theme.textMain} strokeWidth={2.2} />
+          <ChevronLeft size={22} color={theme.textMain} strokeWidth={2.4} />
         </TouchableOpacity>
+        <Text style={[styles.topBarTitle, { color: theme.textMain }]}>Settings</Text>
+        <View style={styles.topBarSpacer} />
       </View>
 
       <ScrollView
@@ -159,10 +162,33 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
         contentContainerStyle={styles.contentContainer}
         showsVerticalScrollIndicator={false}
       >
-        {/* ================= HERO PROFILE CARD ================= */}
+        {/* Notice Toast Banner */}
+        {exportNotice && (
+          <View
+            style={[
+              styles.toastBanner,
+              {
+                backgroundColor: theme.isDark ? 'rgba(35, 240, 125, 0.12)' : 'rgba(16, 185, 129, 0.12)',
+                borderColor: theme.isDark ? theme.brand : '#10B981',
+              },
+            ]}
+          >
+            <Check size={14} color={theme.isDark ? theme.brand : '#10B981'} strokeWidth={2.5} />
+            <Text
+              style={[
+                styles.toastText,
+                { color: theme.isDark ? theme.brand : '#059669' },
+              ]}
+            >
+              {exportNotice}
+            </Text>
+          </View>
+        )}
+
+        {/* ================= 2. WHATSAPP HERO PROFILE BANNER CARD ================= */}
         <TouchableOpacity
           activeOpacity={0.85}
-          onPress={() => setIsEditProfileModalOpen(true)}
+          onPress={() => setIsEditProfileOpen(true)}
           style={[
             styles.heroCard,
             {
@@ -193,7 +219,7 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
             />
           </Animated.View>
 
-          {/* User Name & Email - smoothly reveals */}
+          {/* User Name & About Status - smoothly reveals */}
           <Animated.View
             style={[
               styles.heroTextContainer,
@@ -216,48 +242,24 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
                   },
                 ]}
               >
-                <Sparkles size={11} color={theme.isDark ? '#23F07D' : '#10B981'} />
+                <Sparkles size={11} color={theme.isDark ? theme.brand : '#10B981'} />
                 <Text style={[styles.tierBadgeText, { color: theme.textDim }]}>
                   {isCloudSynced ? 'Pro Cloud' : 'Free Tier'}
                 </Text>
               </View>
             </View>
-            <Text style={[styles.userEmail, { color: theme.textDim }]}>
-              {displayEmail}
+            <Text style={[styles.userAboutText, { color: theme.textDim }]} numberOfLines={1}>
+              {displayAbout}
             </Text>
           </Animated.View>
 
-          {/* Edit icon indicator */}
-          <View style={[styles.editPill, { backgroundColor: theme.surfaceSubtle, borderColor: theme.borderSubtle }]}>
-            <Edit2 size={13} color={theme.textDim} />
+          {/* WhatsApp QR Code Icon Pill */}
+          <View style={[styles.qrBadge, { backgroundColor: theme.surfaceSubtle, borderColor: theme.borderSubtle }]}>
+            <QrCode size={19} color={theme.isDark ? theme.brand : theme.forestDark} strokeWidth={2} />
           </View>
         </TouchableOpacity>
 
-        {/* Notice Toast Banner */}
-        {exportNotice && (
-          <View
-            style={[
-              styles.toastBanner,
-              {
-                backgroundColor: theme.isDark ? 'rgba(35, 240, 125, 0.12)' : 'rgba(16, 185, 129, 0.12)',
-                borderColor: theme.isDark ? '#23F07D' : '#10B981',
-              },
-            ]}
-          >
-            <Check size={14} color={theme.isDark ? '#23F07D' : '#10B981'} strokeWidth={2.5} />
-            <Text
-              style={[
-                styles.toastText,
-                { color: theme.isDark ? '#23F07D' : '#059669' },
-              ]}
-            >
-              {exportNotice}
-            </Text>
-          </View>
-        )}
-
-        {/* ================= SECTION 1: ACCOUNT ================= */}
-        <Text style={[styles.sectionHeaderLabel, { color: theme.textDim }]}>Account</Text>
+        {/* ================= 3. SECTION 1: ACCOUNT & SECURITY ================= */}
         <View
           style={[
             styles.groupedCard,
@@ -267,75 +269,64 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
             },
           ]}
         >
-          {/* Row 1: Manage Profile */}
+          {/* Account */}
           <TouchableOpacity
             activeOpacity={0.7}
-            onPress={() => setIsEditProfileModalOpen(true)}
+            onPress={() => setIsEditProfileOpen(true)}
             style={styles.settingRow}
           >
             <View style={styles.settingRowLeft}>
-              <CircleUser size={19} color={theme.textMain} strokeWidth={1.9} />
-              <Text style={[styles.settingTitle, { color: theme.textMain }]}>
-                Manage Profile
-              </Text>
+              <View style={[styles.iconDisc, { backgroundColor: theme.surfaceSubtle }]}>
+                <KeyRound size={18} color={theme.textMain} strokeWidth={2} />
+              </View>
+              <View style={styles.textStack}>
+                <Text style={[styles.settingTitle, { color: theme.textMain }]}>Account</Text>
+                <Text style={[styles.settingSubtitle, { color: theme.textDim }]}>Security, sync & credentials</Text>
+              </View>
             </View>
             <ChevronRight size={17} color={theme.textDim} strokeWidth={2.2} />
           </TouchableOpacity>
 
           <View style={[styles.rowDivider, { backgroundColor: theme.borderSubtle }]} />
 
-          {/* Row 2: Password & Security */}
+          {/* Privacy */}
           <TouchableOpacity
             activeOpacity={0.7}
             style={styles.settingRow}
           >
             <View style={styles.settingRowLeft}>
-              <Lock size={19} color={theme.textMain} strokeWidth={1.9} />
-              <Text style={[styles.settingTitle, { color: theme.textMain }]}>
-                Password & Security
-              </Text>
+              <View style={[styles.iconDisc, { backgroundColor: theme.surfaceSubtle }]}>
+                <Lock size={18} color={theme.textMain} strokeWidth={2} />
+              </View>
+              <View style={styles.textStack}>
+                <Text style={[styles.settingTitle, { color: theme.textMain }]}>Privacy</Text>
+                <Text style={[styles.settingSubtitle, { color: theme.textDim }]}>Screen lock & balance privacy</Text>
+              </View>
             </View>
             <ChevronRight size={17} color={theme.textDim} strokeWidth={2.2} />
           </TouchableOpacity>
 
           <View style={[styles.rowDivider, { backgroundColor: theme.borderSubtle }]} />
 
-          {/* Row 3: Notifications */}
+          {/* Wallets & Cards */}
           <TouchableOpacity
             activeOpacity={0.7}
             style={styles.settingRow}
           >
             <View style={styles.settingRowLeft}>
-              <Bell size={19} color={theme.textMain} strokeWidth={1.9} />
-              <Text style={[styles.settingTitle, { color: theme.textMain }]}>
-                Notifications
-              </Text>
+              <View style={[styles.iconDisc, { backgroundColor: theme.surfaceSubtle }]}>
+                <CreditCard size={18} color={theme.textMain} strokeWidth={2} />
+              </View>
+              <View style={styles.textStack}>
+                <Text style={[styles.settingTitle, { color: theme.textMain }]}>Wallets & Cards</Text>
+                <Text style={[styles.settingSubtitle, { color: theme.textDim }]}>Linked banks and payment cards</Text>
+              </View>
             </View>
             <ChevronRight size={17} color={theme.textDim} strokeWidth={2.2} />
-          </TouchableOpacity>
-
-          <View style={[styles.rowDivider, { backgroundColor: theme.borderSubtle }]} />
-
-          {/* Row 4: Language */}
-          <TouchableOpacity
-            activeOpacity={0.7}
-            style={styles.settingRow}
-          >
-            <View style={styles.settingRowLeft}>
-              <Languages size={19} color={theme.textMain} strokeWidth={1.9} />
-              <Text style={[styles.settingTitle, { color: theme.textMain }]}>
-                Language
-              </Text>
-            </View>
-            <View style={styles.settingRowRight}>
-              <Text style={[styles.settingValueText, { color: theme.textDim }]}>English</Text>
-              <ChevronRight size={17} color={theme.textDim} strokeWidth={2.2} />
-            </View>
           </TouchableOpacity>
         </View>
 
-        {/* ================= SECTION 2: PREFERENCES ================= */}
-        <Text style={[styles.sectionHeaderLabel, { color: theme.textDim }]}>Preferences</Text>
+        {/* ================= 4. SECTION 2: PREFERENCES ================= */}
         <View
           style={[
             styles.groupedCard,
@@ -345,21 +336,37 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
             },
           ]}
         >
-          {/* Row 1: Primary Currency */}
+          {/* Notifications */}
+          <TouchableOpacity
+            activeOpacity={0.7}
+            style={styles.settingRow}
+          >
+            <View style={styles.settingRowLeft}>
+              <View style={[styles.iconDisc, { backgroundColor: theme.surfaceSubtle }]}>
+                <Bell size={18} color={theme.textMain} strokeWidth={2} />
+              </View>
+              <Text style={[styles.settingTitle, { color: theme.textMain }]}>Notifications</Text>
+            </View>
+            <ChevronRight size={17} color={theme.textDim} strokeWidth={2.2} />
+          </TouchableOpacity>
+
+          <View style={[styles.rowDivider, { backgroundColor: theme.borderSubtle }]} />
+
+          {/* Primary Currency */}
           <TouchableOpacity
             activeOpacity={0.7}
             onPress={() => onToggleCurrency?.(currency === 'INR' ? 'USD' : 'INR')}
             style={styles.settingRow}
           >
             <View style={styles.settingRowLeft}>
-              {currency === 'INR' ? (
-                <IndianRupee size={19} color={theme.textMain} strokeWidth={1.9} />
-              ) : (
-                <DollarSign size={19} color={theme.textMain} strokeWidth={1.9} />
-              )}
-              <Text style={[styles.settingTitle, { color: theme.textMain }]}>
-                Primary Currency
-              </Text>
+              <View style={[styles.iconDisc, { backgroundColor: theme.surfaceSubtle }]}>
+                {currency === 'INR' ? (
+                  <IndianRupee size={18} color={theme.textMain} strokeWidth={2} />
+                ) : (
+                  <DollarSign size={18} color={theme.textMain} strokeWidth={2} />
+                )}
+              </View>
+              <Text style={[styles.settingTitle, { color: theme.textMain }]}>Primary Currency</Text>
             </View>
             <View style={styles.settingRowRight}>
               <Text style={[styles.settingValueText, { color: theme.textMain, fontWeight: '700' }]}>
@@ -371,16 +378,35 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
 
           <View style={[styles.rowDivider, { backgroundColor: theme.borderSubtle }]} />
 
-          {/* Row 2: Theme */}
+          {/* App Language */}
           <TouchableOpacity
             activeOpacity={0.7}
             style={styles.settingRow}
           >
             <View style={styles.settingRowLeft}>
-              <SunMoon size={19} color={theme.textMain} strokeWidth={1.9} />
-              <Text style={[styles.settingTitle, { color: theme.textMain }]}>
-                Theme
-              </Text>
+              <View style={[styles.iconDisc, { backgroundColor: theme.surfaceSubtle }]}>
+                <Languages size={18} color={theme.textMain} strokeWidth={2} />
+              </View>
+              <Text style={[styles.settingTitle, { color: theme.textMain }]}>App Language</Text>
+            </View>
+            <View style={styles.settingRowRight}>
+              <Text style={[styles.settingValueText, { color: theme.textDim }]}>English</Text>
+              <ChevronRight size={17} color={theme.textDim} strokeWidth={2.2} />
+            </View>
+          </TouchableOpacity>
+
+          <View style={[styles.rowDivider, { backgroundColor: theme.borderSubtle }]} />
+
+          {/* Theme */}
+          <TouchableOpacity
+            activeOpacity={0.7}
+            style={styles.settingRow}
+          >
+            <View style={styles.settingRowLeft}>
+              <View style={[styles.iconDisc, { backgroundColor: theme.surfaceSubtle }]}>
+                <SunMoon size={18} color={theme.textMain} strokeWidth={2} />
+              </View>
+              <Text style={[styles.settingTitle, { color: theme.textMain }]}>Theme</Text>
             </View>
             <View style={styles.settingRowRight}>
               <Text style={[styles.settingValueText, { color: theme.textDim }]}>
@@ -392,21 +418,21 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
 
           <View style={[styles.rowDivider, { backgroundColor: theme.borderSubtle }]} />
 
-          {/* Row 3: Home Setup Checklist */}
+          {/* Home Setup Checklist */}
           <TouchableOpacity
             activeOpacity={0.7}
             onPress={onToggleSetupDismissed}
             style={styles.settingRow}
           >
             <View style={styles.settingRowLeft}>
-              {isSetupDismissed ? (
-                <EyeOff size={19} color={theme.textDim} strokeWidth={1.9} />
-              ) : (
-                <Eye size={19} color={theme.textMain} strokeWidth={1.9} />
-              )}
-              <Text style={[styles.settingTitle, { color: theme.textMain }]}>
-                Home Setup Checklist
-              </Text>
+              <View style={[styles.iconDisc, { backgroundColor: theme.surfaceSubtle }]}>
+                {isSetupDismissed ? (
+                  <EyeOff size={18} color={theme.textDim} strokeWidth={2} />
+                ) : (
+                  <Eye size={18} color={theme.textMain} strokeWidth={2} />
+                )}
+              </View>
+              <Text style={[styles.settingTitle, { color: theme.textMain }]}>Home Checklist</Text>
             </View>
             <View style={styles.settingRowRight}>
               <Text
@@ -415,7 +441,7 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
                   {
                     color: isSetupDismissed
                       ? theme.textDim
-                      : (theme.isDark ? '#23F07D' : '#10B981'),
+                      : (theme.isDark ? theme.brand : '#10B981'),
                     fontWeight: '600',
                   },
                 ]}
@@ -428,17 +454,17 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
 
           <View style={[styles.rowDivider, { backgroundColor: theme.borderSubtle }]} />
 
-          {/* Row 4: Export Transactions */}
+          {/* Storage & Data (Export CSV) */}
           <TouchableOpacity
             activeOpacity={0.7}
             onPress={handleExportCSV}
             style={styles.settingRow}
           >
             <View style={styles.settingRowLeft}>
-              <FileSpreadsheet size={19} color={theme.textMain} strokeWidth={1.9} />
-              <Text style={[styles.settingTitle, { color: theme.textMain }]}>
-                Export Transactions
-              </Text>
+              <View style={[styles.iconDisc, { backgroundColor: theme.surfaceSubtle }]}>
+                <FileSpreadsheet size={18} color={theme.textMain} strokeWidth={2} />
+              </View>
+              <Text style={[styles.settingTitle, { color: theme.textMain }]}>Storage & Export</Text>
             </View>
             <View style={styles.settingRowRight}>
               <Text style={[styles.settingValueText, { color: theme.textDim }]}>CSV</Text>
@@ -447,8 +473,7 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
           </TouchableOpacity>
         </View>
 
-        {/* ================= SECTION 3: SUPPORT & CLOUD ================= */}
-        <Text style={[styles.sectionHeaderLabel, { color: theme.textDim }]}>Support</Text>
+        {/* ================= 5. SECTION 3: HELP & SUPPORT ================= */}
         <View
           style={[
             styles.groupedCard,
@@ -458,38 +483,64 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
             },
           ]}
         >
-          {/* Row 1: Help Center */}
+          {/* Help Center */}
           <TouchableOpacity
             activeOpacity={0.7}
             style={styles.settingRow}
           >
             <View style={styles.settingRowLeft}>
-              <HelpCircle size={19} color={theme.textMain} strokeWidth={1.9} />
-              <Text style={[styles.settingTitle, { color: theme.textMain }]}>
-                Help Center
-              </Text>
+              <View style={[styles.iconDisc, { backgroundColor: theme.surfaceSubtle }]}>
+                <HelpCircle size={18} color={theme.textMain} strokeWidth={2} />
+              </View>
+              <Text style={[styles.settingTitle, { color: theme.textMain }]}>Help</Text>
             </View>
             <ChevronRight size={17} color={theme.textDim} strokeWidth={2.2} />
           </TouchableOpacity>
 
           <View style={[styles.rowDivider, { backgroundColor: theme.borderSubtle }]} />
 
-          {/* Row 2: Security & RLS Note */}
+          {/* Encryption Note */}
           <View style={styles.settingRow}>
             <View style={styles.settingRowLeft}>
-              <ShieldCheck size={19} color={theme.textMain} strokeWidth={1.9} />
-              <Text style={[styles.settingTitle, { color: theme.textMain }]}>
-                Security & Encryption
-              </Text>
+              <View style={[styles.iconDisc, { backgroundColor: theme.surfaceSubtle }]}>
+                <ShieldCheck size={18} color={theme.isDark ? theme.brand : '#059669'} strokeWidth={2} />
+              </View>
+              <View style={styles.textStack}>
+                <Text style={[styles.settingTitle, { color: theme.textMain }]}>Encryption</Text>
+                <Text style={[styles.settingSubtitle, { color: theme.textDim }]}>End-to-end cloud protection</Text>
+              </View>
             </View>
-            <View style={styles.settingRowRight}>
-              <Text style={[styles.settingValueText, { color: theme.textDim }]}>AES-256</Text>
-            </View>
+            <Text style={[styles.settingValueText, { color: theme.textDim, fontWeight: '600' }]}>AES-256</Text>
           </View>
 
           <View style={[styles.rowDivider, { backgroundColor: theme.borderSubtle }]} />
 
-          {/* Row 3: Sign In or Sign Out */}
+          {/* Invite a Friend */}
+          <TouchableOpacity
+            activeOpacity={0.7}
+            onPress={handleInviteFriend}
+            style={styles.settingRow}
+          >
+            <View style={styles.settingRowLeft}>
+              <View style={[styles.iconDisc, { backgroundColor: theme.surfaceSubtle }]}>
+                <Share2 size={18} color={theme.textMain} strokeWidth={2} />
+              </View>
+              <Text style={[styles.settingTitle, { color: theme.textMain }]}>Invite a Friend</Text>
+            </View>
+            <ChevronRight size={17} color={theme.textDim} strokeWidth={2.2} />
+          </TouchableOpacity>
+        </View>
+
+        {/* ================= 6. SECTION 4: AUTH & ACCOUNT ACTION ================= */}
+        <View
+          style={[
+            styles.groupedCard,
+            {
+              backgroundColor: theme.surface,
+              borderColor: theme.borderSubtle,
+            },
+          ]}
+        >
           {user ? (
             <TouchableOpacity
               activeOpacity={0.7}
@@ -497,7 +548,9 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
               style={styles.settingRow}
             >
               <View style={styles.settingRowLeft}>
-                <LogOut size={19} color="#EF4444" strokeWidth={1.9} />
+                <View style={[styles.iconDisc, { backgroundColor: theme.isDark ? '#3E1A1A' : '#FEE2E2' }]}>
+                  <LogOut size={18} color="#EF4444" strokeWidth={2} />
+                </View>
                 <Text style={[styles.settingTitle, { color: '#EF4444', fontWeight: '700' }]}>
                   Sign Out
                 </Text>
@@ -514,16 +567,18 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
               style={styles.settingRow}
             >
               <View style={styles.settingRowLeft}>
-                <User
-                  size={19}
-                  color={theme.isDark ? '#23F07D' : '#10B981'}
-                  strokeWidth={1.9}
-                />
+                <View style={[styles.iconDisc, { backgroundColor: theme.surfaceSubtle }]}>
+                  <User
+                    size={18}
+                    color={theme.isDark ? theme.brand : '#059669'}
+                    strokeWidth={2}
+                  />
+                </View>
                 <Text
                   style={[
                     styles.settingTitle,
                     {
-                      color: theme.isDark ? '#23F07D' : '#10B981',
+                      color: theme.isDark ? theme.brand : '#059669',
                       fontWeight: '700',
                     },
                   ]}
@@ -533,7 +588,7 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
               </View>
               <ChevronRight
                 size={17}
-                color={theme.isDark ? '#23F07D' : '#10B981'}
+                color={theme.isDark ? theme.brand : '#059669'}
                 strokeWidth={2.2}
               />
             </TouchableOpacity>
@@ -548,15 +603,6 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
 };
 
 const styles = StyleSheet.create({
-  editPill: {
-    width: 28,
-    height: 28,
-    borderRadius: 14,
-    borderWidth: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginLeft: 6,
-  },
   container: {
     flex: 1,
     width: '100%',
@@ -565,9 +611,11 @@ const styles = StyleSheet.create({
   topBar: {
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'space-between',
     paddingHorizontal: 20,
     paddingTop: Platform.OS === 'android' ? 14 : 10,
-    paddingBottom: 10,
+    paddingBottom: 12,
+    borderBottomWidth: 1,
   },
   backButton: {
     width: 38,
@@ -577,15 +625,37 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
+  topBarTitle: {
+    fontSize: 18,
+    fontWeight: '800',
+    letterSpacing: -0.3,
+  },
+  topBarSpacer: {
+    width: 38,
+  },
   scrollView: {
     flex: 1,
     width: '100%',
   },
   contentContainer: {
     paddingHorizontal: 20,
-    paddingTop: 8,
+    paddingTop: 14,
     paddingBottom: 40,
     alignItems: 'stretch',
+  },
+  toastBanner: {
+    alignSelf: 'stretch',
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    padding: 11,
+    borderRadius: 14,
+    borderWidth: 1,
+    marginBottom: 16,
+  },
+  toastText: {
+    fontSize: 12,
+    fontWeight: '600',
   },
   heroCard: {
     alignSelf: 'stretch',
@@ -593,9 +663,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderRadius: 22,
     borderWidth: 1,
-    paddingVertical: 18,
-    paddingHorizontal: 18,
-    marginBottom: 24,
+    paddingVertical: 14,
+    paddingHorizontal: 16,
+    marginBottom: 18,
     gap: 14,
   },
   avatarContainer: {
@@ -621,7 +691,7 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   userName: {
-    fontSize: 18,
+    fontSize: 17,
     fontWeight: '700',
     letterSpacing: -0.3,
   },
@@ -635,34 +705,20 @@ const styles = StyleSheet.create({
     borderWidth: 1,
   },
   tierBadgeText: {
-    fontSize: 10.5,
+    fontSize: 10,
     fontWeight: '600',
   },
-  userEmail: {
+  userAboutText: {
     fontSize: 12.5,
     letterSpacing: -0.1,
   },
-  toastBanner: {
-    alignSelf: 'stretch',
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    padding: 11,
-    borderRadius: 12,
+  qrBadge: {
+    width: 38,
+    height: 38,
+    borderRadius: 19,
     borderWidth: 1,
-    marginBottom: 16,
-  },
-  toastText: {
-    fontSize: 12,
-    fontWeight: '600',
-  },
-  sectionHeaderLabel: {
-    alignSelf: 'stretch',
-    fontSize: 13,
-    fontWeight: '600',
-    letterSpacing: -0.1,
-    marginBottom: 10,
-    paddingLeft: 4,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   groupedCard: {
     alignSelf: 'stretch',
@@ -670,13 +726,14 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     paddingVertical: 4,
     paddingHorizontal: 16,
-    marginBottom: 22,
+    marginBottom: 16,
+    overflow: 'hidden',
   },
   settingRow: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingVertical: 14,
+    paddingVertical: 13,
   },
   settingRowLeft: {
     flexDirection: 'row',
@@ -684,10 +741,24 @@ const styles = StyleSheet.create({
     gap: 13,
     flex: 1,
   },
+  iconDisc: {
+    width: 36,
+    height: 36,
+    borderRadius: 11,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  textStack: {
+    flex: 1,
+  },
   settingTitle: {
     fontSize: 14.5,
     fontWeight: '600',
     letterSpacing: -0.2,
+  },
+  settingSubtitle: {
+    fontSize: 11.5,
+    marginTop: 1,
   },
   settingRowRight: {
     flexDirection: 'row',
@@ -699,6 +770,6 @@ const styles = StyleSheet.create({
   },
   rowDivider: {
     height: 1,
-    width: '100%',
+    marginLeft: 49,
   },
 });
