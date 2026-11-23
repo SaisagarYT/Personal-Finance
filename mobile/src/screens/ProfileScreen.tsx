@@ -9,11 +9,14 @@ import {
   Image,
   Animated,
   Share,
+  TextInput,
 } from 'react-native';
 import {
   ChevronLeft,
   ChevronRight,
   QrCode,
+  ChevronDown,
+  Search,
   KeyRound,
   Lock,
   CreditCard,
@@ -32,6 +35,10 @@ import {
   User,
   Sparkles,
   Check,
+  CircleHelp,
+  Database,
+  Smartphone,
+  Bot,
 } from 'lucide-react-native';
 import { useAuth } from '../context/AuthContext';
 import { useAppTheme } from '../theme/colors';
@@ -67,6 +74,7 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
   const { user, signOut } = useAuth();
   const [exportNotice, setExportNotice] = useState<string | null>(null);
   const [isEditProfileOpen, setIsEditProfileOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
 
   const handleSignOut = async () => {
     await signOut();
@@ -98,7 +106,7 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
   const avatarScale = animProgress
     ? animProgress.interpolate({
         inputRange: [0, 1],
-        outputRange: [44 / 54, 1],
+        outputRange: [44 / 58, 1],
       })
     : 1;
 
@@ -134,6 +142,13 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
       />
     );
   }
+
+  // Filter helper for search bar
+  const query = searchQuery.trim().toLowerCase();
+  const matches = (text: string, subtitle?: string) => {
+    if (!query) return true;
+    return text.toLowerCase().includes(query) || (subtitle && subtitle.toLowerCase().includes(query));
+  };
 
   return (
     <View style={[styles.container, { backgroundColor: theme.canvas }]}>
@@ -185,414 +200,647 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
           </View>
         )}
 
-        {/* ================= 2. WHATSAPP HERO PROFILE BANNER CARD ================= */}
-        <TouchableOpacity
-          activeOpacity={0.85}
-          onPress={() => setIsEditProfileOpen(true)}
+        {/* ================= 2. WHATSAPP SEARCH BAR ================= */}
+        <View
           style={[
-            styles.heroCard,
+            styles.searchBarContainer,
             {
-              backgroundColor: theme.surface,
+              backgroundColor: theme.surfaceSubtle,
               borderColor: theme.borderSubtle,
             },
           ]}
         >
-          {/* Avatar on the left - smoothly scales and translates */}
-          <Animated.View
-            style={[
-              styles.avatarContainer,
-              {
-                borderColor: theme.borderSubtle,
-                backgroundColor: theme.surfaceSubtle,
-                opacity: isAvatarHidden ? 0 : 1,
-                transform: [
-                  { scale: avatarScale },
-                  { translateX: avatarTranslateX },
-                ],
-              },
-            ]}
-          >
-            <Image
-              source={avatarUri ? { uri: avatarUri } : require('../../assets/esther_avatar.png')}
-              style={styles.avatarImage}
-              resizeMode="cover"
-            />
-          </Animated.View>
+          <Search size={18} color={theme.textDim} strokeWidth={2.2} />
+          <TextInput
+            placeholder="Search settings"
+            placeholderTextColor={theme.textDim}
+            value={searchQuery}
+            onChangeText={setSearchQuery}
+            style={[styles.searchInput, { color: theme.textMain }]}
+            clearButtonMode="while-editing"
+            returnKeyType="search"
+          />
+        </View>
 
-          {/* User Name & About Status - smoothly reveals */}
-          <Animated.View
+        {/* ================= 3. WHATSAPP HERO PROFILE BANNER CARD ================= */}
+        {(!query || matches(displayName, displayAbout)) && (
+          <TouchableOpacity
+            activeOpacity={0.85}
+            onPress={() => setIsEditProfileOpen(true)}
             style={[
-              styles.heroTextContainer,
+              styles.heroCard,
               {
-                opacity: heroDetailsOpacity,
-                transform: [{ translateX: heroDetailsTranslateX }],
+                backgroundColor: theme.surface,
+                borderColor: theme.borderSubtle,
               },
             ]}
           >
-            <View style={styles.nameRow}>
-              <Text style={[styles.userName, { color: theme.textMain }]}>
-                {displayName}
+            {/* 58px Circular Avatar with Subtle Ring */}
+            <Animated.View
+              style={[
+                styles.avatarContainer,
+                {
+                  borderColor: theme.borderSubtle,
+                  backgroundColor: theme.surfaceSubtle,
+                  opacity: isAvatarHidden ? 0 : 1,
+                  transform: [
+                    { scale: avatarScale },
+                    { translateX: avatarTranslateX },
+                  ],
+                },
+              ]}
+            >
+              <Image
+                source={avatarUri ? { uri: avatarUri } : require('../../assets/esther_avatar.png')}
+                style={styles.avatarImage}
+                resizeMode="cover"
+              />
+            </Animated.View>
+
+            {/* User Name & About Status */}
+            <Animated.View
+              style={[
+                styles.heroTextContainer,
+                {
+                  opacity: heroDetailsOpacity,
+                  transform: [{ translateX: heroDetailsTranslateX }],
+                },
+              ]}
+            >
+              <View style={styles.nameRow}>
+                <Text style={[styles.userName, { color: theme.textMain }]} numberOfLines={1}>
+                  {displayName}
+                </Text>
+                <View
+                  style={[
+                    styles.tierBadge,
+                    {
+                      backgroundColor: theme.surfaceSubtle,
+                      borderColor: theme.borderSubtle,
+                    },
+                  ]}
+                >
+                  <Sparkles size={10} color={theme.isDark ? theme.brand : '#10B981'} />
+                  <Text style={[styles.tierBadgeText, { color: theme.textDim }]}>
+                    {isCloudSynced ? 'Pro' : 'Free'}
+                  </Text>
+                </View>
+              </View>
+              <Text style={[styles.userAboutText, { color: theme.textDim }]} numberOfLines={1}>
+                {displayAbout}
               </Text>
+            </Animated.View>
+
+            {/* WhatsApp Right Action Cluster: QR Code + Account Switcher Arrow */}
+            <View style={styles.heroRightActions}>
               <View
                 style={[
-                  styles.tierBadge,
+                  styles.qrBadge,
                   {
                     backgroundColor: theme.surfaceSubtle,
                     borderColor: theme.borderSubtle,
                   },
                 ]}
               >
-                <Sparkles size={11} color={theme.isDark ? theme.brand : '#10B981'} />
-                <Text style={[styles.tierBadgeText, { color: theme.textDim }]}>
-                  {isCloudSynced ? 'Pro Cloud' : 'Free Tier'}
-                </Text>
+                <QrCode
+                  size={19}
+                  color={theme.isDark ? theme.brand : theme.forestDark}
+                  strokeWidth={2.2}
+                />
               </View>
-            </View>
-            <Text style={[styles.userAboutText, { color: theme.textDim }]} numberOfLines={1}>
-              {displayAbout}
-            </Text>
-          </Animated.View>
-
-          {/* WhatsApp QR Code Icon Pill */}
-          <View style={[styles.qrBadge, { backgroundColor: theme.surfaceSubtle, borderColor: theme.borderSubtle }]}>
-            <QrCode size={19} color={theme.isDark ? theme.brand : theme.forestDark} strokeWidth={2} />
-          </View>
-        </TouchableOpacity>
-
-        {/* ================= 3. SECTION 1: ACCOUNT & SECURITY ================= */}
-        <View
-          style={[
-            styles.groupedCard,
-            {
-              backgroundColor: theme.surface,
-              borderColor: theme.borderSubtle,
-            },
-          ]}
-        >
-          {/* Account */}
-          <TouchableOpacity
-            activeOpacity={0.7}
-            onPress={() => setIsEditProfileOpen(true)}
-            style={styles.settingRow}
-          >
-            <View style={styles.settingRowLeft}>
-              <View style={[styles.iconDisc, { backgroundColor: theme.surfaceSubtle }]}>
-                <KeyRound size={18} color={theme.textMain} strokeWidth={2} />
-              </View>
-              <View style={styles.textStack}>
-                <Text style={[styles.settingTitle, { color: theme.textMain }]}>Account</Text>
-                <Text style={[styles.settingSubtitle, { color: theme.textDim }]}>Security, sync & credentials</Text>
-              </View>
-            </View>
-            <ChevronRight size={17} color={theme.textDim} strokeWidth={2.2} />
-          </TouchableOpacity>
-
-          <View style={[styles.rowDivider, { backgroundColor: theme.borderSubtle }]} />
-
-          {/* Privacy */}
-          <TouchableOpacity
-            activeOpacity={0.7}
-            style={styles.settingRow}
-          >
-            <View style={styles.settingRowLeft}>
-              <View style={[styles.iconDisc, { backgroundColor: theme.surfaceSubtle }]}>
-                <Lock size={18} color={theme.textMain} strokeWidth={2} />
-              </View>
-              <View style={styles.textStack}>
-                <Text style={[styles.settingTitle, { color: theme.textMain }]}>Privacy</Text>
-                <Text style={[styles.settingSubtitle, { color: theme.textDim }]}>Screen lock & balance privacy</Text>
-              </View>
-            </View>
-            <ChevronRight size={17} color={theme.textDim} strokeWidth={2.2} />
-          </TouchableOpacity>
-
-          <View style={[styles.rowDivider, { backgroundColor: theme.borderSubtle }]} />
-
-          {/* Wallets & Cards */}
-          <TouchableOpacity
-            activeOpacity={0.7}
-            style={styles.settingRow}
-          >
-            <View style={styles.settingRowLeft}>
-              <View style={[styles.iconDisc, { backgroundColor: theme.surfaceSubtle }]}>
-                <CreditCard size={18} color={theme.textMain} strokeWidth={2} />
-              </View>
-              <View style={styles.textStack}>
-                <Text style={[styles.settingTitle, { color: theme.textMain }]}>Wallets & Cards</Text>
-                <Text style={[styles.settingSubtitle, { color: theme.textDim }]}>Linked banks and payment cards</Text>
-              </View>
-            </View>
-            <ChevronRight size={17} color={theme.textDim} strokeWidth={2.2} />
-          </TouchableOpacity>
-        </View>
-
-        {/* ================= 4. SECTION 2: PREFERENCES ================= */}
-        <View
-          style={[
-            styles.groupedCard,
-            {
-              backgroundColor: theme.surface,
-              borderColor: theme.borderSubtle,
-            },
-          ]}
-        >
-          {/* Notifications */}
-          <TouchableOpacity
-            activeOpacity={0.7}
-            style={styles.settingRow}
-          >
-            <View style={styles.settingRowLeft}>
-              <View style={[styles.iconDisc, { backgroundColor: theme.surfaceSubtle }]}>
-                <Bell size={18} color={theme.textMain} strokeWidth={2} />
-              </View>
-              <Text style={[styles.settingTitle, { color: theme.textMain }]}>Notifications</Text>
-            </View>
-            <ChevronRight size={17} color={theme.textDim} strokeWidth={2.2} />
-          </TouchableOpacity>
-
-          <View style={[styles.rowDivider, { backgroundColor: theme.borderSubtle }]} />
-
-          {/* Primary Currency */}
-          <TouchableOpacity
-            activeOpacity={0.7}
-            onPress={() => onToggleCurrency?.(currency === 'INR' ? 'USD' : 'INR')}
-            style={styles.settingRow}
-          >
-            <View style={styles.settingRowLeft}>
-              <View style={[styles.iconDisc, { backgroundColor: theme.surfaceSubtle }]}>
-                {currency === 'INR' ? (
-                  <IndianRupee size={18} color={theme.textMain} strokeWidth={2} />
-                ) : (
-                  <DollarSign size={18} color={theme.textMain} strokeWidth={2} />
-                )}
-              </View>
-              <Text style={[styles.settingTitle, { color: theme.textMain }]}>Primary Currency</Text>
-            </View>
-            <View style={styles.settingRowRight}>
-              <Text style={[styles.settingValueText, { color: theme.textMain, fontWeight: '700' }]}>
-                {currency === 'INR' ? '₹ INR' : '$ USD'}
-              </Text>
-              <ChevronRight size={17} color={theme.textDim} strokeWidth={2.2} />
-            </View>
-          </TouchableOpacity>
-
-          <View style={[styles.rowDivider, { backgroundColor: theme.borderSubtle }]} />
-
-          {/* App Language */}
-          <TouchableOpacity
-            activeOpacity={0.7}
-            style={styles.settingRow}
-          >
-            <View style={styles.settingRowLeft}>
-              <View style={[styles.iconDisc, { backgroundColor: theme.surfaceSubtle }]}>
-                <Languages size={18} color={theme.textMain} strokeWidth={2} />
-              </View>
-              <Text style={[styles.settingTitle, { color: theme.textMain }]}>App Language</Text>
-            </View>
-            <View style={styles.settingRowRight}>
-              <Text style={[styles.settingValueText, { color: theme.textDim }]}>English</Text>
-              <ChevronRight size={17} color={theme.textDim} strokeWidth={2.2} />
-            </View>
-          </TouchableOpacity>
-
-          <View style={[styles.rowDivider, { backgroundColor: theme.borderSubtle }]} />
-
-          {/* Theme */}
-          <TouchableOpacity
-            activeOpacity={0.7}
-            style={styles.settingRow}
-          >
-            <View style={styles.settingRowLeft}>
-              <View style={[styles.iconDisc, { backgroundColor: theme.surfaceSubtle }]}>
-                <SunMoon size={18} color={theme.textMain} strokeWidth={2} />
-              </View>
-              <Text style={[styles.settingTitle, { color: theme.textMain }]}>Theme</Text>
-            </View>
-            <View style={styles.settingRowRight}>
-              <Text style={[styles.settingValueText, { color: theme.textDim }]}>
-                {theme.isDark ? 'Dark' : 'Light'}
-              </Text>
-              <ChevronRight size={17} color={theme.textDim} strokeWidth={2.2} />
-            </View>
-          </TouchableOpacity>
-
-          <View style={[styles.rowDivider, { backgroundColor: theme.borderSubtle }]} />
-
-          {/* Home Setup Checklist */}
-          <TouchableOpacity
-            activeOpacity={0.7}
-            onPress={onToggleSetupDismissed}
-            style={styles.settingRow}
-          >
-            <View style={styles.settingRowLeft}>
-              <View style={[styles.iconDisc, { backgroundColor: theme.surfaceSubtle }]}>
-                {isSetupDismissed ? (
-                  <EyeOff size={18} color={theme.textDim} strokeWidth={2} />
-                ) : (
-                  <Eye size={18} color={theme.textMain} strokeWidth={2} />
-                )}
-              </View>
-              <Text style={[styles.settingTitle, { color: theme.textMain }]}>Home Checklist</Text>
-            </View>
-            <View style={styles.settingRowRight}>
-              <Text
+              <View
                 style={[
-                  styles.settingValueText,
+                  styles.switchArrowBadge,
                   {
-                    color: isSetupDismissed
-                      ? theme.textDim
-                      : (theme.isDark ? theme.brand : '#10B981'),
-                    fontWeight: '600',
+                    backgroundColor: theme.surfaceSubtle,
+                    borderColor: theme.borderSubtle,
                   },
                 ]}
               >
-                {isSetupDismissed ? 'Hidden' : 'Visible'}
-              </Text>
-              <ChevronRight size={17} color={theme.textDim} strokeWidth={2.2} />
+                <ChevronDown size={17} color={theme.textDim} strokeWidth={2.2} />
+              </View>
             </View>
           </TouchableOpacity>
+        )}
 
-          <View style={[styles.rowDivider, { backgroundColor: theme.borderSubtle }]} />
-
-          {/* Storage & Data (Export CSV) */}
-          <TouchableOpacity
-            activeOpacity={0.7}
-            onPress={handleExportCSV}
-            style={styles.settingRow}
+        {/* ================= 4. WHATSAPP AI ASSISTANT / SINANCE BRAIN CARD ================= */}
+        {(!query || matches('Sinance Brain', 'AI Financial Copilot & Smart Insights')) && (
+          <View
+            style={[
+              styles.aiCard,
+              {
+                backgroundColor: theme.surface,
+                borderColor: theme.borderSubtle,
+              },
+            ]}
           >
-            <View style={styles.settingRowLeft}>
-              <View style={[styles.iconDisc, { backgroundColor: theme.surfaceSubtle }]}>
-                <FileSpreadsheet size={18} color={theme.textMain} strokeWidth={2} />
-              </View>
-              <Text style={[styles.settingTitle, { color: theme.textMain }]}>Storage & Export</Text>
-            </View>
-            <View style={styles.settingRowRight}>
-              <Text style={[styles.settingValueText, { color: theme.textDim }]}>CSV</Text>
-              <ChevronRight size={17} color={theme.textDim} strokeWidth={2.2} />
-            </View>
-          </TouchableOpacity>
-        </View>
-
-        {/* ================= 5. SECTION 3: HELP & SUPPORT ================= */}
-        <View
-          style={[
-            styles.groupedCard,
-            {
-              backgroundColor: theme.surface,
-              borderColor: theme.borderSubtle,
-            },
-          ]}
-        >
-          {/* Help Center */}
-          <TouchableOpacity
-            activeOpacity={0.7}
-            style={styles.settingRow}
-          >
-            <View style={styles.settingRowLeft}>
-              <View style={[styles.iconDisc, { backgroundColor: theme.surfaceSubtle }]}>
-                <HelpCircle size={18} color={theme.textMain} strokeWidth={2} />
-              </View>
-              <Text style={[styles.settingTitle, { color: theme.textMain }]}>Help</Text>
-            </View>
-            <ChevronRight size={17} color={theme.textDim} strokeWidth={2.2} />
-          </TouchableOpacity>
-
-          <View style={[styles.rowDivider, { backgroundColor: theme.borderSubtle }]} />
-
-          {/* Encryption Note */}
-          <View style={styles.settingRow}>
-            <View style={styles.settingRowLeft}>
-              <View style={[styles.iconDisc, { backgroundColor: theme.surfaceSubtle }]}>
-                <ShieldCheck size={18} color={theme.isDark ? theme.brand : '#059669'} strokeWidth={2} />
-              </View>
-              <View style={styles.textStack}>
-                <Text style={[styles.settingTitle, { color: theme.textMain }]}>Encryption</Text>
-                <Text style={[styles.settingSubtitle, { color: theme.textDim }]}>End-to-end cloud protection</Text>
-              </View>
-            </View>
-            <Text style={[styles.settingValueText, { color: theme.textDim, fontWeight: '600' }]}>AES-256</Text>
-          </View>
-
-          <View style={[styles.rowDivider, { backgroundColor: theme.borderSubtle }]} />
-
-          {/* Invite a Friend */}
-          <TouchableOpacity
-            activeOpacity={0.7}
-            onPress={handleInviteFriend}
-            style={styles.settingRow}
-          >
-            <View style={styles.settingRowLeft}>
-              <View style={[styles.iconDisc, { backgroundColor: theme.surfaceSubtle }]}>
-                <Share2 size={18} color={theme.textMain} strokeWidth={2} />
-              </View>
-              <Text style={[styles.settingTitle, { color: theme.textMain }]}>Invite a Friend</Text>
-            </View>
-            <ChevronRight size={17} color={theme.textDim} strokeWidth={2.2} />
-          </TouchableOpacity>
-        </View>
-
-        {/* ================= 6. SECTION 4: AUTH & ACCOUNT ACTION ================= */}
-        <View
-          style={[
-            styles.groupedCard,
-            {
-              backgroundColor: theme.surface,
-              borderColor: theme.borderSubtle,
-            },
-          ]}
-        >
-          {user ? (
             <TouchableOpacity
               activeOpacity={0.7}
-              onPress={handleSignOut}
               style={styles.settingRow}
-            >
-              <View style={styles.settingRowLeft}>
-                <View style={[styles.iconDisc, { backgroundColor: theme.isDark ? '#3E1A1A' : '#FEE2E2' }]}>
-                  <LogOut size={18} color="#EF4444" strokeWidth={2} />
-                </View>
-                <Text style={[styles.settingTitle, { color: '#EF4444', fontWeight: '700' }]}>
-                  Sign Out
-                </Text>
-              </View>
-              <ChevronRight size={17} color="#EF4444" strokeWidth={2.2} />
-            </TouchableOpacity>
-          ) : (
-            <TouchableOpacity
-              activeOpacity={0.7}
               onPress={() => {
-                onBack();
-                onOpenAuth?.();
+                setExportNotice('Sinance Brain Copilot is active and syncing insights');
+                setTimeout(() => setExportNotice(null), 3000);
               }}
-              style={styles.settingRow}
             >
               <View style={styles.settingRowLeft}>
-                <View style={[styles.iconDisc, { backgroundColor: theme.surfaceSubtle }]}>
-                  <User
-                    size={18}
-                    color={theme.isDark ? theme.brand : '#059669'}
-                    strokeWidth={2}
-                  />
-                </View>
-                <Text
+                <View
                   style={[
-                    styles.settingTitle,
+                    styles.iconDisc,
                     {
-                      color: theme.isDark ? theme.brand : '#059669',
-                      fontWeight: '700',
+                      backgroundColor: theme.isDark ? 'rgba(35, 240, 125, 0.15)' : 'rgba(16, 185, 129, 0.15)',
                     },
                   ]}
                 >
-                  Sign In / Connect Supabase
-                </Text>
+                  <Bot
+                    size={19}
+                    color={theme.isDark ? theme.brand : '#059669'}
+                    strokeWidth={2.2}
+                  />
+                </View>
+                <View style={styles.textStack}>
+                  <View style={styles.aiLabelRow}>
+                    <Text style={[styles.settingTitle, { color: theme.textMain }]}>Sinance Brain</Text>
+                    <View
+                      style={[
+                        styles.aiPillBadge,
+                        {
+                          backgroundColor: theme.isDark ? 'rgba(35, 240, 125, 0.2)' : 'rgba(16, 185, 129, 0.18)',
+                        },
+                      ]}
+                    >
+                      <Text
+                        style={[
+                          styles.aiPillText,
+                          { color: theme.isDark ? theme.brand : '#059669' },
+                        ]}
+                      >
+                        AI
+                      </Text>
+                    </View>
+                  </View>
+                  <Text style={[styles.settingSubtitle, { color: theme.textDim }]}>
+                    Copilot insights, anomaly detection & smart tags
+                  </Text>
+                </View>
               </View>
-              <ChevronRight
-                size={17}
-                color={theme.isDark ? theme.brand : '#059669'}
-                strokeWidth={2.2}
-              />
+              <ChevronRight size={17} color={theme.textDim} strokeWidth={2.2} />
             </TouchableOpacity>
-          )}
+          </View>
+        )}
+
+        {/* ================= 5. SECTION 1: ACCOUNT & SECURITY ================= */}
+        {(matches('Account', 'Security, passkeys, cloud sync') ||
+          matches('Privacy', 'Screen lock, biometric, hide balance') ||
+          matches('Linked Wallets & Cards', 'Bank accounts, credit cards, UPI')) && (
+          <View
+            style={[
+              styles.groupedCard,
+              {
+                backgroundColor: theme.surface,
+                borderColor: theme.borderSubtle,
+              },
+            ]}
+          >
+            {/* Account */}
+            {matches('Account', 'Security, passkeys, cloud sync') && (
+              <TouchableOpacity
+                activeOpacity={0.7}
+                onPress={() => setIsEditProfileOpen(true)}
+                style={styles.settingRow}
+              >
+                <View style={styles.settingRowLeft}>
+                  <View style={[styles.iconDisc, { backgroundColor: theme.surfaceSubtle }]}>
+                    <KeyRound size={18} color={theme.textMain} strokeWidth={2} />
+                  </View>
+                  <View style={styles.textStack}>
+                    <Text style={[styles.settingTitle, { color: theme.textMain }]}>Account</Text>
+                    <Text style={[styles.settingSubtitle, { color: theme.textDim }]}>
+                      Security notifications, passkeys, email
+                    </Text>
+                  </View>
+                </View>
+                <ChevronRight size={17} color={theme.textDim} strokeWidth={2.2} />
+              </TouchableOpacity>
+            )}
+
+            {matches('Privacy', 'Screen lock, biometric, hide balance') && (
+              <>
+                <View style={[styles.rowDivider, { backgroundColor: theme.borderSubtle }]} />
+                {/* Privacy */}
+                <TouchableOpacity
+                  activeOpacity={0.7}
+                  style={styles.settingRow}
+                >
+                  <View style={styles.settingRowLeft}>
+                    <View style={[styles.iconDisc, { backgroundColor: theme.surfaceSubtle }]}>
+                      <Lock size={18} color={theme.textMain} strokeWidth={2} />
+                    </View>
+                    <View style={styles.textStack}>
+                      <Text style={[styles.settingTitle, { color: theme.textMain }]}>Privacy</Text>
+                      <Text style={[styles.settingSubtitle, { color: theme.textDim }]}>
+                        Biometric lock, hide net worth balance
+                      </Text>
+                    </View>
+                  </View>
+                  <ChevronRight size={17} color={theme.textDim} strokeWidth={2.2} />
+                </TouchableOpacity>
+              </>
+            )}
+
+            {matches('Linked Wallets & Cards', 'Bank accounts, credit cards, UPI') && (
+              <>
+                <View style={[styles.rowDivider, { backgroundColor: theme.borderSubtle }]} />
+                {/* Linked Wallets & Cards */}
+                <TouchableOpacity
+                  activeOpacity={0.7}
+                  style={styles.settingRow}
+                >
+                  <View style={styles.settingRowLeft}>
+                    <View style={[styles.iconDisc, { backgroundColor: theme.surfaceSubtle }]}>
+                      <CreditCard size={18} color={theme.textMain} strokeWidth={2} />
+                    </View>
+                    <View style={styles.textStack}>
+                      <Text style={[styles.settingTitle, { color: theme.textMain }]}>Linked Wallets & Cards</Text>
+                      <Text style={[styles.settingSubtitle, { color: theme.textDim }]}>
+                        Payment methods, bank sync & UPI
+                      </Text>
+                    </View>
+                  </View>
+                  <ChevronRight size={17} color={theme.textDim} strokeWidth={2.2} />
+                </TouchableOpacity>
+              </>
+            )}
+          </View>
+        )}
+
+        {/* ================= 6. SECTION 2: PREFERENCES & CHATS ================= */}
+        {(matches('Notifications', 'Budget alerts, transaction reminders') ||
+          matches('Primary Currency', 'INR or USD currency') ||
+          matches('Theme', 'Dark or Light appearance') ||
+          matches('Home Checklist', 'Quickstart guide visibility') ||
+          matches('Storage & Data', 'Network usage, CSV ledger export') ||
+          matches('App Language', 'English')) && (
+          <View
+            style={[
+              styles.groupedCard,
+              {
+                backgroundColor: theme.surface,
+                borderColor: theme.borderSubtle,
+              },
+            ]}
+          >
+            {/* Notifications */}
+            {matches('Notifications', 'Budget alerts, transaction reminders') && (
+              <TouchableOpacity
+                activeOpacity={0.7}
+                style={styles.settingRow}
+              >
+                <View style={styles.settingRowLeft}>
+                  <View style={[styles.iconDisc, { backgroundColor: theme.surfaceSubtle }]}>
+                    <Bell size={18} color={theme.textMain} strokeWidth={2} />
+                  </View>
+                  <View style={styles.textStack}>
+                    <Text style={[styles.settingTitle, { color: theme.textMain }]}>Notifications</Text>
+                    <Text style={[styles.settingSubtitle, { color: theme.textDim }]}>
+                      Budget alerts, bill tones & reminders
+                    </Text>
+                  </View>
+                </View>
+                <ChevronRight size={17} color={theme.textDim} strokeWidth={2.2} />
+              </TouchableOpacity>
+            )}
+
+            {/* Primary Currency */}
+            {matches('Primary Currency', 'INR or USD currency') && (
+              <>
+                <View style={[styles.rowDivider, { backgroundColor: theme.borderSubtle }]} />
+                <TouchableOpacity
+                  activeOpacity={0.7}
+                  onPress={() => onToggleCurrency?.(currency === 'INR' ? 'USD' : 'INR')}
+                  style={styles.settingRow}
+                >
+                  <View style={styles.settingRowLeft}>
+                    <View style={[styles.iconDisc, { backgroundColor: theme.surfaceSubtle }]}>
+                      {currency === 'INR' ? (
+                        <IndianRupee size={18} color={theme.textMain} strokeWidth={2} />
+                      ) : (
+                        <DollarSign size={18} color={theme.textMain} strokeWidth={2} />
+                      )}
+                    </View>
+                    <View style={styles.textStack}>
+                      <Text style={[styles.settingTitle, { color: theme.textMain }]}>Currency</Text>
+                      <Text style={[styles.settingSubtitle, { color: theme.textDim }]}>
+                        Default ledger accounting unit
+                      </Text>
+                    </View>
+                  </View>
+                  <View style={styles.settingRowRight}>
+                    <Text style={[styles.settingValueText, { color: theme.textMain, fontWeight: '700' }]}>
+                      {currency === 'INR' ? '₹ INR' : '$ USD'}
+                    </Text>
+                    <ChevronRight size={17} color={theme.textDim} strokeWidth={2.2} />
+                  </View>
+                </TouchableOpacity>
+              </>
+            )}
+
+            {/* Storage & Data */}
+            {matches('Storage & Data', 'Network usage, CSV ledger export') && (
+              <>
+                <View style={[styles.rowDivider, { backgroundColor: theme.borderSubtle }]} />
+                <TouchableOpacity
+                  activeOpacity={0.7}
+                  onPress={handleExportCSV}
+                  style={styles.settingRow}
+                >
+                  <View style={styles.settingRowLeft}>
+                    <View style={[styles.iconDisc, { backgroundColor: theme.surfaceSubtle }]}>
+                      <Database size={18} color={theme.textMain} strokeWidth={2} />
+                    </View>
+                    <View style={styles.textStack}>
+                      <Text style={[styles.settingTitle, { color: theme.textMain }]}>Storage and Data</Text>
+                      <Text style={[styles.settingSubtitle, { color: theme.textDim }]}>
+                        Cache, export CSV & backup history
+                      </Text>
+                    </View>
+                  </View>
+                  <View style={styles.settingRowRight}>
+                    <Text style={[styles.settingValueText, { color: theme.textDim }]}>CSV</Text>
+                    <ChevronRight size={17} color={theme.textDim} strokeWidth={2.2} />
+                  </View>
+                </TouchableOpacity>
+              </>
+            )}
+
+            {/* App Language */}
+            {matches('App Language', 'English') && (
+              <>
+                <View style={[styles.rowDivider, { backgroundColor: theme.borderSubtle }]} />
+                <TouchableOpacity
+                  activeOpacity={0.7}
+                  style={styles.settingRow}
+                >
+                  <View style={styles.settingRowLeft}>
+                    <View style={[styles.iconDisc, { backgroundColor: theme.surfaceSubtle }]}>
+                      <Languages size={18} color={theme.textMain} strokeWidth={2} />
+                    </View>
+                    <View style={styles.textStack}>
+                      <Text style={[styles.settingTitle, { color: theme.textMain }]}>App Language</Text>
+                      <Text style={[styles.settingSubtitle, { color: theme.textDim }]}>
+                        Device default
+                      </Text>
+                    </View>
+                  </View>
+                  <View style={styles.settingRowRight}>
+                    <Text style={[styles.settingValueText, { color: theme.textDim }]}>English</Text>
+                    <ChevronRight size={17} color={theme.textDim} strokeWidth={2.2} />
+                  </View>
+                </TouchableOpacity>
+              </>
+            )}
+
+            {/* Theme */}
+            {matches('Theme', 'Dark or Light appearance') && (
+              <>
+                <View style={[styles.rowDivider, { backgroundColor: theme.borderSubtle }]} />
+                <TouchableOpacity
+                  activeOpacity={0.7}
+                  style={styles.settingRow}
+                >
+                  <View style={styles.settingRowLeft}>
+                    <View style={[styles.iconDisc, { backgroundColor: theme.surfaceSubtle }]}>
+                      <SunMoon size={18} color={theme.textMain} strokeWidth={2} />
+                    </View>
+                    <View style={styles.textStack}>
+                      <Text style={[styles.settingTitle, { color: theme.textMain }]}>Theme</Text>
+                      <Text style={[styles.settingSubtitle, { color: theme.textDim }]}>
+                        Display mode & contrast
+                      </Text>
+                    </View>
+                  </View>
+                  <View style={styles.settingRowRight}>
+                    <Text style={[styles.settingValueText, { color: theme.textDim }]}>
+                      {theme.isDark ? 'Dark' : 'Light'}
+                    </Text>
+                    <ChevronRight size={17} color={theme.textDim} strokeWidth={2.2} />
+                  </View>
+                </TouchableOpacity>
+              </>
+            )}
+
+            {/* Home Setup Checklist */}
+            {matches('Home Checklist', 'Quickstart guide visibility') && (
+              <>
+                <View style={[styles.rowDivider, { backgroundColor: theme.borderSubtle }]} />
+                <TouchableOpacity
+                  activeOpacity={0.7}
+                  onPress={onToggleSetupDismissed}
+                  style={styles.settingRow}
+                >
+                  <View style={styles.settingRowLeft}>
+                    <View style={[styles.iconDisc, { backgroundColor: theme.surfaceSubtle }]}>
+                      {isSetupDismissed ? (
+                        <EyeOff size={18} color={theme.textDim} strokeWidth={2} />
+                      ) : (
+                        <Eye size={18} color={theme.textMain} strokeWidth={2} />
+                      )}
+                    </View>
+                    <View style={styles.textStack}>
+                      <Text style={[styles.settingTitle, { color: theme.textMain }]}>Home Checklist</Text>
+                      <Text style={[styles.settingSubtitle, { color: theme.textDim }]}>
+                        Quickstart onboarding widget
+                      </Text>
+                    </View>
+                  </View>
+                  <View style={styles.settingRowRight}>
+                    <Text
+                      style={[
+                        styles.settingValueText,
+                        {
+                          color: isSetupDismissed
+                            ? theme.textDim
+                            : (theme.isDark ? theme.brand : '#10B981'),
+                          fontWeight: '600',
+                        },
+                      ]}
+                    >
+                      {isSetupDismissed ? 'Hidden' : 'Visible'}
+                    </Text>
+                    <ChevronRight size={17} color={theme.textDim} strokeWidth={2.2} />
+                  </View>
+                </TouchableOpacity>
+              </>
+            )}
+          </View>
+        )}
+
+        {/* ================= 7. SECTION 3: HELP & SUPPORT ================= */}
+        {(matches('Help', 'Help center, contact us, privacy policy') ||
+          matches('Encryption', 'End-to-end cloud protection') ||
+          matches('Invite a Friend', 'Share Sinance with family or friends')) && (
+          <View
+            style={[
+              styles.groupedCard,
+              {
+                backgroundColor: theme.surface,
+                borderColor: theme.borderSubtle,
+              },
+            ]}
+          >
+            {/* Help Center */}
+            {matches('Help', 'Help center, contact us, privacy policy') && (
+              <TouchableOpacity
+                activeOpacity={0.7}
+                style={styles.settingRow}
+              >
+                <View style={styles.settingRowLeft}>
+                  <View style={[styles.iconDisc, { backgroundColor: theme.surfaceSubtle }]}>
+                    <CircleHelp size={18} color={theme.textMain} strokeWidth={2} />
+                  </View>
+                  <View style={styles.textStack}>
+                    <Text style={[styles.settingTitle, { color: theme.textMain }]}>Help</Text>
+                    <Text style={[styles.settingSubtitle, { color: theme.textDim }]}>
+                      Help center, contact us, privacy policy
+                    </Text>
+                  </View>
+                </View>
+                <ChevronRight size={17} color={theme.textDim} strokeWidth={2.2} />
+              </TouchableOpacity>
+            )}
+
+            {/* Encryption Note */}
+            {matches('Encryption', 'End-to-end cloud protection') && (
+              <>
+                <View style={[styles.rowDivider, { backgroundColor: theme.borderSubtle }]} />
+                <View style={styles.settingRow}>
+                  <View style={styles.settingRowLeft}>
+                    <View style={[styles.iconDisc, { backgroundColor: theme.surfaceSubtle }]}>
+                      <ShieldCheck size={18} color={theme.isDark ? theme.brand : '#059669'} strokeWidth={2} />
+                    </View>
+                    <View style={styles.textStack}>
+                      <Text style={[styles.settingTitle, { color: theme.textMain }]}>Encryption</Text>
+                      <Text style={[styles.settingSubtitle, { color: theme.textDim }]}>
+                        End-to-end protected with AES-256
+                      </Text>
+                    </View>
+                  </View>
+                  <Text style={[styles.settingValueText, { color: theme.textDim, fontWeight: '600' }]}>
+                    AES-256
+                  </Text>
+                </View>
+              </>
+            )}
+
+            {/* Invite a Friend */}
+            {matches('Invite a Friend', 'Share Sinance with family or friends') && (
+              <>
+                <View style={[styles.rowDivider, { backgroundColor: theme.borderSubtle }]} />
+                <TouchableOpacity
+                  activeOpacity={0.7}
+                  onPress={handleInviteFriend}
+                  style={styles.settingRow}
+                >
+                  <View style={styles.settingRowLeft}>
+                    <View style={[styles.iconDisc, { backgroundColor: theme.surfaceSubtle }]}>
+                      <Share2 size={18} color={theme.textMain} strokeWidth={2} />
+                    </View>
+                    <View style={styles.textStack}>
+                      <Text style={[styles.settingTitle, { color: theme.textMain }]}>Invite a Friend</Text>
+                      <Text style={[styles.settingSubtitle, { color: theme.textDim }]}>
+                        Share Sinance with family or friends
+                      </Text>
+                    </View>
+                  </View>
+                  <ChevronRight size={17} color={theme.textDim} strokeWidth={2.2} />
+                </TouchableOpacity>
+              </>
+            )}
+          </View>
+        )}
+
+        {/* ================= 8. SECTION 4: AUTH & ACCOUNT ACTION ================= */}
+        {(!query || matches('Sign Out') || matches('Sign In')) && (
+          <View
+            style={[
+              styles.groupedCard,
+              {
+                backgroundColor: theme.surface,
+                borderColor: theme.borderSubtle,
+              },
+            ]}
+          >
+            {user ? (
+              <TouchableOpacity
+                activeOpacity={0.7}
+                onPress={handleSignOut}
+                style={styles.settingRow}
+              >
+                <View style={styles.settingRowLeft}>
+                  <View style={[styles.iconDisc, { backgroundColor: theme.isDark ? '#3E1A1A' : '#FEE2E2' }]}>
+                    <LogOut size={18} color="#EF4444" strokeWidth={2} />
+                  </View>
+                  <View style={styles.textStack}>
+                    <Text style={[styles.settingTitle, { color: '#EF4444', fontWeight: '700' }]}>
+                      Sign Out
+                    </Text>
+                    <Text style={[styles.settingSubtitle, { color: theme.textDim }]}>
+                      {displayEmail}
+                    </Text>
+                  </View>
+                </View>
+                <ChevronRight size={17} color="#EF4444" strokeWidth={2.2} />
+              </TouchableOpacity>
+            ) : (
+              <TouchableOpacity
+                activeOpacity={0.7}
+                onPress={() => {
+                  onBack();
+                  onOpenAuth?.();
+                }}
+                style={styles.settingRow}
+              >
+                <View style={styles.settingRowLeft}>
+                  <View style={[styles.iconDisc, { backgroundColor: theme.surfaceSubtle }]}>
+                    <User
+                      size={18}
+                      color={theme.isDark ? theme.brand : '#059669'}
+                      strokeWidth={2}
+                    />
+                  </View>
+                  <View style={styles.textStack}>
+                    <Text
+                      style={[
+                        styles.settingTitle,
+                        {
+                          color: theme.isDark ? theme.brand : '#059669',
+                          fontWeight: '700',
+                        },
+                      ]}
+                    >
+                      Sign In / Connect Supabase
+                    </Text>
+                    <Text style={[styles.settingSubtitle, { color: theme.textDim }]}>
+                      Sync your ledger safely to the cloud
+                    </Text>
+                  </View>
+                </View>
+                <ChevronRight
+                  size={17}
+                  color={theme.isDark ? theme.brand : '#059669'}
+                  strokeWidth={2.2}
+                />
+              </TouchableOpacity>
+            )}
+          </View>
+        )}
+
+        {/* ================= 9. META-STYLE FOOTER BRANDING ================= */}
+        <View style={styles.footerContainer}>
+          <Text style={[styles.footerFromText, { color: theme.textDim }]}>from</Text>
+          <View style={styles.footerBrandRow}>
+            <Sparkles size={13} color={theme.isDark ? theme.brand : '#10B981'} />
+            <Text style={[styles.footerBrandName, { color: theme.textMain }]}>Sinance</Text>
+          </View>
         </View>
 
         {/* Spacing for bottom */}
@@ -639,7 +887,7 @@ const styles = StyleSheet.create({
   },
   contentContainer: {
     paddingHorizontal: 20,
-    paddingTop: 14,
+    paddingTop: 12,
     paddingBottom: 40,
     alignItems: 'stretch',
   },
@@ -651,11 +899,28 @@ const styles = StyleSheet.create({
     padding: 11,
     borderRadius: 14,
     borderWidth: 1,
-    marginBottom: 16,
+    marginBottom: 14,
   },
   toastText: {
     fontSize: 12,
     fontWeight: '600',
+  },
+  searchBarContainer: {
+    alignSelf: 'stretch',
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderRadius: 14,
+    borderWidth: 1,
+    paddingHorizontal: 14,
+    paddingVertical: Platform.OS === 'ios' ? 10 : 6,
+    marginBottom: 16,
+    gap: 10,
+  },
+  searchInput: {
+    flex: 1,
+    fontSize: 14,
+    fontWeight: '500',
+    paddingVertical: 0,
   },
   heroCard: {
     alignSelf: 'stretch',
@@ -665,13 +930,13 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     paddingVertical: 14,
     paddingHorizontal: 16,
-    marginBottom: 18,
+    marginBottom: 16,
     gap: 14,
   },
   avatarContainer: {
-    width: 54,
-    height: 54,
-    borderRadius: 27,
+    width: 58,
+    height: 58,
+    borderRadius: 29,
     borderWidth: 1.5,
     overflow: 'hidden',
     alignItems: 'center',
@@ -694,6 +959,7 @@ const styles = StyleSheet.create({
     fontSize: 17,
     fontWeight: '700',
     letterSpacing: -0.3,
+    flexShrink: 1,
   },
   tierBadge: {
     flexDirection: 'row',
@@ -712,13 +978,50 @@ const styles = StyleSheet.create({
     fontSize: 12.5,
     letterSpacing: -0.1,
   },
+  heroRightActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
   qrBadge: {
-    width: 38,
-    height: 38,
-    borderRadius: 19,
+    width: 36,
+    height: 36,
+    borderRadius: 18,
     borderWidth: 1,
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  switchArrowBadge: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    borderWidth: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  aiCard: {
+    alignSelf: 'stretch',
+    borderRadius: 20,
+    borderWidth: 1,
+    paddingVertical: 2,
+    paddingHorizontal: 16,
+    marginBottom: 16,
+    overflow: 'hidden',
+  },
+  aiLabelRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  aiPillBadge: {
+    paddingHorizontal: 6,
+    paddingVertical: 1,
+    borderRadius: 5,
+  },
+  aiPillText: {
+    fontSize: 10,
+    fontWeight: '800',
+    letterSpacing: 0.5,
   },
   groupedCard: {
     alignSelf: 'stretch',
@@ -738,27 +1041,28 @@ const styles = StyleSheet.create({
   settingRowLeft: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 13,
+    gap: 14,
     flex: 1,
   },
   iconDisc: {
-    width: 36,
-    height: 36,
-    borderRadius: 11,
+    width: 38,
+    height: 38,
+    borderRadius: 12,
     alignItems: 'center',
     justifyContent: 'center',
   },
   textStack: {
     flex: 1,
+    gap: 2,
   },
   settingTitle: {
-    fontSize: 14.5,
+    fontSize: 15,
     fontWeight: '600',
     letterSpacing: -0.2,
   },
   settingSubtitle: {
-    fontSize: 11.5,
-    marginTop: 1,
+    fontSize: 12,
+    letterSpacing: -0.1,
   },
   settingRowRight: {
     flexDirection: 'row',
@@ -770,6 +1074,28 @@ const styles = StyleSheet.create({
   },
   rowDivider: {
     height: 1,
-    marginLeft: 49,
+    marginLeft: 52,
+  },
+  footerContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 8,
+    marginBottom: 20,
+    gap: 2,
+  },
+  footerFromText: {
+    fontSize: 11,
+    fontWeight: '500',
+    letterSpacing: 0.2,
+  },
+  footerBrandRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+  },
+  footerBrandName: {
+    fontSize: 13,
+    fontWeight: '800',
+    letterSpacing: 0.6,
   },
 });

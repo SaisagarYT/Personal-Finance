@@ -437,19 +437,19 @@ function AppContent() {
                     {
                       translateX: profileAnim.interpolate({
                         inputRange: [0, 1],
-                        outputRange: [0, 24],
+                        outputRange: [0, 23],
                       }),
                     },
                     {
                       translateY: profileAnim.interpolate({
                         inputRange: [0, 1],
-                        outputRange: [0, 78],
+                        outputRange: [0, 126],
                       }),
                     },
                     {
                       scale: profileAnim.interpolate({
                         inputRange: [0, 1],
-                        outputRange: [1, 54 / 44],
+                        outputRange: [1, 58 / 44],
                       }),
                     },
                   ],
