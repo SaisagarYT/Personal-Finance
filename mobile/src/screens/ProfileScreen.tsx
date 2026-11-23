@@ -43,6 +43,7 @@ import {
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import { useAppTheme } from '../theme/colors';
+import { StatusSymbol } from '../components/StatusSymbol';
 import { UserProfile } from '../services/profileService';
 import { EditProfileScreen } from './EditProfileScreen';
 
@@ -810,7 +811,7 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
         <View style={styles.footerContainer}>
           <Text style={[styles.footerFromText, { color: theme.textDim }]}>from</Text>
           <View style={styles.footerBrandRow}>
-            <Sparkles size={13} color={theme.isDark ? theme.brand : '#10B981'} />
+            <StatusSymbol size={13} color={theme.isDark ? theme.brand : '#059669'} strokeWidth={2.4} />
             <Text style={[styles.footerBrandName, { color: theme.textMain }]}>Sinance</Text>
           </View>
         </View>

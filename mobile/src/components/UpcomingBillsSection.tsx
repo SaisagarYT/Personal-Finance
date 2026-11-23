@@ -173,17 +173,18 @@ export const UpcomingBillsSection: React.FC<UpcomingBillsSectionProps> = ({
                   style={[
                     styles.statusPill,
                     {
-                      backgroundColor: theme.isDark ? 'rgba(35, 240, 125, 0.12)' : 'rgba(16, 185, 129, 0.12)',
-                      borderColor: theme.isDark ? 'rgba(35, 240, 125, 0.3)' : 'rgba(16, 185, 129, 0.25)',
+                      backgroundColor: theme.surfaceSubtle,
+                      borderColor: theme.borderSubtle,
                     },
                   ]}
                 >
-                  <Text
+                  <View
                     style={[
-                      styles.statusPillText,
-                      { color: theme.isDark ? '#23F07D' : '#059669' },
+                      styles.statusDot,
+                      { backgroundColor: theme.isDark ? theme.brand : '#059669' },
                     ]}
-                  >
+                  />
+                  <Text style={[styles.statusPillText, { color: theme.textMain }]}>
                     Auto-pay
                   </Text>
                 </View>
@@ -197,6 +198,12 @@ export const UpcomingBillsSection: React.FC<UpcomingBillsSectionProps> = ({
                     },
                   ]}
                 >
+                  <View
+                    style={[
+                      styles.statusDot,
+                      { backgroundColor: theme.textDim },
+                    ]}
+                  />
                   <Text style={[styles.statusPillText, { color: theme.textDim }]}>
                     Scheduled
                   </Text>
@@ -306,13 +313,21 @@ const styles = StyleSheet.create({
     letterSpacing: -0.2,
   },
   statusPill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
     paddingHorizontal: 8,
-    paddingVertical: 2.5,
-    borderRadius: 6,
+    paddingVertical: 3,
+    borderRadius: 8,
     borderWidth: 1,
   },
+  statusDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+  },
   statusPillText: {
-    fontSize: 10.5,
+    fontSize: 11,
     fontWeight: '600',
     letterSpacing: -0.1,
   },

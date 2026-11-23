@@ -20,6 +20,7 @@ import {
   Sparkles,
 } from 'lucide-react-native';
 import { useAppTheme } from '../theme/colors';
+import { StatusSymbol } from './StatusSymbol';
 import { useAuth } from '../context/AuthContext';
 
 export interface SetupStep {
@@ -129,7 +130,7 @@ export const GetSetUpModal: React.FC<GetSetUpModalProps> = ({
         return <Cloud size={16} color={color} strokeWidth={2.2} />;
       case 'sparkles':
       default:
-        return <Sparkles size={16} color={color} strokeWidth={2.2} />;
+        return <StatusSymbol size={16} color={color} strokeWidth={2.4} />;
     }
   };
 

@@ -24,38 +24,16 @@ import {
 } from 'lucide-react-native';
 import { useAppTheme } from '../theme/colors';
 
+import { StatusSymbol } from '../components/StatusSymbol';
+
 export interface TaskManagerScreenProps {
   onOpenProfile?: () => void;
   onSelectProject?: (projectId: string) => void;
   initialView?: 'overview' | 'detail';
 }
 
-/**
- * 8-ray sunburst / asterisk symbol with open center,
- * matching the exact pixel geometry from the reference mockup.
- */
-interface ProjectStatusSymbolProps {
-  size?: number;
-  color?: string;
-}
-
-const ProjectStatusSymbol: React.FC<ProjectStatusSymbolProps> = ({
-  size = 13,
-  color = '#64748B',
-}) => {
-  return (
-    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
-      <Line x1="16.0" y1="12.0" x2="21.5" y2="12.0" stroke={color} strokeWidth="2.3" strokeLinecap="round" />
-      <Line x1="14.83" y1="14.83" x2="18.72" y2="18.72" stroke={color} strokeWidth="2.3" strokeLinecap="round" />
-      <Line x1="12.0" y1="16.0" x2="12.0" y2="21.5" stroke={color} strokeWidth="2.3" strokeLinecap="round" />
-      <Line x1="9.17" y1="14.83" x2="5.28" y2="18.72" stroke={color} strokeWidth="2.3" strokeLinecap="round" />
-      <Line x1="8.0" y1="12.0" x2="2.5" y2="12.0" stroke={color} strokeWidth="2.3" strokeLinecap="round" />
-      <Line x1="9.17" y1="9.17" x2="5.28" y2="5.28" stroke={color} strokeWidth="2.3" strokeLinecap="round" />
-      <Line x1="12.0" y1="8.0" x2="12.0" y2="2.5" stroke={color} strokeWidth="2.3" strokeLinecap="round" />
-      <Line x1="14.83" y1="9.17" x2="18.72" y2="5.28" stroke={color} strokeWidth="2.3" strokeLinecap="round" />
-    </Svg>
-  );
-};
+// Re-export StatusSymbol as ProjectStatusSymbol for clean backward-compatibility
+const ProjectStatusSymbol = StatusSymbol;
 
 /**
  * Circular progress ring with percentage in center,

@@ -349,7 +349,7 @@ export const EditProfileScreen: React.FC<EditProfileScreenProps> = ({
               </View>
             </View>
             <View style={[styles.verifiedPill, { backgroundColor: theme.surfaceSubtle, borderColor: theme.borderSubtle }]}>
-              <Sparkles size={11} color={theme.isDark ? theme.brand : '#10B981'} />
+              <Check size={12} color={theme.isDark ? theme.brand : '#059669'} strokeWidth={2.8} />
               <Text style={[styles.verifiedPillText, { color: theme.textDim }]}>Verified</Text>
             </View>
           </View>

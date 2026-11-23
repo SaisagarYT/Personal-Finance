@@ -433,7 +433,7 @@ export const StatsView: React.FC<StatsViewProps> = ({
               { backgroundColor: theme.expenseIconCircleBg },
             ]}
           >
-            <Sparkles size={16} color={theme.brand} strokeWidth={2} />
+            <TrendingUp size={16} color={theme.brand} strokeWidth={2.2} />
           </View>
           <Text style={[styles.metricValue, { color: theme.textMain }]}>
             {potentialSavings}

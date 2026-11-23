@@ -28,10 +28,10 @@ import {
   Trash2,
   CheckCircle2,
   ChevronRight,
-  Sparkles,
 } from 'lucide-react-native';
 import { useAppTheme } from '../theme/colors';
 import { useToast } from '../context/ToastContext';
+import { StatusSymbol } from './StatusSymbol';
 import { BillCategory, BillItem } from './UpcomingBillsSection';
 import { SubscriptionService, formatShortDate, computeDueCountdown } from '../services/subscriptionService';
 
@@ -357,16 +357,16 @@ export const AllBillsModal: React.FC<AllBillsModalProps> = ({
                 style={[
                   styles.summaryPill,
                   {
-                    backgroundColor: theme.isDark ? 'rgba(35, 240, 125, 0.14)' : 'rgba(16, 185, 129, 0.12)',
-                    borderColor: theme.isDark ? theme.brand : '#10B981',
+                    backgroundColor: theme.surfaceSubtle,
+                    borderColor: theme.borderSubtle,
                   },
                 ]}
               >
-                <Sparkles size={12} color={theme.isDark ? theme.brand : '#059669'} />
+                <StatusSymbol size={11} color={theme.isDark ? theme.brand : theme.forestDark} strokeWidth={2.4} />
                 <Text
                   style={[
                     styles.summaryPillText,
-                    { color: theme.isDark ? theme.brand : '#059669' },
+                    { color: theme.isDark ? theme.brand : theme.forestDark },
                   ]}
                 >
                   Tracked
@@ -721,22 +721,26 @@ export const AllBillsModal: React.FC<AllBillsModalProps> = ({
                             style={[
                               styles.statusBadge,
                               {
-                                backgroundColor: bill.isAutoPay
-                                  ? (theme.isDark ? 'rgba(35, 240, 125, 0.12)' : 'rgba(16, 185, 129, 0.12)')
-                                  : theme.surfaceSubtle,
-                                borderColor: bill.isAutoPay
-                                  ? (theme.isDark ? theme.brand : '#10B981')
-                                  : theme.borderSubtle,
+                                backgroundColor: theme.surfaceSubtle,
+                                borderColor: theme.borderSubtle,
                               },
                             ]}
                           >
+                            <View
+                              style={[
+                                styles.statusDot,
+                                {
+                                  backgroundColor: bill.isAutoPay
+                                    ? (theme.isDark ? theme.brand : '#059669')
+                                    : theme.textDim,
+                                },
+                              ]}
+                            />
                             <Text
                               style={[
                                 styles.statusBadgeText,
                                 {
-                                  color: bill.isAutoPay
-                                    ? (theme.isDark ? theme.brand : '#059669')
-                                    : theme.textDim,
+                                  color: theme.textMain,
                                 },
                               ]}
                             >
@@ -1165,14 +1169,23 @@ const styles = StyleSheet.create({
     letterSpacing: -0.2,
   },
   statusBadge: {
-    paddingHorizontal: 7,
-    paddingVertical: 2,
-    borderRadius: 6,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 8,
     borderWidth: 1,
   },
+  statusDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+  },
   statusBadgeText: {
-    fontSize: 10.5,
+    fontSize: 11,
     fontWeight: '600',
+    letterSpacing: -0.1,
   },
   rowDivider: {
     height: 1,
