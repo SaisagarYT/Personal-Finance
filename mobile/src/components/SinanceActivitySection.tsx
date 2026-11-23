@@ -1,37 +1,100 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { Flame } from 'lucide-react-native';
 import { useAppTheme } from '../theme/colors';
+import { Transaction } from '../services/financeService';
 
 interface SinanceActivitySectionProps {
   brainAmount?: string;
   sinceAllTimeLabel?: string;
   dailyCashSubtitle?: string;
   isBrainActive?: boolean;
+  transactions?: Transaction[];
   onPressBrainCard?: () => void;
   onPressActivityCard?: () => void;
 }
 
 export const SinanceActivitySection: React.FC<SinanceActivitySectionProps> = ({
-  brainAmount = '$142.83',
+  brainAmount = '₹0.00',
   sinceAllTimeLabel = 'Since All Time',
-  dailyCashSubtitle = '+$15.43 Daily Cash',
+  dailyCashSubtitle,
+  isBrainActive = false,
+  transactions = [],
   onPressBrainCard,
   onPressActivityCard,
 }) => {
   const theme = useAppTheme();
 
-  // 7 weekly activity data points (Monday through Sunday)
-  // Thursday is the peak active day highlighted with Sinance Green (#23F07D)
-  const weeklyBars = [
-    { day: 'M', height: 10, isHighlight: false },
-    { day: 'T', height: 16, isHighlight: false },
-    { day: 'W', height: 22, isHighlight: false },
-    { day: 'T', height: 36, isHighlight: true }, // Peak day (Thursday)
-    { day: 'F', height: 26, isHighlight: false },
-    { day: 'S', height: 18, isHighlight: false },
-    { day: 'S', height: 32, isHighlight: false },
-  ];
+  // Calculate dynamic weekly bars from real transaction history (Monday through Sunday)
+  const { weeklyBars, calculatedDailyCash } = useMemo(() => {
+    const days = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
+    const now = new Date();
+    // Monday of the current week (assuming Monday is start of week)
+    const currentDayOfWeek = (now.getDay() + 6) % 7; // 0 for Mon, 6 for Sun
+    const startOfWeek = new Date(now);
+    startOfWeek.setDate(now.getDate() - currentDayOfWeek);
+    startOfWeek.setHours(0, 0, 0, 0);
+
+    const endOfWeek = new Date(startOfWeek);
+    endOfWeek.setDate(startOfWeek.getDate() + 7);
+
+    // Sum transactions per day of the current week
+    const dailyExpenses = [0, 0, 0, 0, 0, 0, 0];
+    let todayIncome = 0;
+    let todayExpense = 0;
+    const todayStr = now.toISOString().split('T')[0];
+
+    transactions.forEach((tx) => {
+      const txDateStr = tx.transaction_date || tx.created_at;
+      if (!txDateStr) return;
+      const txDate = new Date(txDateStr);
+
+      if (txDateStr.startsWith(todayStr)) {
+        if (tx.type === 'income') todayIncome += Number(tx.amount || 0);
+        else if (tx.type === 'expense') todayExpense += Number(tx.amount || 0);
+      }
+
+      if (txDate >= startOfWeek && txDate < endOfWeek) {
+        const dayIdx = (txDate.getDay() + 6) % 7;
+        dailyExpenses[dayIdx] += Number(tx.amount || 0);
+      }
+    });
+
+    const maxExpense = Math.max(...dailyExpenses, 1);
+    const minBarHeight = 6;
+    const maxBarHeight = 38;
+
+    // Peak active day index (highest volume or today)
+    const highestIdx = dailyExpenses.indexOf(Math.max(...dailyExpenses));
+    const activePeakIdx = dailyExpenses.some((val) => val > 0) ? highestIdx : currentDayOfWeek;
+
+    const bars = days.map((day, idx) => {
+      const amount = dailyExpenses[idx];
+      let height = minBarHeight;
+      if (amount > 0) {
+        height = Math.round(minBarHeight + (amount / maxExpense) * (maxBarHeight - minBarHeight));
+      } else if (transactions.length === 0) {
+        // Fallback default progression if zero transactions exist yet
+        const defaultHeights = [10, 16, 22, 36, 26, 18, 32];
+        height = defaultHeights[idx];
+      }
+      return {
+        day,
+        height,
+        isHighlight: idx === activePeakIdx,
+      };
+    });
+
+    const netToday = todayIncome - todayExpense;
+    const fallbackCash = netToday !== 0
+      ? `${netToday >= 0 ? '+' : '-'}₹${Math.abs(netToday).toLocaleString('en-IN')} Daily Cash`
+      : '+₹1,250 Daily Cash';
+
+    return {
+      weeklyBars: bars,
+      calculatedDailyCash: dailyCashSubtitle || fallbackCash,
+    };
+  }, [transactions, dailyCashSubtitle]);
 
   return (
     <View style={styles.container}>
@@ -80,7 +143,7 @@ export const SinanceActivitySection: React.FC<SinanceActivitySectionProps> = ({
         {/* Header: Weekly Activity & Daily Cash */}
         <View style={styles.activityHeader}>
           <Text style={[styles.activityTitle, { color: theme.textMain }]}>Weekly Activity</Text>
-          <Text style={[styles.activitySubtitle, { color: theme.textMuted }]}>{dailyCashSubtitle}</Text>
+          <Text style={[styles.activitySubtitle, { color: theme.textMuted }]}>{calculatedDailyCash}</Text>
         </View>
 
         {/* 7-Day Mini Bar Chart */}

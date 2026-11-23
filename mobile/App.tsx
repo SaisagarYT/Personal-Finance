@@ -359,7 +359,7 @@ function AppContent() {
                 <SinanceActivitySection
                   brainAmount={formattedBalance}
                   sinceAllTimeLabel="Since All Time"
-                  dailyCashSubtitle="+₹1,250 Daily Cash"
+                  transactions={transactions}
                   isBrainActive={isPocketOpen}
                   onPressBrainCard={() => {
                     setIsPocketOpen(true);

@@ -3,7 +3,6 @@ import { View, Text, TouchableOpacity, StyleSheet, ScrollView, Platform } from '
 import {
   ArrowLeft,
   DollarSign,
-  Star,
   ChevronRight,
   ArrowDown,
   ArrowUp,
@@ -19,6 +18,7 @@ import { useAppTheme } from '../theme/colors';
 import { Account, Transaction } from '../services/financeService';
 import { AddAccountModal } from '../components/AddAccountModal';
 import { QuickTransferModal } from '../components/QuickTransferModal';
+import { StatusSymbol } from '../components/StatusSymbol';
 
 interface SinancePocketScreenProps {
   onBack: () => void;
@@ -256,7 +256,7 @@ export const SinancePocketScreen: React.FC<SinancePocketScreenProps> = ({
                   activeSubTab === 'activity' && styles.subTabTextActive,
                 ]}
               >
-                Activity ({transactions.length > 0 ? transactions.length : '17'})
+                Activity ({transactions.length})
               </Text>
             </TouchableOpacity>
 
@@ -287,7 +287,7 @@ export const SinancePocketScreen: React.FC<SinancePocketScreenProps> = ({
               >
                 <View style={styles.quickCardLeft}>
                   <View style={[styles.starDisc, { backgroundColor: theme.forestDark }]}>
-                    <Star size={16} color={theme.brand} fill={theme.brand} />
+                    <StatusSymbol size={15} color={theme.brand} strokeWidth={2.4} />
                   </View>
                   <View style={styles.quickTextWrapper}>
                     <Text style={[styles.quickCardTitle, { color: theme.forestDark }]}>
