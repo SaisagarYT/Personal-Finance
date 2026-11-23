@@ -9,6 +9,8 @@ import {
   Animated,
   Platform,
   KeyboardAvoidingView,
+  PanResponder,
+  ScrollView,
 } from 'react-native';
 import {
   X,
@@ -20,6 +22,7 @@ import {
 } from 'lucide-react-native';
 import { useAppTheme } from '../theme/colors';
 import { PixelMorphMatrix } from './PixelMorphMatrix';
+import { AudioWaveformIndicator } from './AudioWaveformIndicator';
 import { BrainService, SinsMessage, AppContextData } from '../services/brainService';
 
 interface SinsBrainModalProps {
@@ -48,6 +51,33 @@ export const SinsBrainModal: React.FC<SinsBrainModalProps> = ({
 
   const slideAnim = useRef(new Animated.Value(320)).current;
   const fadeAnim = useRef(new Animated.Value(0)).current;
+
+  // PanResponder to enable smooth swipe-down-to-dismiss gesture
+  const panResponder = useRef(
+    PanResponder.create({
+      onStartShouldSetPanResponder: () => false,
+      onMoveShouldSetPanResponder: (_, gestureState) => {
+        return gestureState.dy > 8;
+      },
+      onPanResponderMove: (_, gestureState) => {
+        if (gestureState.dy > 0) {
+          slideAnim.setValue(gestureState.dy);
+        }
+      },
+      onPanResponderRelease: (_, gestureState) => {
+        if (gestureState.dy > 80 || gestureState.vy > 0.5) {
+          handleSmoothClose();
+        } else {
+          Animated.spring(slideAnim, {
+            toValue: 0,
+            friction: 8,
+            tension: 40,
+            useNativeDriver: true,
+          }).start();
+        }
+      },
+    })
+  ).current;
 
   useEffect(() => {
     if (visible) {
@@ -151,6 +181,28 @@ export const SinsBrainModal: React.FC<SinsBrainModalProps> = ({
     handleSendMessage('Scan receipt for Whole Foods Grocery');
   };
 
+  // Context-aware smart prompt suggestions generated dynamically from app data
+  const dynamicSuggestions = React.useMemo(() => {
+    const list: string[] = [];
+
+    // 1. Next upcoming bill reminder
+    if (contextData.bills && contextData.bills.length > 0) {
+      const nextBill = contextData.bills[0];
+      list.push(`Pay ${nextBill.name} (${nextBill.amount})`);
+    }
+
+    // 2. Spending query
+    list.push('How much did I spend this week?');
+
+    // 3. Quick expense log
+    list.push('Spent ₹350 on lunch');
+
+    // 4. Portfolio net worth
+    list.push('Show total portfolio balance');
+
+    return list;
+  }, [contextData.bills]);
+
   if (!isMounted) return null;
 
   return (
@@ -183,6 +235,7 @@ export const SinsBrainModal: React.FC<SinsBrainModalProps> = ({
 
         {/* ================= FULL-WIDTH SINANCE PREMIUM CARD ================= */}
         <Animated.View
+          {...panResponder.panHandlers}
           style={[
             styles.geminiCard,
             {
@@ -192,6 +245,11 @@ export const SinsBrainModal: React.FC<SinsBrainModalProps> = ({
             },
           ]}
         >
+          {/* Subtle Pull Handle */}
+          <View style={styles.dragHandleWrapper}>
+            <View style={[styles.dragHandle, { backgroundColor: theme.borderSubtle }]} />
+          </View>
+
           {/* Top Bar: 4-Block Animated Matrix + "What would you like to do today?" + Dismiss */}
           <View style={styles.topBar}>
             <View style={styles.topBarLeft}>
@@ -256,22 +314,47 @@ export const SinsBrainModal: React.FC<SinsBrainModalProps> = ({
                         </Text>
                       )}
                     </View>
-                    <Text
-                      style={[styles.actionCardDetail, { color: theme.textMuted }]}
-                      numberOfLines={1}
-                    >
-                      {activeResponse.actionCard.detail}
-                    </Text>
+                    <View style={styles.actionCardBottomRow}>
+                      <Text
+                        style={[styles.actionCardDetail, { color: theme.textMuted }]}
+                        numberOfLines={1}
+                      >
+                        {activeResponse.actionCard.detail}
+                      </Text>
+
+                      {/* Undo Action Trigger */}
+                      {(activeResponse.actionCard.type === 'transaction_created' || activeResponse.actionCard.type === 'bill_paid') && (
+                        <TouchableOpacity
+                          activeOpacity={0.7}
+                          onPress={() => {
+                            setActiveResponse({
+                              id: Date.now().toString(),
+                              sender: 'sins',
+                              text: 'Action reversed. Ledger state restored.',
+                              timestamp: 'Just now',
+                            });
+                          }}
+                          style={[styles.undoButton, { borderColor: theme.borderSubtle }]}
+                        >
+                          <Text style={[styles.undoButtonText, { color: theme.isDark ? '#23F07D' : '#059669' }]}>
+                            Undo
+                          </Text>
+                        </TouchableOpacity>
+                      )}
+                    </View>
                   </View>
                 )}
               </View>
             ) : isListening ? (
               <View style={styles.listeningContainer}>
-                <Text style={[styles.listeningTitle, { color: theme.textMain }]}>
-                  Listening...
-                </Text>
+                <View style={styles.listeningHeaderRow}>
+                  <AudioWaveformIndicator height={28} barCount={6} />
+                  <Text style={[styles.listeningTitle, { color: theme.textMain }]}>
+                    Sins is listening...
+                  </Text>
+                </View>
                 <Text style={[styles.listeningSubtitle, { color: theme.textMuted }]}>
-                  Speak to log expenses, check bills, or manage accounts
+                  Try saying "Spent ₹350 on lunch" or "Pay my Netflix bill"
                 </Text>
               </View>
             ) : activeModality === 'text' ? (
@@ -295,16 +378,44 @@ export const SinsBrainModal: React.FC<SinsBrainModalProps> = ({
                 </TouchableOpacity>
               </View>
             ) : (
-              /* Hero Callout matching reference: "Type, talk, or share a photo" */
-              <TouchableOpacity
-                activeOpacity={0.8}
-                onPress={() => setActiveModality('text')}
-                style={styles.heroPromptWrapper}
-              >
-                <Text style={[styles.heroPromptText, { color: theme.textMain }]}>
-                  Type, talk, or share a photo
-                </Text>
-              </TouchableOpacity>
+              /* Hero Callout matching reference: "Type, talk, or share a photo" + Context Suggestions */
+              <View style={styles.heroWrapper}>
+                <TouchableOpacity
+                  activeOpacity={0.8}
+                  onPress={() => setActiveModality('text')}
+                  style={styles.heroPromptWrapper}
+                >
+                  <Text style={[styles.heroPromptText, { color: theme.textMain }]}>
+                    Type, talk, or share a photo
+                  </Text>
+                </TouchableOpacity>
+
+                {/* Context-aware suggestions scroll */}
+                <ScrollView
+                  horizontal
+                  showsHorizontalScrollIndicator={false}
+                  contentContainerStyle={styles.suggestionsScroll}
+                >
+                  {dynamicSuggestions.map((suggestion, idx) => (
+                    <TouchableOpacity
+                      key={idx}
+                      activeOpacity={0.7}
+                      onPress={() => handleSendMessage(suggestion)}
+                      style={[
+                        styles.suggestionChip,
+                        {
+                          backgroundColor: theme.surfaceSubtle,
+                          borderColor: theme.borderSubtle,
+                        },
+                      ]}
+                    >
+                      <Text style={[styles.suggestionChipText, { color: theme.textMuted }]}>
+                        {suggestion}
+                      </Text>
+                    </TouchableOpacity>
+                  ))}
+                </ScrollView>
+              </View>
             )}
           </View>
 
@@ -402,6 +513,16 @@ const styles = StyleSheet.create({
     shadowRadius: 16,
     elevation: 12,
   },
+  dragHandleWrapper: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingBottom: 8,
+  },
+  dragHandle: {
+    width: 36,
+    height: 4,
+    borderRadius: 2,
+  },
   topBar: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -431,14 +552,47 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     paddingVertical: 8,
   },
+  heroWrapper: {
+    gap: 12,
+  },
   heroPromptWrapper: {
-    paddingVertical: 4,
+    paddingVertical: 2,
   },
   heroPromptText: {
-    fontSize: 26,
+    fontSize: 25,
     fontWeight: '500',
-    letterSpacing: -0.8,
-    lineHeight: 33,
+    letterSpacing: -0.7,
+    lineHeight: 32,
+  },
+  suggestionsScroll: {
+    gap: 8,
+    paddingRight: 10,
+  },
+  suggestionChip: {
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 14,
+    borderWidth: 1,
+  },
+  suggestionChipText: {
+    fontSize: 12,
+    fontWeight: '600',
+  },
+  actionCardBottomRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginTop: 2,
+  },
+  undoButton: {
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 8,
+    borderWidth: 1,
+  },
+  undoButtonText: {
+    fontSize: 11,
+    fontWeight: '700',
   },
   textInputContainer: {
     flexDirection: 'row',
@@ -503,10 +657,15 @@ const styles = StyleSheet.create({
     fontWeight: '500',
   },
   listeningContainer: {
-    gap: 4,
+    gap: 6,
+  },
+  listeningHeaderRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
   },
   listeningTitle: {
-    fontSize: 22,
+    fontSize: 20,
     fontWeight: '600',
     letterSpacing: -0.4,
   },
