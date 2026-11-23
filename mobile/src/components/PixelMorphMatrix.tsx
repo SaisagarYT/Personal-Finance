@@ -1,141 +1,101 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { View, StyleSheet, Animated } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { View, StyleSheet } from 'react-native';
 import { useAppTheme } from '../theme/colors';
 
 export interface PixelMorphMatrixProps {
   size?: number;
-  color?: string;
-  glowColor?: string;
   speedMs?: number;
-  isThinking?: boolean;
 }
 
 /**
- * 3x3 Pixel matrix states representing discrete morph steps from the reference video:
- * 1 = Pixel ON (illuminated)
- * 0 = Pixel OFF (transparent/hidden)
+ * Clean 2x2 4-block square matrix.
+ * Exactly 4 blocks with sequential rotating color illumination:
+ * Block 1 (top-left) -> Block 2 (top-right) -> Block 4 (bottom-right) -> Block 3 (bottom-left)
+ * Pure minimalist square grid with zero circular or blurred glow backgrounds.
  */
-const MATRIX_FRAMES = [
-  // Frame 0: Top-left L-bracket / corner
-  [
-    1, 1, 0,
-    1, 0, 0,
-    0, 0, 0,
-  ],
-  // Frame 1: Full top bar + left stalk
-  [
-    1, 1, 1,
-    1, 0, 0,
-    1, 0, 0,
-  ],
-  // Frame 2: Solid filled block / box
-  [
-    1, 1, 1,
-    1, 1, 1,
-    0, 1, 1,
-  ],
-  // Frame 3: Inverted bottom-right bracket
-  [
-    0, 0, 0,
-    0, 1, 1,
-    0, 1, 1,
-  ],
-  // Frame 4: Cross / central node
-  [
-    0, 1, 0,
-    1, 1, 1,
-    0, 1, 0,
-  ],
-  // Frame 5: Diagonal staircase
-  [
-    1, 0, 0,
-    1, 1, 0,
-    0, 1, 1,
-  ],
-];
-
 export const PixelMorphMatrix: React.FC<PixelMorphMatrixProps> = ({
   size = 18,
-  color,
-  glowColor,
-  speedMs = 280,
-  isThinking = true,
+  speedMs = 220,
 }) => {
   const theme = useAppTheme();
-  const activeColor = color || (theme.isDark ? '#23F07D' : '#059669');
-  const activeGlow = glowColor || (theme.isDark ? 'rgba(35, 240, 125, 0.45)' : 'rgba(5, 150, 105, 0.35)');
+  const [activeStep, setActiveStep] = useState(0);
 
-  const [frameIndex, setFrameIndex] = useState(0);
-  const glowAnim = useRef(new Animated.Value(0.4)).current;
-
-  // Step through pixel morph frames rhythmically (identical to reference video)
+  // Cycle through 0 -> 1 -> 2 -> 3 in a clockwise rotation
   useEffect(() => {
-    if (!isThinking) return;
-
-    const interval = setInterval(() => {
-      setFrameIndex((prev) => (prev + 1) % MATRIX_FRAMES.length);
+    const timer = setInterval(() => {
+      setActiveStep((prev) => (prev + 1) % 4);
     }, speedMs);
 
-    return () => clearInterval(interval);
-  }, [speedMs, isThinking]);
+    return () => clearInterval(timer);
+  }, [speedMs]);
 
-  // Subtle breathing pulse behind the pixel cluster
-  useEffect(() => {
-    const pulse = Animated.loop(
-      Animated.sequence([
-        Animated.timing(glowAnim, {
-          toValue: 0.85,
-          duration: 900,
-          useNativeDriver: true,
-        }),
-        Animated.timing(glowAnim, {
-          toValue: 0.35,
-          duration: 900,
-          useNativeDriver: true,
-        }),
-      ])
-    );
-    pulse.start();
+  const primaryColor = theme.isDark ? '#23F07D' : '#059669';
+  const dimColor = theme.isDark ? 'rgba(35, 240, 125, 0.22)' : 'rgba(5, 150, 105, 0.22)';
 
-    return () => pulse.stop();
-  }, [glowAnim]);
+  const gap = 2;
+  const blockSize = Math.floor((size - gap) / 2);
 
-  const currentFrame = MATRIX_FRAMES[frameIndex];
-  const pixelGap = Math.max(1, Math.round(size * 0.08));
-  const pixelSize = Math.floor((size - pixelGap * 2) / 3);
+  // Rotation order:
+  // Index 0: Top-Left
+  // Index 1: Top-Right
+  // Index 2: Bottom-Right
+  // Index 3: Bottom-Left
+  const getBlockColor = (blockIndex: number) => {
+    return activeStep === blockIndex ? primaryColor : dimColor;
+  };
 
   return (
     <View style={[styles.container, { width: size, height: size }]}>
-      {/* Background Soft Glow Aura */}
-      <Animated.View
-        style={[
-          styles.glowBackdrop,
-          {
-            backgroundColor: activeGlow,
-            width: size * 1.5,
-            height: size * 1.5,
-            borderRadius: (size * 1.5) / 2,
-            opacity: glowAnim,
-          },
-        ]}
-      />
+      {/* Top Row: Block 0 (TL), Block 1 (TR) */}
+      <View style={[styles.row, { gap }]}>
+        <View
+          style={[
+            styles.block,
+            {
+              width: blockSize,
+              height: blockSize,
+              backgroundColor: getBlockColor(0),
+              borderRadius: Math.max(1, blockSize * 0.2),
+            },
+          ]}
+        />
+        <View
+          style={[
+            styles.block,
+            {
+              width: blockSize,
+              height: blockSize,
+              backgroundColor: getBlockColor(1),
+              borderRadius: Math.max(1, blockSize * 0.2),
+            },
+          ]}
+        />
+      </View>
 
-      {/* 3x3 Pixel Grid */}
-      <View style={[styles.grid, { width: size, height: size, gap: pixelGap }]}>
-        {currentFrame.map((isOn, idx) => (
-          <View
-            key={idx}
-            style={[
-              styles.pixel,
-              {
-                width: pixelSize,
-                height: pixelSize,
-                backgroundColor: isOn ? activeColor : 'transparent',
-                borderRadius: Math.max(1, pixelSize * 0.22),
-              },
-            ]}
-          />
-        ))}
+      {/* Bottom Row: Block 3 (BL), Block 2 (BR) */}
+      <View style={[styles.row, { gap, marginTop: gap }]}>
+        <View
+          style={[
+            styles.block,
+            {
+              width: blockSize,
+              height: blockSize,
+              backgroundColor: getBlockColor(3),
+              borderRadius: Math.max(1, blockSize * 0.2),
+            },
+          ]}
+        />
+        <View
+          style={[
+            styles.block,
+            {
+              width: blockSize,
+              height: blockSize,
+              backgroundColor: getBlockColor(2),
+              borderRadius: Math.max(1, blockSize * 0.2),
+            },
+          ]}
+        />
       </View>
     </View>
   );
@@ -143,24 +103,13 @@ export const PixelMorphMatrix: React.FC<PixelMorphMatrixProps> = ({
 
 const styles = StyleSheet.create({
   container: {
-    alignItems: 'center',
     justifyContent: 'center',
-    position: 'relative',
+    alignItems: 'center',
   },
-  glowBackdrop: {
-    position: 'absolute',
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.7,
-    shadowRadius: 8,
-  },
-  grid: {
+  row: {
     flexDirection: 'row',
-    flexWrap: 'wrap',
-    alignItems: 'center',
-    justifyContent: 'center',
-    zIndex: 2,
   },
-  pixel: {
-    // Sharp yet subtle soft-cornered square pixel
+  block: {
+    // Crisp, clean square tile
   },
 });

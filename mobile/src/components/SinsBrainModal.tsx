@@ -138,12 +138,7 @@ export const SinsBrainModal: React.FC<SinsBrainModalProps> = ({
           {/* Top Bar: Icon + "What would you like to do today?" + Actions */}
           <View style={styles.topBar}>
             <View style={styles.topBarLeft}>
-              <PixelMorphMatrix
-                size={16}
-                color={theme.isDark ? '#23F07D' : '#059669'}
-                glowColor={theme.isDark ? 'rgba(35, 240, 125, 0.45)' : 'rgba(5, 150, 105, 0.35)'}
-                isThinking={true}
-              />
+              <PixelMorphMatrix size={16} speedMs={200} />
               <Text style={[styles.topPromptText, { color: theme.textMuted }]}>
                 What would you like to do today?
               </Text>
