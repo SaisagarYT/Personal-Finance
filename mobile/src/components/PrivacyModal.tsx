@@ -217,12 +217,13 @@ export const PrivacyModal: React.FC<PrivacyModalProps> = ({
                   style={[
                     styles.previewValue,
                     {
-                      color: isPrivacyMode ? theme.textDim : theme.textMain,
-                      letterSpacing: isPrivacyMode ? 3 : -0.5,
+                      color: isPrivacyMode ? activeAccent : theme.textMain,
+                      letterSpacing: isPrivacyMode ? 1 : -0.5,
+                      fontWeight: '800',
                     },
                   ]}
                 >
-                  {maskAmount(currentBalance, '••••••••')}
+                  {maskAmount(currentBalance)}
                 </Text>
               </View>
             </View>

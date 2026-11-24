@@ -374,8 +374,8 @@ function AppContent() {
                 <SinanceHeroCard
                   userName={userProfile?.name || userName}
                   avatarUri={userProfile?.avatarUri}
-                  balance={maskAmount(formattedBalance, '••••••••')}
-                  pastWeekDiff={maskAmount('+₹1,940 past week', '•••• past week')}
+                  balance={maskAmount(formattedBalance)}
+                  pastWeekDiff={maskAmount('+₹1,940 past week')}
                   onboardingStep={onboardingHeadline}
                   onboardingText={onboardingDetailText}
                   isSetupDismissed={isSetupDismissed}
@@ -391,7 +391,7 @@ function AppContent() {
 
                 {/* SECTION 2: TWO-COLUMN ACTIVITY & BRAIN CARDS */}
                 <SinanceActivitySection
-                  brainAmount={maskAmount(formattedBalance, '••••••••')}
+                  brainAmount={maskAmount(formattedBalance)}
                   sinceAllTimeLabel="Since All Time"
                   transactions={transactions}
                   isBrainActive={isSinsBrainOpen}

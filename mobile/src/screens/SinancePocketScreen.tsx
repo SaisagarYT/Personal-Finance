@@ -138,10 +138,10 @@ export const SinancePocketScreen: React.FC<SinancePocketScreenProps> = ({
           {/* Balance Section */}
           <View style={styles.balanceContainer}>
             <Text style={[styles.balanceAmount, { color: theme.forestDark }]}>
-              {maskAmount(balance, '••••••••')}
+              {maskAmount(balance)}
             </Text>
             <Text style={[styles.availableText, { color: theme.forestMedium }]}>
-              {maskAmount(availableBalance, '••••••••')}
+              {maskAmount(availableBalance)}
             </Text>
             <View style={[styles.instantBadge, { backgroundColor: theme.forestBadgeBg }]}>
               <Text style={[styles.instantBadgeText, { color: theme.forestMedium }]}>
@@ -220,8 +220,7 @@ export const SinancePocketScreen: React.FC<SinancePocketScreenProps> = ({
                   </Text>
                   <Text style={[styles.accBalance, { color: theme.textMain }]}>
                     {maskAmount(
-                      `₹${Number(acc.balance).toLocaleString('en-IN', { minimumFractionDigits: 2 })}`,
-                      '••••••'
+                      `₹${Number(acc.balance).toLocaleString('en-IN', { minimumFractionDigits: 2 })}`
                     )}
                   </Text>
                 </View>

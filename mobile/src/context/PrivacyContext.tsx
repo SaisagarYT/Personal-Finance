@@ -76,14 +76,54 @@ export const PrivacyProvider: React.FC<{ children: ReactNode }> = ({ children })
   };
 
   /**
-   * Universal masking helper function:
-   * Masks numbers with dots (e.g. ₹2,40,250.00 -> ••••••••) when privacy mode is enabled.
+   * Universal smart masking helper function:
+   * Masks currency/numbers with "xxx" prefix while keeping the last 2 digits visible (e.g. ₹2,40,250 -> ₹xxx50).
+   * - If the value ends with cents/decimals (e.g. .00), it preserves the last 2 digits of the main integer part or decimals.
+   * - If the number is 0, it displays '0' or '₹0'.
+   * - If only 1 digit exists (e.g. 5), it shows 'xxx5'.
+   * - If a sign (+ or -) or currency prefix exists (₹ or $), it preserves them at the beginning.
    */
-  const maskAmount = (value: string | number, placeholder: string = '••••••••'): string => {
+  const maskAmount = (value: string | number, fallbackPlaceholder?: string): string => {
     if (!settings.isPrivacyMode) {
       return String(value);
     }
-    return placeholder;
+
+    if (fallbackPlaceholder && fallbackPlaceholder !== '••••••••' && fallbackPlaceholder !== '••••••' && fallbackPlaceholder !== '••••') {
+      return fallbackPlaceholder;
+    }
+
+    const str = String(value).trim();
+    if (!str) return 'xxx';
+
+    // Check if the value is zero
+    if (str === '0' || str === '₹0' || str === '$0' || str === '₹0.00' || str === '$0.00') {
+      return str.includes('₹') ? '₹0' : (str.includes('$') ? '$0' : '0');
+    }
+
+    // Extract leading sign (+, -) and currency symbol (₹, $)
+    const prefixMatch = str.match(/^([+-]?\s*[₹$]?|[₹$]\s*[+-]?)/);
+    const prefix = prefixMatch ? prefixMatch[0] : '';
+    const remainder = str.slice(prefix.length).trim();
+
+    // Separate main integer number and decimal part if present (e.g. "2,40,250.00")
+    const parts = remainder.split('.');
+    const intDigits = parts[0].replace(/[^\d]/g, '');
+
+    // Check for trailing suffix text like "past week" or "Available"
+    const suffixMatch = remainder.match(/\s+[A-Za-z].*$/);
+    const suffix = suffixMatch ? suffixMatch[0] : '';
+
+    if (!intDigits || intDigits === '0') {
+      return `${prefix}0${suffix}`;
+    }
+
+    if (intDigits.length === 1) {
+      return `${prefix}xxx${intDigits}${suffix}`;
+    }
+
+    // Grab the last 2 digits of the integer amount
+    const lastTwo = intDigits.slice(-2);
+    return `${prefix}xxx${lastTwo}${suffix}`;
   };
 
   return (
