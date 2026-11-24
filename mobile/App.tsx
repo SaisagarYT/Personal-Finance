@@ -26,6 +26,7 @@ import { ProfileScreen } from './src/screens/ProfileScreen';
 import { GetSetUpModal } from './src/components/GetSetUpModal';
 import { AuthProvider, useAuth } from './src/context/AuthContext';
 import { ToastProvider, ToastHost } from './src/context/ToastContext';
+import { PrivacyProvider, usePrivacy } from './src/context/PrivacyContext';
 import { FinanceService, Account, Transaction } from './src/services/financeService';
 import { SubscriptionService } from './src/services/subscriptionService';
 import { ProfileService, UserProfile } from './src/services/profileService';
@@ -34,6 +35,7 @@ import { useAppTheme } from './src/theme/colors';
 function AppContent() {
   const theme = useAppTheme();
   const { user } = useAuth();
+  const { maskAmount } = usePrivacy();
   const { height: windowHeight } = useWindowDimensions();
   const screenHeight = windowHeight || 900;
 
@@ -372,8 +374,8 @@ function AppContent() {
                 <SinanceHeroCard
                   userName={userProfile?.name || userName}
                   avatarUri={userProfile?.avatarUri}
-                  balance={formattedBalance}
-                  pastWeekDiff="+₹1,940 past week"
+                  balance={maskAmount(formattedBalance, '••••••••')}
+                  pastWeekDiff={maskAmount('+₹1,940 past week', '•••• past week')}
                   onboardingStep={onboardingHeadline}
                   onboardingText={onboardingDetailText}
                   isSetupDismissed={isSetupDismissed}
@@ -389,7 +391,7 @@ function AppContent() {
 
                 {/* SECTION 2: TWO-COLUMN ACTIVITY & BRAIN CARDS */}
                 <SinanceActivitySection
-                  brainAmount={formattedBalance}
+                  brainAmount={maskAmount(formattedBalance, '••••••••')}
                   sinceAllTimeLabel="Since All Time"
                   transactions={transactions}
                   isBrainActive={isSinsBrainOpen}
@@ -609,9 +611,11 @@ function AppContent() {
 export default function App() {
   return (
     <AuthProvider>
-      <ToastProvider>
-        <AppContent />
-      </ToastProvider>
+      <PrivacyProvider>
+        <ToastProvider>
+          <AppContent />
+        </ToastProvider>
+      </PrivacyProvider>
     </AuthProvider>
   );
 }

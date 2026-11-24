@@ -46,6 +46,8 @@ import { useAppTheme } from '../theme/colors';
 import { StatusSymbol } from '../components/StatusSymbol';
 import { UserProfile } from '../services/profileService';
 import { EditProfileScreen } from './EditProfileScreen';
+import { PrivacyModal } from '../components/PrivacyModal';
+import { usePrivacy } from '../context/PrivacyContext';
 
 export interface ProfileScreenProps {
   onBack: () => void;
@@ -77,7 +79,9 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
   const theme = useAppTheme();
   const { user, signOut } = useAuth();
   const { showToast } = useToast();
+  const { isPrivacyMode } = usePrivacy();
   const [isEditProfileOpen, setIsEditProfileOpen] = useState(false);
+  const [isPrivacyModalOpen, setIsPrivacyModalOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
 
   const handleSignOut = async () => {
@@ -408,16 +412,21 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
                 {/* Privacy */}
                 <TouchableOpacity
                   activeOpacity={0.7}
+                  onPress={() => setIsPrivacyModalOpen(true)}
                   style={styles.settingRow}
                 >
                   <View style={styles.settingRowLeft}>
                     <View style={[styles.iconDisc, { backgroundColor: theme.surfaceSubtle }]}>
-                      <Lock size={18} color={theme.textMain} strokeWidth={2} />
+                      {isPrivacyMode ? (
+                        <EyeOff size={18} color={theme.isDark ? '#23F07D' : '#059669'} strokeWidth={2.4} />
+                      ) : (
+                        <Lock size={18} color={theme.textMain} strokeWidth={2} />
+                      )}
                     </View>
                     <View style={styles.textStack}>
                       <Text style={[styles.settingTitle, { color: theme.textMain }]}>Privacy</Text>
-                      <Text style={[styles.settingSubtitle, { color: theme.textDim }]}>
-                        Biometric lock, hide net worth balance
+                      <Text style={[styles.settingSubtitle, { color: isPrivacyMode ? (theme.isDark ? '#23F07D' : '#059669') : theme.textDim }]}>
+                        {isPrivacyMode ? 'Discreet Mode Active • Balances Masked' : 'Biometric lock, hide net worth balance'}
                       </Text>
                     </View>
                   </View>
@@ -825,6 +834,12 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
         {/* Spacing for bottom */}
         <View style={{ height: 60 }} />
       </ScrollView>
+
+      {/* ================= PRIVACY & SECURITY BOTTOM SHEET ================= */}
+      <PrivacyModal
+        visible={isPrivacyModalOpen}
+        onClose={() => setIsPrivacyModalOpen(false)}
+      />
     </View>
   );
 };

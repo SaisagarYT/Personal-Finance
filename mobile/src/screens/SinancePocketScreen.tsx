@@ -19,6 +19,7 @@ import { Account, Transaction } from '../services/financeService';
 import { AddAccountModal } from '../components/AddAccountModal';
 import { QuickTransferModal } from '../components/QuickTransferModal';
 import { StatusSymbol } from '../components/StatusSymbol';
+import { usePrivacy } from '../context/PrivacyContext';
 
 interface SinancePocketScreenProps {
   onBack: () => void;
@@ -40,6 +41,7 @@ export const SinancePocketScreen: React.FC<SinancePocketScreenProps> = ({
   onTransactionAdded,
 }) => {
   const theme = useAppTheme();
+  const { maskAmount, settings } = usePrivacy();
   const [activeSubTab, setActiveSubTab] = useState<'activity' | 'moreInfo'>('activity');
   const [isAddAccountOpen, setIsAddAccountOpen] = useState(false);
   const [transferMode, setTransferMode] = useState<'deposit' | 'withdrawal' | null>(null);
@@ -135,8 +137,12 @@ export const SinancePocketScreen: React.FC<SinancePocketScreenProps> = ({
 
           {/* Balance Section */}
           <View style={styles.balanceContainer}>
-            <Text style={[styles.balanceAmount, { color: theme.forestDark }]}>{balance}</Text>
-            <Text style={[styles.availableText, { color: theme.forestMedium }]}>{availableBalance}</Text>
+            <Text style={[styles.balanceAmount, { color: theme.forestDark }]}>
+              {maskAmount(balance, '••••••••')}
+            </Text>
+            <Text style={[styles.availableText, { color: theme.forestMedium }]}>
+              {maskAmount(availableBalance, '••••••••')}
+            </Text>
             <View style={[styles.instantBadge, { backgroundColor: theme.forestBadgeBg }]}>
               <Text style={[styles.instantBadgeText, { color: theme.forestMedium }]}>
                 Instant Cloud Sync
@@ -213,7 +219,10 @@ export const SinancePocketScreen: React.FC<SinancePocketScreenProps> = ({
                     {acc.name}
                   </Text>
                   <Text style={[styles.accBalance, { color: theme.textMain }]}>
-                    ₹{Number(acc.balance).toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+                    {maskAmount(
+                      `₹${Number(acc.balance).toLocaleString('en-IN', { minimumFractionDigits: 2 })}`,
+                      '••••••'
+                    )}
                   </Text>
                 </View>
               </View>
@@ -354,7 +363,12 @@ export const SinancePocketScreen: React.FC<SinancePocketScreenProps> = ({
                           { color: isIncome ? (theme.isDark ? '#23F07D' : '#059669') : theme.textMain },
                         ]}
                       >
-                        {isIncome ? '+' : '-'}₹{Number(tx.amount).toLocaleString('en-IN')}
+                        {settings.maskTransactions
+                          ? maskAmount(
+                              `${isIncome ? '+' : '-'}₹${Number(tx.amount).toLocaleString('en-IN')}`,
+                              `${isIncome ? '+' : '-'}••••`
+                            )
+                          : `${isIncome ? '+' : '-'}₹${Number(tx.amount).toLocaleString('en-IN')}`}
                       </Text>
                     </View>
                   );
