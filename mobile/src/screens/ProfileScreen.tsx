@@ -61,6 +61,7 @@ export interface ProfileScreenProps {
   userProfile?: UserProfile;
   onProfileUpdated?: (updated: UserProfile) => void;
   onOpenSinanceBrain?: () => void;
+  onOpenPocket?: () => void;
 }
 
 export const ProfileScreen: React.FC<ProfileScreenProps> = ({
@@ -75,6 +76,7 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
   userProfile,
   onProfileUpdated,
   onOpenSinanceBrain,
+  onOpenPocket,
 }) => {
   const theme = useAppTheme();
   const { user, signOut } = useAuth();
@@ -365,7 +367,7 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
         {/* ================= 5. SECTION 1: ACCOUNT & SECURITY ================= */}
         {(matches('Account', 'Security, passkeys, cloud sync') ||
           matches('Privacy', 'Screen lock, biometric, hide balance') ||
-          matches('Linked Wallets & Cards', 'Bank accounts, credit cards, UPI')) && (
+          matches('Accounts & Wallets', 'Bank accounts, credit cards, cash ledger')) && (
           <View
             style={[
               styles.groupedCard,
@@ -426,12 +428,13 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
               </>
             )}
 
-            {matches('Linked Wallets & Cards', 'Bank accounts, credit cards, UPI') && (
+            {matches('Accounts & Wallets', 'Bank accounts, credit cards, cash ledger') && (
               <>
                 <View style={[styles.rowDivider, { backgroundColor: theme.borderSubtle }]} />
-                {/* Linked Wallets & Cards */}
+                {/* Accounts & Wallets */}
                 <TouchableOpacity
                   activeOpacity={0.7}
+                  onPress={onOpenPocket}
                   style={styles.settingRow}
                 >
                   <View style={styles.settingRowLeft}>
@@ -439,9 +442,9 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
                       <CreditCard size={18} color={theme.textMain} strokeWidth={2} />
                     </View>
                     <View style={styles.textStack}>
-                      <Text style={[styles.settingTitle, { color: theme.textMain }]}>Linked Wallets & Cards</Text>
+                      <Text style={[styles.settingTitle, { color: theme.textMain }]}>Accounts & Wallets</Text>
                       <Text style={[styles.settingSubtitle, { color: theme.textDim }]}>
-                        Payment methods, bank sync & UPI
+                        Manage bank balances, cash & cards
                       </Text>
                     </View>
                   </View>

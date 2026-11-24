@@ -477,6 +477,7 @@ function AppContent() {
                 userProfile={userProfile || undefined}
                 onProfileUpdated={(updated) => setUserProfile(updated)}
                 onOpenSinanceBrain={() => setIsSinsBrainOpen(true)}
+                onOpenPocket={() => setIsPocketOpen(true)}
               />
             </Animated.View>
           )}
