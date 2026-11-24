@@ -89,15 +89,6 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
     onBack();
   };
 
-  const handleExportCSV = () => {
-    showToast({
-      title: 'Ledger exported successfully!',
-      description: 'Records saved to your device download storage (CSV)',
-      type: 'success',
-      actionLabel: 'Got It!',
-    });
-  };
-
   const handleInviteFriend = async () => {
     try {
       await Share.share({
@@ -466,7 +457,6 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
           matches('Primary Currency', 'INR or USD currency') ||
           matches('Theme', 'Dark or Light appearance') ||
           matches('Home Checklist', 'Quickstart guide visibility') ||
-          matches('Storage & Data', 'Network usage, CSV ledger export') ||
           matches('App Language', 'English')) && (
           <View
             style={[
@@ -526,34 +516,6 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
                     <Text style={[styles.settingValueText, { color: theme.textMain, fontWeight: '700' }]}>
                       {currency === 'INR' ? '₹ INR' : '$ USD'}
                     </Text>
-                    <ChevronRight size={17} color={theme.textDim} strokeWidth={2.2} />
-                  </View>
-                </TouchableOpacity>
-              </>
-            )}
-
-            {/* Storage & Data */}
-            {matches('Storage & Data', 'Network usage, CSV ledger export') && (
-              <>
-                <View style={[styles.rowDivider, { backgroundColor: theme.borderSubtle }]} />
-                <TouchableOpacity
-                  activeOpacity={0.7}
-                  onPress={handleExportCSV}
-                  style={styles.settingRow}
-                >
-                  <View style={styles.settingRowLeft}>
-                    <View style={[styles.iconDisc, { backgroundColor: theme.surfaceSubtle }]}>
-                      <Database size={18} color={theme.textMain} strokeWidth={2} />
-                    </View>
-                    <View style={styles.textStack}>
-                      <Text style={[styles.settingTitle, { color: theme.textMain }]}>Storage and Data</Text>
-                      <Text style={[styles.settingSubtitle, { color: theme.textDim }]}>
-                        Cache, export CSV & backup history
-                      </Text>
-                    </View>
-                  </View>
-                  <View style={styles.settingRowRight}>
-                    <Text style={[styles.settingValueText, { color: theme.textDim }]}>CSV</Text>
                     <ChevronRight size={17} color={theme.textDim} strokeWidth={2.2} />
                   </View>
                 </TouchableOpacity>
