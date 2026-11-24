@@ -102,6 +102,21 @@ export function App() {
     }
   }, [session]);
 
+  // Allow previewing the AuthView via ?preview=auth without terminating the session
+  const urlParams = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : null;
+  const isAuthPreview = urlParams?.get('preview') === 'auth';
+  const previewTab = urlParams?.get('tab') as 'Overview' | 'Activity' | 'Account' | null;
+
+  // Set active tab from URL query if provided and immediately dismiss loading
+  useEffect(() => {
+    if (previewTab || isAuthPreview) {
+      setAuthLoading(false);
+    }
+    if (previewTab) {
+      setActiveTab(previewTab);
+    }
+  }, [previewTab, isAuthPreview]);
+
   const handleDeleteTransaction = async (id: string, accountId: string, amount: number, type: string) => {
     if (!confirm('Delete this transaction?')) return;
     try {
@@ -137,21 +152,6 @@ export function App() {
       </div>
     );
   }
-
-  // Allow previewing the AuthView via ?preview=auth without terminating the session
-  const urlParams = new URLSearchParams(window.location.search);
-  const isAuthPreview = urlParams.get('preview') === 'auth';
-  const previewTab = urlParams.get('tab') as 'Overview' | 'Activity' | 'Account' | null;
-
-  // Set active tab from URL query if provided and immediately dismiss loading
-  useEffect(() => {
-    if (previewTab || isAuthPreview) {
-      setAuthLoading(false);
-    }
-    if (previewTab) {
-      setActiveTab(previewTab);
-    }
-  }, [previewTab, isAuthPreview]);
 
   // If user is not authenticated or explicitly previewing auth, show fullscreen AuthView
   if ((!session?.user && !previewTab) || isAuthPreview) {
